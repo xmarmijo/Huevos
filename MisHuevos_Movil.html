@@ -946,12 +946,14 @@ function guardarSyncConfig(){
     const m = texto.match(/\{[\s\S]*\}/);
     cfg = JSON.parse(m ? m[0] : texto);
   }catch(e){ toast('❌ El texto no es un JSON válido'); return; }
-  if(!cfg || !cfg.databaseURL){ toast('❌ Falta databaseURL. Copia el bloque completo'); return; }
+  if(!cfg || !cfg.apiKey){ toast('❌ Falta apiKey. Copia el bloque completo'); return; }
+  if(!cfg.databaseURL && cfg.projectId){ cfg.databaseURL = 'https://'+cfg.projectId+'-default-rtdb.firebaseio.com'; }
+  if(!cfg.databaseURL){ toast('❌ Falta databaseURL y projectId'); return; }
   localStorage.setItem('misHuevosFirebase', JSON.stringify(cfg));
   if(fb){ desconectarSync(); }
   conectarFirebase(cfg);
   toast('☁️ Guardando conexión...');
-  setTimeout(()=>cerrarModal('modalSync'), 400);
+  setTimeout(()=>cerrarModal('modalDatos'), 400);
 }
 function desconectarSync(){
   if(fb){
