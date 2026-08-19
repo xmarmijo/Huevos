@@ -2446,6 +2446,7 @@ function reiniciarTodo(){
   estado.clientesPrecios = {};
   estado.versiones = [];
   estado.ultimoRespaldo = null;
+  if(fbRef){ syncOcupado = true; syncFirebase(); setTimeout(()=>{ syncOcupado = false; }, 2000); }
   guardar(); actualizarTodo(); cerrarModal('modalReset'); toast('🔥 Todo reiniciado desde cero');
 }
 
