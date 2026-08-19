@@ -2446,7 +2446,12 @@ function reiniciarTodo(){
   estado.clientesPrecios = {};
   estado.versiones = [];
   estado.ultimoRespaldo = null;
-  if(fbRef){ syncOcupado = true; syncFirebase(); setTimeout(()=>{ syncOcupado = false; }, 2000); }
+  if(fbRef){
+    try{ fbRef.off(); }catch(e){}
+    fbRef.set(JSON.parse(JSON.stringify(estado))).then(()=>{
+      setTimeout(()=>{ try{ fbRef.on('value', snap=>{ const d=snap.val(); if(d && !syncOcupado){ estado=Object.assign(estado,d); guardar(); actualizarTodo(); }}); }catch(e){}}, 500);
+    });
+  }
   guardar(); actualizarTodo(); cerrarModal('modalReset'); toast('🔥 Todo reiniciado desde cero');
 }
 
