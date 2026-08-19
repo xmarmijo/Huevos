@@ -176,7 +176,7 @@ body.dark .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316;
 
 <header>
   <div class="top">
-    <h1>🥚 Mis Huevos <span id="syncDot" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;" title="Sin sincronizar">OFF</span></h1>
+    <h1>🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span></h1>
     <div>
       <div class="hoy"><button id="btnTema" onclick="toggleTema()" style="background:none;border:1px solid rgba(255,255,255,.4);color:#fff;padding:3px 8px;border-radius:12px;font-size:11px;cursor:pointer;margin-bottom:3px;">🌙</button> <span id="fechaHoy"></span></div>
       <div class="gan">Ganancia hoy: <span id="ganHoy">$0</span></div>
@@ -997,6 +997,15 @@ function conectarFirebase(cfg){
 function llenarModalDatos(){
   const el = document.getElementById('ultimoRespaldoLbl');
   el.textContent = estado.ultimoRespaldo ? new Date(estado.ultimoRespaldo).toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit',year:'2-digit'}) : 'nunca';
+}
+function tapSyncDot(){
+  if(fbRef && fbConectado){ toast('Ya estás sincronizado'); return; }
+  const cfg = {"apiKey":"AIzaSyDGkne1l3xny7lCC4PvdWhmQEfS3yAE5No","authDomain":"xmishuevosx.firebaseapp.com","projectId":"xmishuevosx","storageBucket":"xmishuevosx.firebasestorage.app","messagingSenderId":"959739221540","appId":"1:959739221540:web:794b2a25429a57fcfbeab1"};
+  cfg.databaseURL = 'https://xmishuevosx-default-rtdb.firebaseio.com';
+  localStorage.setItem('misHuevosFirebase', JSON.stringify(cfg));
+  if(fb){ desconectarSync(); }
+  conectarFirebase(cfg);
+  toast('☁️ Conectando...');
 }
 function actualizarSyncUI(){
   const el = document.getElementById('syncEstado');
@@ -1916,7 +1925,7 @@ function datosTab(tab){
   });
   document.getElementById(panels[tab]).style.display='block';
   if(tab==='respaldar') llenarModalDatos();
-  if(tab==='sync'){ const cfg=getFbConfig(); document.getElementById('syncConfig').value=cfg?JSON.stringify(cfg,null,2):''; actualizarSyncUI(); }
+  if(tab==='sync'){ document.getElementById('syncConfig').value='{"apiKey":"AIzaSyDGkne1l3xny7lCC4PvdWhmQEfS3yAE5No","authDomain":"xmishuevosx.firebaseapp.com","projectId":"xmishuevosx","storageBucket":"xmishuevosx.firebasestorage.app","messagingSenderId":"959739221540","appId":"1:959739221540:web:794b2a25429a57fcfbeab1"}'; actualizarSyncUI(); }
 }
 function historialTab(tab){
   const panels = {log:'historialPanelLog', versiones:'historialPanelVersiones'};
