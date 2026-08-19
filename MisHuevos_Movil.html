@@ -176,7 +176,7 @@ body.dark .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316;
 
 <header>
   <div class="top">
-    <h1>🥚 Mis Huevos <span id="syncDot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#9ca3af;margin-left:6px;vertical-align:middle;" title="Sin sincronizar"></span></h1>
+    <h1>🥚 Mis Huevos <span id="syncDot" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;" title="Sin sincronizar">OFF</span></h1>
     <div>
       <div class="hoy"><button id="btnTema" onclick="toggleTema()" style="background:none;border:1px solid rgba(255,255,255,.4);color:#fff;padding:3px 8px;border-radius:12px;font-size:11px;cursor:pointer;margin-bottom:3px;">🌙</button> <span id="fechaHoy"></span></div>
       <div class="gan">Ganancia hoy: <span id="ganHoy">$0</span></div>
@@ -1000,17 +1000,16 @@ function llenarModalDatos(){
 }
 function actualizarSyncUI(){
   const el = document.getElementById('syncEstado');
-  if(!el) return;
   const dot = document.getElementById('syncDot');
   if(!fbRef){
-    el.textContent = 'No conectado';
-    if(dot){ dot.style.background='#9ca3af'; dot.title='Sin sincronizar'; }
+    if(el) el.textContent = 'No conectado';
+    if(dot){ dot.style.background='#6b7280'; dot.textContent='OFF'; dot.title='Sin sincronizar'; }
   } else if(fbConectado){
-    el.textContent = '✅ En línea';
-    if(dot){ dot.style.background='#22c55e'; dot.title='Sincronizando — online'; }
+    if(el) el.textContent = '✅ En línea';
+    if(dot){ dot.style.background='#22c55e'; dot.textContent='ON'; dot.title='Sincronizando — online'; }
   } else {
-    el.textContent = '⏳ Conectando...';
-    if(dot){ dot.style.background='#eab308'; dot.title='Conectando...'; }
+    if(el) el.textContent = '⏳ Conectando...';
+    if(dot){ dot.style.background='#eab308'; dot.textContent='...'; dot.title='Conectando...'; }
   }
 }
 
