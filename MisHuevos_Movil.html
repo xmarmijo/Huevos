@@ -713,9 +713,13 @@ if ('serviceWorker' in navigator) {
   <div class="modal">
     <div class="modal-header"><h3>🗑️ Reiniciar todo</h3><button class="modal-close" onclick="cerrarModal('modalReset')">✕</button></div>
     <div style="background:#fff2cc;color:#ef6c00;border-left:4px solid #ef6c00;padding:10px;border-radius:6px;font-size:13px;font-weight:700;">⚠️ Se borrará TODO: ventas, compras, gastos, merma, deudas, logs, cuadratura, precios de terceras y versiones. Stock vuelve a 0.</div>
+    <div style="margin-top:12px;">
+      <label class="campo">Escribe 1234 para confirmar</label>
+      <input type="password" id="resetClave" class="field" inputmode="numeric" placeholder="Clave" maxlength="4" style="text-align:center;font-size:18px;font-weight:700;letter-spacing:8px;">
+    </div>
     <div class="modal-btns">
       <button class="btn-cancel" onclick="cerrarModal('modalReset')">Cancelar</button>
-      <button class="btn-ok" style="background:#dc2626 !important;" onclick="reiniciarTodo()">Sí, reiniciar</button>
+      <button class="btn-ok" id="btnResetConfirmar" style="background:#dc2626 !important;opacity:0.5;" onclick="reiniciarTodo()" disabled>Sí, reiniciar</button>
     </div>
   </div>
 </div>
@@ -2415,7 +2419,19 @@ function importarDatos(e){
 }
 
 // ── RESET ──
+document.getElementById('resetClave').addEventListener('input', function(){
+  const btn = document.getElementById('btnResetConfirmar');
+  if(this.value === '1234'){
+    btn.disabled = false;
+    btn.style.opacity = '1';
+  } else {
+    btn.disabled = true;
+    btn.style.opacity = '0.5';
+  }
+});
 function reiniciarTodo(){
+  const clave = document.getElementById('resetClave').value;
+  if(clave !== '1234'){ toast('❌ Clave incorrecta'); return; }
   logAccion('REINICIAR', 'App reiniciada completamente · '+new Date().toLocaleString('es-CL'));
   estado.stock = { Primera: 0, Segunda: 0 };
   estado.ventas = [];
@@ -2470,12 +2486,19 @@ function abrirVersiones(){
 }
 function restaurarVersion(idx){
   const v = estado.versiones[idx];
-  if(!v) return;
+  if(!v || !v.snapshot) return;
   miConfirmar('¿Restaurar '+v.label+'? Se perderán los cambios desde entonces.', ()=>{
+    estado.stock = v.snapshot.stock || { Primera: 0, Segunda: 0 };
+    estado.ventas = v.snapshot.ventas || [];
+    estado.compras = v.snapshot.compras || [];
+    estado.mermas = v.snapshot.mermas || [];
+    estado.gastos = v.snapshot.gastos || [];
+    estado.deudas = v.snapshot.deudas || [];
+    estado.precios = v.snapshot.precios || estado.precios;
     logAccion('RESTAURAR', 'Restaurado desde '+v.label+' · '+new Date(v.fecha).toLocaleString('es-CL'));
-    guardar();
+    guardar(); actualizarTodo();
     toast('↩ Restaurado: '+v.label);
-    cerrarModal('modalVersiones');
+    cerrarModal('modalHistorial');
   });
 }
 
