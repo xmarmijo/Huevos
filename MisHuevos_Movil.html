@@ -939,7 +939,7 @@ function idbGet(key){
 }
 
 // ── SINCRO FIREBASE ──
-let fb = null, fbRef = null, syncOcupado = false, fbConectado = false;
+let fb = null, fbRef = null, syncOcupado = false, fbConectado = false, reiniciando = false;
 function getFbConfig(){
   try{ const s = localStorage.getItem('misHuevosFirebase'); if(!s) return null; const c = JSON.parse(s); if(c && c.databaseURL && c.apiKey) return c; return null; }catch(e){ return null; }
 }
@@ -968,7 +968,7 @@ function desconectarSync(){
   toast('Desconectado');
 }
 function syncFirebase(){
-  if(!fbRef || syncOcupado) return;
+  if(!fbRef || syncOcupado || reiniciando) return;
   syncOcupado = true;
   fbRef.set(JSON.parse(JSON.stringify(estado))).catch(()=>{}).finally(()=>{ syncOcupado = false; });
 }
@@ -988,8 +988,8 @@ function conectarFirebase(cfg){
     });
     fbRef.on('value', snap=>{
       const d = snap.val();
-      if(d && !syncOcupado){
-        estado = Object.assign(estado, d);
+      if(d && !syncOcupado && !reiniciando){
+        estado = JSON.parse(JSON.stringify(d));
         guardar();
         aplicarTema(estado.tema); actualizarTodo();
       }
@@ -2432,6 +2432,7 @@ document.getElementById('resetClave').addEventListener('input', function(){
 function reiniciarTodo(){
   const clave = document.getElementById('resetClave').value;
   if(clave !== '1234'){ toast('❌ Clave incorrecta'); return; }
+  reiniciando = true;
   logAccion('REINICIAR', 'App reiniciada completamente · '+new Date().toLocaleString('es-CL'));
   estado.stock = { Primera: 0, Segunda: 0 };
   estado.ventas = [];
@@ -2446,13 +2447,24 @@ function reiniciarTodo(){
   estado.clientesPrecios = {};
   estado.versiones = [];
   estado.ultimoRespaldo = null;
+  guardar();
   if(fbRef){
     try{ fbRef.off(); }catch(e){}
-    fbRef.set(JSON.parse(JSON.stringify(estado))).then(()=>{
-      setTimeout(()=>{ try{ fbRef.on('value', snap=>{ const d=snap.val(); if(d && !syncOcupado){ estado=Object.assign(estado,d); guardar(); actualizarTodo(); }}); }catch(e){}}, 500);
-    });
+    const pending = JSON.parse(JSON.stringify(estado));
+    fbRef.set(null).then(()=>{
+      return new Promise(r=>setTimeout(r, 2000));
+    }).then(()=>{
+      return fbRef.set(pending);
+    }).then(()=>{
+      return new Promise(r=>setTimeout(r, 1500));
+    }).then(()=>{
+      reiniciando = false;
+      try{ fbRef.on('value', snap=>{ const d=snap.val(); if(d && !syncOcupado && !reiniciando){ estado=JSON.parse(JSON.stringify(d)); guardar(); actualizarTodo(); }}); }catch(e){}
+    }).catch(()=>{ reiniciando = false; try{ fbRef.on('value', snap=>{ const d=snap.val(); if(d && !syncOcupado && !reiniciando){ estado=JSON.parse(JSON.stringify(d)); guardar(); actualizarTodo(); }}); }catch(e){}});
+  } else {
+    reiniciando = false;
   }
-  guardar(); actualizarTodo(); cerrarModal('modalReset'); toast('🔥 Todo reiniciado desde cero');
+  actualizarTodo(); cerrarModal('modalReset'); toast('🔥 Todo reiniciado desde cero');
 }
 
 function guardarManual(){
