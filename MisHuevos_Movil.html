@@ -2691,7 +2691,7 @@ function autoBackup(){
 }
 
 // ── INIT ──
-function actualizarTodo(){ actualizarStockUI(); actualizarPreciosUI(); actualizarHistorial(); }
+function actualizarTodo(){ actualizarStockUI(); actualizarPreciosUI(); actualizarHistorial(); actualizarBtnApertura(); }
 async function initApp(){
   const s = cargar();
   document.getElementById('fechaHoy').textContent = 'Hoy: '+hoy();
