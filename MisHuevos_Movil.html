@@ -941,7 +941,7 @@ function idbGet(key){
 }
 
 // ── SINCRO FIREBASE ──
-let fb = null, fbRef = null, syncOcupado = false, fbConectado = false, reiniciando = false;
+let fb = null, fbRef = null, syncOcupado = false, fbConectado = false, reiniciando = false, ultimaSyncLocal = 0;
 function getFbConfig(){
   try{ const s = localStorage.getItem('misHuevosFirebase'); if(!s) return null; const c = JSON.parse(s); if(c && c.databaseURL && c.apiKey) return c; return null; }catch(e){ return null; }
 }
@@ -972,6 +972,7 @@ function desconectarSync(){
 function syncFirebase(){
   if(!fbRef || syncOcupado || reiniciando) return;
   syncOcupado = true;
+  ultimaSyncLocal = Date.now();
   fbRef.set(JSON.parse(JSON.stringify(estado))).catch(()=>{}).finally(()=>{ syncOcupado = false; });
 }
 function conectarFirebase(cfg){
@@ -998,6 +999,7 @@ function conectarFirebase(cfg){
     fbRef.on('value', snap=>{
       const d = snap.val();
       if(d && !syncOcupado && !reiniciando){
+        if(Date.now() - ultimaSyncLocal < 2000) return;
         const fbTime = d.lastModified || 0;
         const localTime = estado.lastModified || 0;
         if(fbTime > localTime){
