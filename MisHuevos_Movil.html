@@ -226,7 +226,7 @@ body.dark .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316;
     </div>
     <!-- ADMIN: CORREO + CONTRASEÑA -->
     <div id="loginAdmin" style="display:none;">
-      <input type="text" id="loginEmail" class="login-field" placeholder="Tu nombre" autocomplete="name">
+      <input type="text" id="loginEmail" class="login-field" placeholder="Tu nombre o correo" autocomplete="name">
       <input type="password" id="loginPass" class="login-field" placeholder="Contraseña" autocomplete="current-password">
       <button class="login-btn" id="loginEmailBtn" onclick="setupAdmin()" disabled>Crear mi cuenta admin</button>
       <button class="login-btn" id="loginExistingBtn" onclick="loginConEmail()" style="display:none;background:#7c3aed;margin-top:6px;" disabled>Ingresar</button>
@@ -2930,18 +2930,31 @@ async function loginConPin(){
 }
 
 async function loginConEmail(){
-  const email = document.getElementById('loginEmail').value.trim();
+  const input = document.getElementById('loginEmail').value.trim();
   const pass = document.getElementById('loginPass').value;
-  if(!email || !pass){ loginShowError('Completa todos los campos'); return; }
+  if(!input || !pass){ loginShowError('Completa todos los campos'); return; }
   document.getElementById('loginExistingBtn').disabled = true;
   document.getElementById('loginExistingBtn').textContent = 'Entrando...';
   try{
     const db = getAuthDb();
     if(!db){ loginShowError('Sin conexión a Firebase'); document.getElementById('loginExistingBtn').disabled=false; document.getElementById('loginExistingBtn').textContent='Ingresar'; return; }
-    const snap = await db.ref('huevos/usuarios').orderByChild('email').equalTo(email).once('value');
-    const users = snap.val();
+    let users = null;
+    let snap = await db.ref('huevos/usuarios').orderByChild('email').equalTo(input).once('value');
+    users = snap.val();
     if(!users){
-      loginShowError('Correo no registrado');
+      snap = await db.ref('huevos/usuarios').orderByChild('nombre').equalTo(input).once('value');
+      users = snap.val();
+    }
+    if(!users){
+      snap = await db.ref('huevos/usuarios').once('value');
+      const all = snap.val();
+      if(all){
+        const found = Object.keys(all).find(k => all[k].nombre && all[k].nombre.toLowerCase() === input.toLowerCase());
+        if(found){ users = { [found]: all[found] }; }
+      }
+    }
+    if(!users){
+      loginShowError('Usuario no encontrado');
       document.getElementById('loginExistingBtn').disabled=false;
       document.getElementById('loginExistingBtn').textContent='Ingresar';
       return;
@@ -2960,7 +2973,7 @@ async function loginConEmail(){
       document.getElementById('loginExistingBtn').textContent='Ingresar';
       return;
     }
-    currentUser = { uid: key, email: email, nombre: u.nombre, rol: u.rol||'admin' };
+    currentUser = { uid: key, email: u.email||'', nombre: u.nombre, rol: u.rol||'admin' };
     localStorage.setItem('misHuevosSession', JSON.stringify(currentUser));
     entrarApp();
   }catch(e){
