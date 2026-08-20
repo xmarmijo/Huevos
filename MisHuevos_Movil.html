@@ -823,7 +823,7 @@ const STOCK_INI = { Primera: DATOS.btxPrim, Segunda: DATOS.btxSeg };
 
 let estado = {
   stock: {...STOCK_INI},
-  precios: { Primera: Math.round(COSTO_BTX.Primera*1.18), Segunda: Math.round(COSTO_BTX.Segunda*1.18) },
+  precios: { Primera: Math.round(COSTO_BTX.Primera*(1+18/100)), Segunda: Math.round(COSTO_BTX.Segunda*(1+18/100)) },
   feriaPrecio: 6000,
   margen: 18,
   tema: 'naranja',
@@ -1695,10 +1695,10 @@ function confirmarCompra(){
   if(!estado.stock[categoria]) estado.stock[categoria] = 0;
   if(!COSTO_BTX[categoria]) COSTO_BTX[categoria] = Math.round(precioCaja / 6);
   if(!estado.precios) estado.precios = {};
-  if(!estado.precios[categoria]) estado.precios[categoria] = Math.round(COSTO_BTX[categoria] * 1.18);
+  if(!estado.precios[categoria]) estado.precios[categoria] = Math.round(COSTO_BTX[categoria] * (1+estado.margen/100));
   if(categoria==='Tercera' && !estado.tercera.activada){
     estado.tercera.activada = true;
-    if(!estado.tercera.precio || estado.tercera.precio<=0) estado.tercera.precio = Math.round(COSTO_BTX[categoria] * 1.18);
+    if(!estado.tercera.precio || estado.tercera.precio<=0) estado.tercera.precio = Math.round(COSTO_BTX[categoria] * (1+estado.tercera.margen/100));
     toast('🥚 Tercera activada automáticamente');
   }
   estado.stock[categoria] += totalBandejas;
@@ -2446,7 +2446,7 @@ function reiniciarTodo(){
   estado.stockParcial = {};
   estado.clientesPrecios = {};
   estado.versiones = [];
-  estado.ultimoRespaldo = null;
+  estado.ultimoRespaldo = Date.now();
   guardar();
   if(fbRef){
     try{ fbRef.off(); }catch(e){}
