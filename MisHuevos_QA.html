@@ -401,6 +401,10 @@ if ('serviceWorker' in navigator) {
       <div><div class="num" id="feriaCant">1</div><div class="unid" id="feriaCantUnid">bandeja(s)</div></div>
       <button class="mas" onclick="feriaCant(1)">+</button>
     </div>
+    <div style="display:flex;gap:6px;margin-bottom:8px;">
+      <div class="pago-op act" id="feriaPagoEfectivo" onclick="feriaPago('efectivo')" style="flex:1;text-align:center;">💵 Efectivo</div>
+      <div class="pago-op" id="feriaPagoTransferencia" onclick="feriaPago('transferencia')" style="flex:1;text-align:center;">🏦 Transferencia</div>
+    </div>
     <div class="paso-titulo">Precio <span id="feriaPrecioPorLbl">por bandeja</span></div>
     <input type="number" class="field" id="feriaPrecioModal" value="6000" min="0" style="font-size:18px;font-weight:800;">
     <div class="fast-info">
@@ -414,10 +418,6 @@ if ('serviceWorker' in navigator) {
       <button class="btn-ok" style="flex:none;padding:0 16px;" onclick="agregarOtro('feria')">➕</button>
     </div>
     <button class="fast-reg" onclick="confirmarFeria()">⚡ REGISTRAR VENTA</button>
-    <div style="display:flex;gap:6px;margin-bottom:8px;">
-      <div class="pago-op act" id="feriaPagoEfectivo" onclick="feriaPago('efectivo')" style="flex:1;text-align:center;">💵 Efectivo</div>
-      <div class="pago-op" id="feriaPagoTransferencia" onclick="feriaPago('transferencia')" style="flex:1;text-align:center;">🏦 Transferencia</div>
-    </div>
     <div class="sesion-resumen">
       <div><div class="v" id="feriaCount">0</div><div class="l">ventas ahora</div></div>
       <div><div class="v" id="feriaTotal2">$0</div><div class="l">total vendido</div></div>
