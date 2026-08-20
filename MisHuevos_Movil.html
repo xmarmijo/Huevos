@@ -601,6 +601,7 @@ if ('serviceWorker' in navigator) {
       <button onclick="reportesTab('resumen')" id="rTabResumen" style="flex:1;padding:8px;border:2px solid #2563eb;background:#eff6ff;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;">📈 Resumen</button>
       <button onclick="reportesTab('proyeccion')" id="rTabProyec" style="flex:1;padding:8px;border:2px solid #e5e7eb;background:#fff;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;">💰 Proyección</button>
       <button onclick="reportesTab('graficas')" id="rTabGrafic" style="flex:1;padding:8px;border:2px solid #e5e7eb;background:#fff;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;">📊 Gráficas</button>
+      <button onclick="reportesTab('vendedores')" id="rTabVendedores" style="flex:1;padding:8px;border:2px solid #e5e7eb;background:#fff;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;">👥 Vendedores</button>
     </div>
     <div id="repoPanelResumen">
       <div class="paso-titulo">Ganancias</div>
@@ -629,6 +630,7 @@ if ('serviceWorker' in navigator) {
     </div>
     <div id="repoPanelProyec" style="display:none;"><div id="proyeccionContenido" style="max-height:60vh;overflow-y:auto;"></div></div>
     <div id="repoPanelGrafic" style="display:none;"><div id="graficaContainer" style="max-height:60vh;overflow-y:auto;"></div></div>
+    <div id="repoPanelVendedores" style="display:none;"><div id="vendedoresContenido" style="max-height:60vh;overflow-y:auto;"></div></div>
     <div class="modal-btns"><button class="btn-cancel" onclick="cerrarModal('modalReportes')">Cerrar</button></div>
   </div>
 </div>
@@ -887,6 +889,10 @@ if ('serviceWorker' in navigator) {
       </select>
       <div id="camposVendedor">
         <input type="password" id="nuevoPin" class="field" inputmode="numeric" maxlength="6" placeholder="PIN (4-6 dígitos)" style="margin-bottom:6px;">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+          <input type="number" id="nuevoComision" class="field" placeholder="Comisión %" min="0" max="50" value="5" style="flex:1;margin-bottom:0;">
+          <span style="font-size:11px;color:#6b7280;">% sobre venta</span>
+        </div>
       </div>
       <div id="camposAdmin" style="display:none;">
         <input type="email" id="nuevoEmail" class="field" placeholder="Correo electrónico" style="margin-bottom:6px;">
@@ -1037,6 +1043,9 @@ function idbGet(key){
 
 // ── SINCRO FIREBASE ──
 let fb = null, fbRef = null, syncOcupado = false, fbConectado = false, reiniciando = false;
+let syncQueue = []; // Cola de cambios pendientes cuando hay offline
+let notifListeners = {};
+
 function getFbConfig(){
   try{ const s = localStorage.getItem('misHuevosFirebase'); if(!s) return null; const c = JSON.parse(s); if(c && c.databaseURL && c.apiKey) return c; return null; }catch(e){ return null; }
 }
@@ -1066,8 +1075,64 @@ function desconectarSync(){
 }
 function syncFirebase(){
   if(!fbRef || syncOcupado || reiniciando) return;
+  if(!navigator.onLine){
+    syncQueue.push({ ts: Date.now(), data: JSON.parse(JSON.stringify(estado)) });
+    if(syncQueue.length > 20) syncQueue = syncQueue.slice(-20);
+    idbPut('syncQueue', JSON.stringify(syncQueue));
+    return;
+  }
   syncOcupado = true;
   fbRef.set(JSON.parse(JSON.stringify(estado))).catch(()=>{}).finally(()=>{ syncOcupado = false; });
+}
+function flushSyncQueue(){
+  if(syncQueue.length === 0 || !fbRef || !navigator.onLine) return;
+  const latest = syncQueue[syncQueue.length - 1];
+  syncQueue = [];
+  idbPut('syncQueue', '[]');
+  syncOcupado = true;
+  fbRef.set(latest.data).catch(()=>{}).finally(()=>{ syncOcupado = false; });
+}
+window.addEventListener('online', ()=>{
+  toast('🟢 Conectado — sincronizando...');
+  actualizarSyncUI();
+  idbGet('syncQueue').then(q=>{
+    if(q){ try{ syncQueue = JSON.parse(q); }catch(e){ syncQueue = []; } }
+    flushSyncQueue();
+  });
+});
+window.addEventListener('offline', ()=>{
+  toast('🔴 Sin conexión — los cambios se guardan localmente');
+  actualizarSyncUI();
+});
+
+// ── NOTIFICACIONES (admin ve ventas de vendedores) ──
+function enviarNotificacion(tipo, mensaje){
+  if(!fbRef || !currentUser) return;
+  try{
+    const notifRef = firebase.database(fb).ref('huevos/notificaciones');
+    notifRef.push({ tipo, mensaje, de: currentUser.nombre, uid: currentUser.uid, ts: Date.now(), leido: false });
+  }catch(e){}
+}
+function escucharNotificaciones(){
+  if(!fb || !isAdmin()) return;
+  try{
+    const notifRef = firebase.database(fb).ref('huevos/notificaciones');
+    notifRef.orderByChild('leido').equalTo(false).on('child_added', snap=>{
+      const n = snap.val();
+      if(n && n.uid !== (currentUser?currentUser.uid:'')){
+        toast('🔔 '+n.de+': '+n.mensaje);
+        if('Notification' in window && Notification.permission === 'granted'){
+          new Notification('Mis Huevos', { body: n.de+': '+n.mensaje, icon:'icons/icon-192.png' });
+        }
+      }
+      snap.ref.update({ leido: true });
+    });
+  }catch(e){}
+}
+function pedirPermisoNotif(){
+  if('Notification' in window && Notification.permission === 'default'){
+    Notification.requestPermission();
+  }
 }
 function conectarFirebase(cfg){
   try{
@@ -1111,9 +1176,13 @@ function tapSyncDot(){
 function actualizarSyncUI(){
   const el = document.getElementById('syncEstado');
   const dot = document.getElementById('syncDot');
+  const online = navigator.onLine;
   if(!fbRef){
     if(el) el.textContent = 'No conectado';
     if(dot){ dot.style.background='#6b7280'; dot.textContent='OFF'; dot.title='Sin sincronizar'; }
+  } else if(!online){
+    if(el) el.textContent = '🔴 Sin internet — cola local';
+    if(dot){ dot.style.background='#ef4444'; dot.textContent='OFF'; dot.title='Offline — cambios se guardan localmente'; }
   } else if(fbConectado){
     if(el) el.textContent = '✅ En línea';
     if(dot){ dot.style.background='#22c55e'; dot.textContent='ON'; dot.title='Sincronizando — online'; }
@@ -1604,6 +1673,7 @@ function confirmarVenta(){
   document.getElementById('ventaQuien').value='';
   feedbackVenta();
   toast(venta.pago==='transferencia' ? '🏦 Registrado: '+fmt(precio) : venta.pago==='deuda' ? '📒 Deuda anotada: '+fmt(precio) : '✅ Registrado: '+fmt(precio));
+  if(isVendedor()) enviarNotificacion('venta', 'Vendió '+prod+' '+venta.tipo+' · '+fmt(precio));
 }
 function actualizarSesionVenta(){
   const s = venta.sesion;
@@ -1723,6 +1793,7 @@ function confirmarFeria(){
   if(estado.ventas.length % 10 === 0){ autoBackup(); toast('💾 Respaldo automático hecho'); }
   feedbackVenta();
   toast('🎪 Vendido '+feria.cant+' '+feria.tipo+(feria.cant>1?'s':'')+' · '+fmt(precio));
+  if(isVendedor()) enviarNotificacion('venta', 'Feria: '+feria.cant+' '+feria.tipo+' · '+fmt(precio));
 }
 function actualizarSesionFeria(){
   const s = feria.sesion;
@@ -2004,8 +2075,8 @@ function actualizarBtnApertura(){
   }
 }
 function reportesTab(tab){
-  const panels = {resumen:'repoPanelResumen', proyeccion:'repoPanelProyec', graficas:'repoPanelGrafic'};
-  const ids = {resumen:'rTabResumen', proyeccion:'rTabProyec', graficas:'rTabGrafic'};
+  const panels = {resumen:'repoPanelResumen', proyeccion:'repoPanelProyec', graficas:'repoPanelGrafic', vendedores:'repoPanelVendedores'};
+  const ids = {resumen:'rTabResumen', proyeccion:'rTabProyec', graficas:'rTabGrafic', vendedores:'rTabVendedores'};
   Object.values(panels).forEach(p=>document.getElementById(p).style.display='none');
   Object.entries(ids).forEach(([k,id])=>{
     const btn = document.getElementById(id);
@@ -2016,6 +2087,7 @@ function reportesTab(tab){
   if(tab==='resumen') llenarResumen();
   if(tab==='proyeccion') llenarProyeccion();
   if(tab==='graficas') renderGraficas();
+  if(tab==='vendedores') llenarVendedores();
 }
 function datosTab(tab){
   const panels = {respaldar:'datosPanelRespaldar', sync:'datosPanelSync'};
@@ -2145,6 +2217,92 @@ function llenarResumen(){
   if(estado.stock.Segunda > 0) partes.push(estado.stock.Segunda + ' btx Segunda');
   if(estado.stock.Terceira > 0) partes.push(estado.stock.Terceira + ' btx Tercera');
   document.getElementById('rsInvertido').innerHTML = partes.length > 0 ? partes.join('<br>') : '<span style="color:#999;">Sin stock</span>';
+}
+
+// ── REPORTE VENDEDORES / COMISIONES ──
+function llenarVendedores(){
+  const el = document.getElementById('vendedoresContenido');
+  const hoy0 = new Date(); hoy0.setHours(0,0,0,0);
+  const mes0 = new Date(hoy0.getFullYear(), hoy0.getMonth(), 1);
+  const semana0 = new Date(hoy0); semana0.setDate(hoy0.getDate()-hoy0.getDay());
+
+  // Agrupar ventas por vendedor
+  const vends = {};
+  estado.ventas.forEach(v=>{
+    const uid = v.vendedorUid || 'sin_vendedor';
+    const nombre = v.vendedorNombre || 'Sin asignar';
+    if(!vends[uid]) vends[uid] = { nombre, ventasHoy: 0, ventasSem: 0, ventasMes: 0, totalMes: 0, total: 0, comisionPct: 5, count: 0 };
+    vends[uid].count++;
+    vends[uid].total += v.precio;
+    if(v.f >= mes0.getTime()){
+      vends[uid].ventasMes += v.precio;
+      vends[uid].totalMes += v.precio;
+    }
+    if(v.f >= semana0.getTime()) vends[uid].ventasSem += v.precio;
+    if(v.f >= hoy0.getTime()) vends[uid].ventasHoy += v.precio;
+  });
+
+  // Cargar info de usuarios de Firebase si hay conexión
+  const db = getAuthDb();
+  if(db){
+    db.ref('huevos/usuarios').once('value', snap=>{
+      const users = snap.val();
+      if(users){
+        Object.keys(users).forEach(k=>{
+          const u = users[k];
+          if(vends[u.uid]) vends[u.uid].comisionPct = u.comision || 5;
+          else if(u.rol==='vendedor'){
+            // Buscar por nombre
+            Object.keys(vends).forEach(vid=>{
+              if(vends[vid].nombre === u.nombre) vends[vid].comisionPct = u.comision || 5;
+            });
+          }
+        });
+      }
+      renderVendedores(el, vends);
+    });
+  } else {
+    renderVendedores(el, vends);
+  }
+}
+function renderVendedores(el, vends){
+  const keys = Object.keys(vends);
+  if(keys.length === 0){
+    el.innerHTML = '<div style="text-align:center;color:#999;padding:20px;">Sin ventas registradas</div>';
+    return;
+  }
+  let html = '<div style="font-size:11px;color:#6b7280;margin-bottom:10px;">Ventas y comisiones por vendedor — '+new Date().toLocaleDateString('es-CL')+'</div>';
+  let totalGeneral = 0, totalComisiones = 0;
+  keys.forEach(k=>{
+    const v = vends[k];
+    const comision = Math.round(v.ventasMes * v.comisionPct / 100);
+    totalGeneral += v.ventasMes;
+    totalComisiones += comision;
+    html += '<div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:12px;margin-bottom:8px;">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">'+
+        '<span style="font-weight:800;font-size:14px;color:#1e293b;">👤 '+v.nombre+'</span>'+
+        '<span style="font-size:10px;background:#ede9fe;color:#7c3aed;padding:2px 8px;border-radius:12px;">'+v.comisionPct+'% comisión</span>'+
+      '</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;font-size:11px;">'+
+        '<div style="background:#fff;border-radius:6px;padding:6px;text-align:center;"><div style="font-weight:800;color:#059669;">'+fmt(v.ventasHoy)+'</div><div style="color:#999;">Hoy</div></div>'+
+        '<div style="background:#fff;border-radius:6px;padding:6px;text-align:center;"><div style="font-weight:800;color:#2563eb;">'+fmt(v.ventasSem)+'</div><div style="color:#999;">Semana</div></div>'+
+        '<div style="background:#fff;border-radius:6px;padding:6px;text-align:center;"><div style="font-weight:800;color:#9333ea;">'+fmt(v.ventasMes)+'</div><div style="color:#999;">Mes</div></div>'+
+      '</div>'+
+      '<div style="margin-top:8px;display:flex;justify-content:space-between;font-size:12px;">'+
+        '<span>💰 Comisión del mes: <b style="color:#059669;">'+fmt(comision)+'</b></span>'+
+        '<span style="color:#999;">'+v.count+' ventas totales</span>'+
+      '</div>'+
+    '</div>';
+  });
+  html += '<div style="background:linear-gradient(135deg,#059669,#16a34a);color:#fff;border-radius:10px;padding:14px;margin-top:4px;">'+
+    '<div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;">'+
+      '<span>💰 Total comisiones mes:</span><span>'+fmt(totalComisiones)+'</span>'+
+    '</div>'+
+    '<div style="display:flex;justify-content:space-between;font-size:11px;margin-top:4px;opacity:0.8;">'+
+      '<span>Total ventas mes:</span><span>'+fmt(totalGeneral)+'</span>'+
+    '</div>'+
+  '</div>';
+  el.innerHTML = html;
 }
 
 // ── CAMBIO ──
@@ -2988,6 +3146,16 @@ function entrarApp(){
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('appPrincipal').style.display='';
   initApp();
+  pedirPermisoNotif();
+  if(isAdmin()){
+    const cfg = getFbConfig();
+    if(cfg && !fb){
+      conectarFirebase(cfg);
+      setTimeout(()=>escucharNotificaciones(), 3000);
+    } else {
+      escucharNotificaciones();
+    }
+  }
 }
 
 function logoutApp(){
@@ -3092,6 +3260,7 @@ async function crearUsuario(){
   const pin = document.getElementById('nuevoPin').value.trim();
   const pass = document.getElementById('nuevoPass').value;
   const rol = document.getElementById('nuevoRol').value;
+  const comision = rol==='vendedor' ? parseInt(document.getElementById('nuevoComision').value)||5 : 0;
   if(!nombre){ toast('❌ Nombre requerido'); return; }
   if(rol==='vendedor' && !pin){ toast('❌ PIN requerido para vendedor'); return; }
   if(rol==='admin' && !email){ toast('❌ Correo requerido para admin'); return; }
@@ -3107,12 +3276,13 @@ async function crearUsuario(){
       const existente = await db.ref('huevos/usuarios').orderByChild('email').equalTo(email).once('value');
       if(existente.val()){ toast('❌ Ese correo ya está registrado'); return; }
     }
-    await db.ref('huevos/usuarios').push({ nombre, email, pin, pass, rol, activo: true, creado: Date.now() });
+    await db.ref('huevos/usuarios').push({ nombre, email, pin, pass, rol, comision, activo: true, creado: Date.now() });
     toast('✅ Usuario "'+nombre+'" creado');
     document.getElementById('nuevoNombre').value='';
     document.getElementById('nuevoEmail').value='';
     document.getElementById('nuevoPin').value='';
     document.getElementById('nuevoPass').value='';
+    document.getElementById('nuevoComision').value='5';
     abrirPanelUsuarios();
   }catch(e){ toast('❌ Error al crear usuario'); }
 }
