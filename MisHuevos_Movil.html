@@ -170,73 +170,9 @@ body.dark .chart-wrap{ background:#1f2937; }
 .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316; }
 body.dark .filtro-btn{ background:#374151; border-color:#4b5563; color:#e5e7eb; }
 body.dark .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316; }
-
-/* ── LOGIN SCREEN ── */
-#loginScreen{ display:none; position:fixed; inset:0; z-index:9999; background:linear-gradient(135deg,#f59e0b 0%,#f97316 100%); padding:0; overflow-y:auto; }
-#loginScreen.show{ display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; }
-.login-card{ background:#fff; border-radius:20px; padding:30px 24px; width:90%; max-width:360px; box-shadow:0 8px 32px rgba(0,0,0,.15); }
-.login-card h2{ text-align:center; font-size:22px; margin-bottom:4px; }
-.login-card .sub{ text-align:center; color:#888; font-size:12px; margin-bottom:20px; }
-.login-tabs{ display:flex; gap:0; margin-bottom:20px; border-radius:12px; overflow:hidden; border:2px solid #e5e7eb; }
-.login-tab{ flex:1; padding:10px; text-align:center; font-weight:800; font-size:13px; cursor:pointer; background:#f3f4f6; color:#666; border:none; transition:.2s; }
-.login-tab.act{ background:#f97316; color:#fff; }
-.login-field{ width:100%; padding:12px 14px; border:2px solid #e5e7eb; border-radius:12px; font-size:16px; margin-bottom:12px; outline:none; transition:.2s; }
-.login-field:focus{ border-color:#f97316; }
-.pin-input{ text-align:center; font-size:28px; font-weight:900; letter-spacing:12px; width:100%; padding:14px; border:2px solid #e5e7eb; border-radius:12px; outline:none; }
-.pin-input:focus{ border-color:#f97316; }
-.login-btn{ width:100%; padding:14px; background:#f97316; color:#fff; border:none; border-radius:12px; font-size:16px; font-weight:800; cursor:pointer; margin-top:8px; transition:.2s; }
-.login-btn:disabled{ opacity:.4; cursor:not-allowed; }
-.login-btn:active{ transform:scale(.97); }
-.login-footer{ text-align:center; margin-top:14px; font-size:11px; color:#999; }
-.login-error{ background:#fef2f2; color:#dc2626; padding:8px 12px; border-radius:8px; font-size:12px; font-weight:700; margin-bottom:10px; display:none; text-align:center; }
-.login-error.show{ display:block; }
-
-/* ── ROLE BADGE ── */
-.role-badge{ display:inline-block; font-size:9px; padding:1px 6px; border-radius:6px; font-weight:700; vertical-align:middle; }
-.role-admin{ background:#7c3aed; color:#fff; }
-.role-vendedor{ background:#16a34a; color:#fff; }
-
-/* ── ADMIN USERS PANEL ── */
-.user-list-item{ display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #f3f4f6; }
-.user-list-item:last-child{ border-bottom:none; }
-.user-info{ flex:1; }
-.user-name{ font-weight:800; font-size:13px; }
-.user-email{ font-size:11px; color:#888; }
-.user-role{ font-size:10px; font-weight:700; padding:2px 8px; border-radius:8px; margin-left:8px; }
-.user-del{ background:none; border:none; color:#dc2626; font-size:16px; cursor:pointer; padding:4px 8px; }
 </style>
 </head>
 <body>
-
-<!-- ═══ LOGIN SCREEN ═══ -->
-<div id="loginScreen" class="show">
-  <div class="login-card">
-    <h2>🥚 Mis Huevos</h2>
-    <div class="sub">Sistema de control de ventas</div>
-    <div class="login-tabs">
-      <button class="login-tab act" onclick="loginTabVendedor()">📱 Vendedor</button>
-      <button class="login-tab" onclick="loginTabAdmin()">🔑 Admin</button>
-    </div>
-    <div id="loginError" class="login-error"></div>
-    <!-- VENDEDOR: PIN -->
-    <div id="loginVendedor">
-      <input type="password" id="loginPin" class="pin-input" inputmode="numeric" maxlength="6" placeholder="····" autocomplete="off">
-      <button class="login-btn" id="loginPinBtn" onclick="loginConPin()" disabled>Entrar</button>
-      <div class="login-footer">Ingresa tu PIN de acceso</div>
-    </div>
-    <!-- ADMIN: CORREO + CONTRASEÑA -->
-    <div id="loginAdmin" style="display:none;">
-      <input type="text" id="loginEmail" class="login-field" placeholder="Tu nombre o correo" autocomplete="name">
-      <input type="password" id="loginPass" class="login-field" placeholder="Contraseña" autocomplete="current-password">
-      <button class="login-btn" id="loginEmailBtn" onclick="setupAdmin()" disabled>Crear mi cuenta admin</button>
-      <button class="login-btn" id="loginExistingBtn" onclick="loginConEmail()" style="display:none;background:#7c3aed;margin-top:6px;" disabled>Ingresar</button>
-      <div class="login-footer">Primera vez: crea tu cuenta · Ya tienes cuenta: inicia sesión</div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══ APP PRINCIPAL (oculta hasta login) ═══ -->
-<div id="appPrincipal" style="display:none;">
 
 <header>
   <div class="top">
@@ -333,8 +269,6 @@ body.dark .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316;
       <button class="util-btn" onclick="exportarExcel()"><span class="ic">📊</span>Excel</button>
       <button class="util-btn" onclick="abrirModal('modalAjustar')"><span class="ic">🔧</span>Ajustar</button>
       <button class="util-btn" onclick="abrirModal('modalReset')"><span class="ic">🗑️</span>Reiniciar</button>
-      <button class="util-btn admin-only" onclick="abrirPanelUsuarios()"><span class="ic">👥</span>Usuarios</button>
-      <button class="util-btn" onclick="logoutApp()" style="grid-column:span 2;background:#fef2f2;border:2px solid #f87171;"><span class="ic">🚪</span>Cerrar sesión</button>
     </div>
   </div>
 
@@ -601,7 +535,6 @@ if ('serviceWorker' in navigator) {
       <button onclick="reportesTab('resumen')" id="rTabResumen" style="flex:1;padding:8px;border:2px solid #2563eb;background:#eff6ff;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;">📈 Resumen</button>
       <button onclick="reportesTab('proyeccion')" id="rTabProyec" style="flex:1;padding:8px;border:2px solid #e5e7eb;background:#fff;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;">💰 Proyección</button>
       <button onclick="reportesTab('graficas')" id="rTabGrafic" style="flex:1;padding:8px;border:2px solid #e5e7eb;background:#fff;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;">📊 Gráficas</button>
-      <button onclick="reportesTab('vendedores')" id="rTabVendedores" style="flex:1;padding:8px;border:2px solid #e5e7eb;background:#fff;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;">👥 Vendedores</button>
     </div>
     <div id="repoPanelResumen">
       <div class="paso-titulo">Ganancias</div>
@@ -630,7 +563,6 @@ if ('serviceWorker' in navigator) {
     </div>
     <div id="repoPanelProyec" style="display:none;"><div id="proyeccionContenido" style="max-height:60vh;overflow-y:auto;"></div></div>
     <div id="repoPanelGrafic" style="display:none;"><div id="graficaContainer" style="max-height:60vh;overflow-y:auto;"></div></div>
-    <div id="repoPanelVendedores" style="display:none;"><div id="vendedoresContenido" style="max-height:60vh;overflow-y:auto;"></div></div>
     <div class="modal-btns"><button class="btn-cancel" onclick="cerrarModal('modalReportes')">Cerrar</button></div>
   </div>
 </div>
@@ -874,44 +806,9 @@ if ('serviceWorker' in navigator) {
   </div>
 </div>
 
-</div><!-- cierra appPrincipal -->
-
-<!-- ═══ MODAL USUARIOS (ADMIN) ═══ -->
-<div class="modal-back" id="modalUsuarios">
-  <div class="modal">
-    <div class="modal-header"><h3>👥 Usuarios</h3><button class="modal-close" onclick="cerrarModal('modalUsuarios')">✕</button></div>
-    <div style="margin-bottom:12px;">
-      <h4 style="font-size:13px;margin-bottom:8px;">Crear nuevo usuario</h4>
-      <input type="text" id="nuevoNombre" class="field" placeholder="Nombre" style="margin-bottom:6px;">
-      <select id="nuevoRol" class="field" style="margin-bottom:6px;" onchange="toggleCamposRol()">
-        <option value="vendedor">Vendedor</option>
-        <option value="admin">Administrador</option>
-      </select>
-      <div id="camposVendedor">
-        <input type="password" id="nuevoPin" class="field" inputmode="numeric" maxlength="6" placeholder="PIN (4-6 dígitos)" style="margin-bottom:6px;">
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
-          <input type="number" id="nuevoComision" class="field" placeholder="Comisión %" min="0" max="50" value="5" style="flex:1;margin-bottom:0;">
-          <span style="font-size:11px;color:#6b7280;">% sobre venta</span>
-        </div>
-      </div>
-      <div id="camposAdmin" style="display:none;">
-        <input type="email" id="nuevoEmail" class="field" placeholder="Correo electrónico" style="margin-bottom:6px;">
-        <input type="password" id="nuevoPass" class="field" placeholder="Contraseña" style="margin-bottom:6px;">
-      </div>
-      <button class="btn-ok" style="width:100%;padding:10px;border:none;border-radius:10px;" onclick="crearUsuario()">+ Crear usuario</button>
-    </div>
-    <div style="border-top:1px solid #eee;padding-top:12px;">
-      <h4 style="font-size:13px;margin-bottom:8px;">Usuarios existentes</h4>
-      <div id="usuariosLista"></div>
-    </div>
-    <div class="modal-btns"><button class="btn-cancel" onclick="cerrarModal('modalUsuarios')">Cerrar</button></div>
-  </div>
-</div>
-
 <div id="toast" class="toast"></div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <script>
@@ -948,8 +845,7 @@ let estado = {
   clientesPrecios: {},
   cuadratura: {},
   darkMode: false,
-  stockParcial: {},
-  lastModified: Date.now()
+  stockParcial: {}
 };
 
 const TEMAS = {
@@ -985,7 +881,6 @@ function aplicarDefaults(d){
   d.ventas.forEach((v,i)=>{ if(!v.id) v.id='v'+i+'-'+v.f; });
 }
 function guardar(){
-  estado.lastModified = Date.now();
   const json = JSON.stringify(estado);
   let lok = true;
   try{ localStorage.setItem('misHuevos', json); }catch(e){ lok = false; }
@@ -1045,9 +940,6 @@ function idbGet(key){
 
 // ── SINCRO FIREBASE ──
 let fb = null, fbRef = null, syncOcupado = false, fbConectado = false, reiniciando = false;
-let syncQueue = []; // Cola de cambios pendientes cuando hay offline
-let notifListeners = {};
-
 function getFbConfig(){
   try{ const s = localStorage.getItem('misHuevosFirebase'); if(!s) return null; const c = JSON.parse(s); if(c && c.databaseURL && c.apiKey) return c; return null; }catch(e){ return null; }
 }
@@ -1077,64 +969,8 @@ function desconectarSync(){
 }
 function syncFirebase(){
   if(!fbRef || syncOcupado || reiniciando) return;
-  if(!navigator.onLine){
-    syncQueue.push({ ts: Date.now(), data: JSON.parse(JSON.stringify(estado)) });
-    if(syncQueue.length > 20) syncQueue = syncQueue.slice(-20);
-    idbPut('syncQueue', JSON.stringify(syncQueue));
-    return;
-  }
   syncOcupado = true;
   fbRef.set(JSON.parse(JSON.stringify(estado))).catch(()=>{}).finally(()=>{ syncOcupado = false; });
-}
-function flushSyncQueue(){
-  if(syncQueue.length === 0 || !fbRef || !navigator.onLine) return;
-  const latest = syncQueue[syncQueue.length - 1];
-  syncQueue = [];
-  idbPut('syncQueue', '[]');
-  syncOcupado = true;
-  fbRef.set(latest.data).catch(()=>{}).finally(()=>{ syncOcupado = false; });
-}
-window.addEventListener('online', ()=>{
-  toast('🟢 Conectado — sincronizando...');
-  actualizarSyncUI();
-  idbGet('syncQueue').then(q=>{
-    if(q){ try{ syncQueue = JSON.parse(q); }catch(e){ syncQueue = []; } }
-    flushSyncQueue();
-  });
-});
-window.addEventListener('offline', ()=>{
-  toast('🔴 Sin conexión — los cambios se guardan localmente');
-  actualizarSyncUI();
-});
-
-// ── NOTIFICACIONES (admin ve ventas de vendedores) ──
-function enviarNotificacion(tipo, mensaje){
-  if(!fbRef || !currentUser) return;
-  try{
-    const notifRef = firebase.database(fb).ref('huevos/notificaciones');
-    notifRef.push({ tipo, mensaje, de: currentUser.nombre, uid: currentUser.uid, ts: Date.now(), leido: false });
-  }catch(e){}
-}
-function escucharNotificaciones(){
-  if(!fb || !isAdmin()) return;
-  try{
-    const notifRef = firebase.database(fb).ref('huevos/notificaciones');
-    notifRef.orderByChild('leido').equalTo(false).on('child_added', snap=>{
-      const n = snap.val();
-      if(n && n.uid !== (currentUser?currentUser.uid:'')){
-        toast('🔔 '+n.de+': '+n.mensaje);
-        if('Notification' in window && Notification.permission === 'granted'){
-          new Notification('Mis Huevos', { body: n.de+': '+n.mensaje, icon:'icons/icon-192.png' });
-        }
-      }
-      snap.ref.update({ leido: true });
-    });
-  }catch(e){}
-}
-function pedirPermisoNotif(){
-  if('Notification' in window && Notification.permission === 'default'){
-    Notification.requestPermission();
-  }
 }
 function conectarFirebase(cfg){
   try{
@@ -1143,19 +979,9 @@ function conectarFirebase(cfg){
     fbRef = firebase.database(fb).ref('huevos/estado');
     fbRef.once('value', snap=>{
       if(snap.exists()){
-        const d = snap.val();
-        const fbTime = d.lastModified || 0;
-        const localTime = estado.lastModified || 0;
-        if(fbTime > localTime){
-          Object.keys(d).forEach(k=>{
-            if(k==='lastModified') return;
-            estado[k] = d[k];
-          });
-          guardar();
-          aplicarTema(estado.tema); actualizarTodo();
-        } else {
-          fbRef.set(JSON.parse(JSON.stringify(estado)));
-        }
+        estado = Object.assign(estado, snap.val());
+        guardar();
+        aplicarTema(estado.tema); actualizarTodo();
       } else {
         fbRef.set(JSON.parse(JSON.stringify(estado)));
       }
@@ -1163,16 +989,9 @@ function conectarFirebase(cfg){
     fbRef.on('value', snap=>{
       const d = snap.val();
       if(d && !syncOcupado && !reiniciando){
-        const fbTime = d.lastModified || 0;
-        const localTime = estado.lastModified || 0;
-        if(fbTime > localTime){
-          Object.keys(d).forEach(k=>{
-            if(k==='lastModified') return;
-            estado[k] = d[k];
-          });
-          guardar();
-          aplicarTema(estado.tema); actualizarTodo();
-        }
+        estado = JSON.parse(JSON.stringify(d));
+        guardar();
+        aplicarTema(estado.tema); actualizarTodo();
       }
     });
     firebase.database(fb).ref('.info/connected').on('value', s=>{ fbConectado = !!s.val(); actualizarSyncUI(); });
@@ -1195,13 +1014,9 @@ function tapSyncDot(){
 function actualizarSyncUI(){
   const el = document.getElementById('syncEstado');
   const dot = document.getElementById('syncDot');
-  const online = navigator.onLine;
   if(!fbRef){
     if(el) el.textContent = 'No conectado';
     if(dot){ dot.style.background='#6b7280'; dot.textContent='OFF'; dot.title='Sin sincronizar'; }
-  } else if(!online){
-    if(el) el.textContent = '🔴 Sin internet — cola local';
-    if(dot){ dot.style.background='#ef4444'; dot.textContent='OFF'; dot.title='Offline — cambios se guardan localmente'; }
   } else if(fbConectado){
     if(el) el.textContent = '✅ En línea';
     if(dot){ dot.style.background='#22c55e'; dot.textContent='ON'; dot.title='Sincronizando — online'; }
@@ -1220,8 +1035,6 @@ function fDate(d){ return new Date(d).toLocaleDateString('es-CL',{day:'2-digit',
 
 // ── MODALES + botón atrás ──
 function abrirModal(id){
-  const adminOnly = ['modalCompra','modalMerma','modalGasto','modalDeudas','modalReportes','modalDatos','modalHistorial','modalAjustar','modalReset','modalCierre','modalClientes'];
-  if(isVendedor() && adminOnly.includes(id)){ toast('❌ Sin permisos'); return; }
   document.getElementById(id).classList.add('show');
   try{ history.pushState({modal:id}, ''); }catch(e){}
   if(id==='modalCompra'){ document.getElementById('compraFecha').value=new Date().toISOString().slice(0,10); }
@@ -1684,7 +1497,7 @@ function confirmarVenta(){
   }
   
   const costoTotal = btx * costoBtx(prod);
-  const vReg = { id:Date.now()+'-'+Math.random().toString(36).slice(2,7), f:Date.now(), prod:prod, tipo:venta.tipo, cant:venta.cant, bandejas:btx, precio:precio, gan:precio - costoTotal, pago:venta.pago, quien:cliente, vendedorUid:currentUser?currentUser.uid:'', vendedorNombre:currentUser?currentUser.nombre:'' };
+  const vReg = { id:Date.now()+'-'+Math.random().toString(36).slice(2,7), f:Date.now(), prod:prod, tipo:venta.tipo, cant:venta.cant, bandejas:btx, precio:precio, gan:precio - costoTotal, pago:venta.pago, quien:cliente };
   estado.ventas.push(vReg);
   venta.sesion.push(vReg);
   guardar(); actualizarTodo(); actualizarSesionVenta();
@@ -1692,7 +1505,6 @@ function confirmarVenta(){
   document.getElementById('ventaQuien').value='';
   feedbackVenta();
   toast(venta.pago==='transferencia' ? '🏦 Registrado: '+fmt(precio) : venta.pago==='deuda' ? '📒 Deuda anotada: '+fmt(precio) : '✅ Registrado: '+fmt(precio));
-  if(isVendedor()) enviarNotificacion('venta', 'Vendió '+prod+' '+venta.tipo+' · '+fmt(precio));
 }
 function actualizarSesionVenta(){
   const s = venta.sesion;
@@ -1805,14 +1617,13 @@ function confirmarFeria(){
   }
   
   const costoTotal = bandejas * costoBtx(prod);
-  const vReg = { id:Date.now()+'-'+Math.random().toString(36).slice(2,7), f:Date.now(), prod:prod, tipo:feria.tipo, cant:feria.cant, bandejas:bandejas, precio:precio, gan:precio - costoTotal, pago:'efectivo', quien:'Feria', vendedorUid:currentUser?currentUser.uid:'', vendedorNombre:currentUser?currentUser.nombre:'' };
+  const vReg = { id:Date.now()+'-'+Math.random().toString(36).slice(2,7), f:Date.now(), prod:prod, tipo:feria.tipo, cant:feria.cant, bandejas:bandejas, precio:precio, gan:precio - costoTotal, pago:'efectivo', quien:'Feria' };
   estado.ventas.push(vReg);
   feria.sesion.push(vReg);
   guardar(); actualizarTodo(); actualizarSesionFeria();
   if(estado.ventas.length % 10 === 0){ autoBackup(); toast('💾 Respaldo automático hecho'); }
   feedbackVenta();
   toast('🎪 Vendido '+feria.cant+' '+feria.tipo+(feria.cant>1?'s':'')+' · '+fmt(precio));
-  if(isVendedor()) enviarNotificacion('venta', 'Feria: '+feria.cant+' '+feria.tipo+' · '+fmt(precio));
 }
 function actualizarSesionFeria(){
   const s = feria.sesion;
@@ -1833,7 +1644,7 @@ function agregarOtro(dest){
   if(precio<=0){ toast('Ingresa el precio'); return; }
   const quien = esFeria ? 'Feria' : (document.getElementById('ventaQuien').value.trim() || 'Venta suelta');
   const pago = esFeria ? 'efectivo' : venta.pago;
-  const vReg = { id:Date.now()+'-'+Math.random().toString(36).slice(2,7), f:Date.now(), prod:'Otro', nombre:nombre, tipo:'otro', cant:1, bandejas:0, precio:precio, gan:precio, pago:pago, quien:quien, vendedorUid:currentUser?currentUser.uid:'', vendedorNombre:currentUser?currentUser.nombre:'' };
+  const vReg = { id:Date.now()+'-'+Math.random().toString(36).slice(2,7), f:Date.now(), prod:'Otro', nombre:nombre, tipo:'otro', cant:1, bandejas:0, precio:precio, gan:precio, pago:pago, quien:quien };
   estado.ventas.push(vReg);
   (esFeria?feria.sesion:venta.sesion).push(vReg);
   guardar(); actualizarTodo();
@@ -2094,8 +1905,8 @@ function actualizarBtnApertura(){
   }
 }
 function reportesTab(tab){
-  const panels = {resumen:'repoPanelResumen', proyeccion:'repoPanelProyec', graficas:'repoPanelGrafic', vendedores:'repoPanelVendedores'};
-  const ids = {resumen:'rTabResumen', proyeccion:'rTabProyec', graficas:'rTabGrafic', vendedores:'rTabVendedores'};
+  const panels = {resumen:'repoPanelResumen', proyeccion:'repoPanelProyec', graficas:'repoPanelGrafic'};
+  const ids = {resumen:'rTabResumen', proyeccion:'rTabProyec', graficas:'rTabGrafic'};
   Object.values(panels).forEach(p=>document.getElementById(p).style.display='none');
   Object.entries(ids).forEach(([k,id])=>{
     const btn = document.getElementById(id);
@@ -2106,7 +1917,6 @@ function reportesTab(tab){
   if(tab==='resumen') llenarResumen();
   if(tab==='proyeccion') llenarProyeccion();
   if(tab==='graficas') renderGraficas();
-  if(tab==='vendedores') llenarVendedores();
 }
 function datosTab(tab){
   const panels = {respaldar:'datosPanelRespaldar', sync:'datosPanelSync'};
@@ -2238,92 +2048,6 @@ function llenarResumen(){
   document.getElementById('rsInvertido').innerHTML = partes.length > 0 ? partes.join('<br>') : '<span style="color:#999;">Sin stock</span>';
 }
 
-// ── REPORTE VENDEDORES / COMISIONES ──
-function llenarVendedores(){
-  const el = document.getElementById('vendedoresContenido');
-  const hoy0 = new Date(); hoy0.setHours(0,0,0,0);
-  const mes0 = new Date(hoy0.getFullYear(), hoy0.getMonth(), 1);
-  const semana0 = new Date(hoy0); semana0.setDate(hoy0.getDate()-hoy0.getDay());
-
-  // Agrupar ventas por vendedor
-  const vends = {};
-  estado.ventas.forEach(v=>{
-    const uid = v.vendedorUid || 'sin_vendedor';
-    const nombre = v.vendedorNombre || 'Sin asignar';
-    if(!vends[uid]) vends[uid] = { nombre, ventasHoy: 0, ventasSem: 0, ventasMes: 0, totalMes: 0, total: 0, comisionPct: 5, count: 0 };
-    vends[uid].count++;
-    vends[uid].total += v.precio;
-    if(v.f >= mes0.getTime()){
-      vends[uid].ventasMes += v.precio;
-      vends[uid].totalMes += v.precio;
-    }
-    if(v.f >= semana0.getTime()) vends[uid].ventasSem += v.precio;
-    if(v.f >= hoy0.getTime()) vends[uid].ventasHoy += v.precio;
-  });
-
-  // Cargar info de usuarios de Firebase si hay conexión
-  const db = getAuthDb();
-  if(db){
-    db.ref('huevos/usuarios').once('value', snap=>{
-      const users = snap.val();
-      if(users){
-        Object.keys(users).forEach(k=>{
-          const u = users[k];
-          if(vends[u.uid]) vends[u.uid].comisionPct = u.comision || 5;
-          else if(u.rol==='vendedor'){
-            // Buscar por nombre
-            Object.keys(vends).forEach(vid=>{
-              if(vends[vid].nombre === u.nombre) vends[vid].comisionPct = u.comision || 5;
-            });
-          }
-        });
-      }
-      renderVendedores(el, vends);
-    });
-  } else {
-    renderVendedores(el, vends);
-  }
-}
-function renderVendedores(el, vends){
-  const keys = Object.keys(vends);
-  if(keys.length === 0){
-    el.innerHTML = '<div style="text-align:center;color:#999;padding:20px;">Sin ventas registradas</div>';
-    return;
-  }
-  let html = '<div style="font-size:11px;color:#6b7280;margin-bottom:10px;">Ventas y comisiones por vendedor — '+new Date().toLocaleDateString('es-CL')+'</div>';
-  let totalGeneral = 0, totalComisiones = 0;
-  keys.forEach(k=>{
-    const v = vends[k];
-    const comision = Math.round(v.ventasMes * v.comisionPct / 100);
-    totalGeneral += v.ventasMes;
-    totalComisiones += comision;
-    html += '<div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:12px;margin-bottom:8px;">'+
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">'+
-        '<span style="font-weight:800;font-size:14px;color:#1e293b;">👤 '+v.nombre+'</span>'+
-        '<span style="font-size:10px;background:#ede9fe;color:#7c3aed;padding:2px 8px;border-radius:12px;">'+v.comisionPct+'% comisión</span>'+
-      '</div>'+
-      '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;font-size:11px;">'+
-        '<div style="background:#fff;border-radius:6px;padding:6px;text-align:center;"><div style="font-weight:800;color:#059669;">'+fmt(v.ventasHoy)+'</div><div style="color:#999;">Hoy</div></div>'+
-        '<div style="background:#fff;border-radius:6px;padding:6px;text-align:center;"><div style="font-weight:800;color:#2563eb;">'+fmt(v.ventasSem)+'</div><div style="color:#999;">Semana</div></div>'+
-        '<div style="background:#fff;border-radius:6px;padding:6px;text-align:center;"><div style="font-weight:800;color:#9333ea;">'+fmt(v.ventasMes)+'</div><div style="color:#999;">Mes</div></div>'+
-      '</div>'+
-      '<div style="margin-top:8px;display:flex;justify-content:space-between;font-size:12px;">'+
-        '<span>💰 Comisión del mes: <b style="color:#059669;">'+fmt(comision)+'</b></span>'+
-        '<span style="color:#999;">'+v.count+' ventas totales</span>'+
-      '</div>'+
-    '</div>';
-  });
-  html += '<div style="background:linear-gradient(135deg,#059669,#16a34a);color:#fff;border-radius:10px;padding:14px;margin-top:4px;">'+
-    '<div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;">'+
-      '<span>💰 Total comisiones mes:</span><span>'+fmt(totalComisiones)+'</span>'+
-    '</div>'+
-    '<div style="display:flex;justify-content:space-between;font-size:11px;margin-top:4px;opacity:0.8;">'+
-      '<span>Total ventas mes:</span><span>'+fmt(totalGeneral)+'</span>'+
-    '</div>'+
-  '</div>';
-  el.innerHTML = html;
-}
-
 // ── CAMBIO ──
 document.getElementById('cambioVenta').addEventListener('input', calcularVuelto);
 document.getElementById('cambioPago').addEventListener('input', calcularVuelto);
@@ -2374,9 +2098,8 @@ function actualizarHistorial(){
       const f = fDate(v.f);
       const h = new Date(v.f).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
       const quien = v.quien ? ' → '+v.quien : '';
-      const ven = v.vendedorNombre ? '<span style="font-size:9px;background:#7c3aed;color:#fff;padding:1px 5px;border-radius:4px;margin-left:3px;">'+v.vendedorNombre+'</span>' : '';
       const pg = v.pago==='transferencia' ? '🏦' : v.pago==='deuda' ? '📒' : '💵';
-      return '<div class="h-item"><span><b>'+((v.nombre||v.prod)+'').slice(0,12)+'</b> '+v.tipo+' · <span class="d">'+f+' '+h+quien+' '+pg+ven+'</span></span><span class="t">'+fmt(v.precio)+' <button style="background:none;border:none;font-size:13px;cursor:pointer;" onclick="editarVenta(\''+v.id+'\')">✏️</button> <button style="background:none;border:none;font-size:13px;cursor:pointer;" onclick="eliminarVenta(\''+v.id+'\')">🗑️</button></span></div>';
+      return '<div class="h-item"><span><b>'+((v.nombre||v.prod)+'').slice(0,12)+'</b> '+v.tipo+' · <span class="d">'+f+' '+h+quien+' '+pg+'</span></span><span class="t">'+fmt(v.precio)+' <button style="background:none;border:none;font-size:13px;cursor:pointer;" onclick="editarVenta(\''+v.id+'\')">✏️</button> <button style="background:none;border:none;font-size:13px;cursor:pointer;" onclick="eliminarVenta(\''+v.id+'\')">🗑️</button></span></div>';
     }).join('');
   }
   const hoyVentas = estado.ventas.filter(v=>new Date(v.f).toDateString()===new Date().toDateString());
@@ -3008,450 +2731,6 @@ function autoBackup(){
   }catch(e){}
 }
 
-// ══════════════════════════════════════
-// ── SISTEMA DE AUTENTICACIÓN Y ROLES ──
-// ══════════════════════════════════════
-let currentUser = null; // { uid, email, nombre, rol: 'admin'|'vendedor' }
-let authApp = null, authDb = null;
-
-const ADMIN_EMAILS = ['miguel.armijo.n@gmail.com'];
-
-function getAuthDb(){
-  if(authDb) return authDb;
-  try{
-    const cfg = JSON.parse(localStorage.getItem('misHuevosFirebase') || 'null');
-    if(!cfg) return null;
-    authApp = firebase.initializeApp(cfg, 'auth_'+Date.now());
-    authDb = firebase.database(authApp);
-    return authDb;
-  }catch(e){ return null; }
-}
-
-function loginTabVendedor(){
-  document.querySelectorAll('.login-tab').forEach(t=>t.classList.remove('act'));
-  document.querySelectorAll('.login-tab')[0].classList.add('act');
-  document.getElementById('loginVendedor').style.display='';
-  document.getElementById('loginAdmin').style.display='none';
-  document.getElementById('loginError').classList.remove('show');
-  document.getElementById('loginPin').focus();
-}
-
-function loginTabAdmin(){
-  document.querySelectorAll('.login-tab').forEach(t=>t.classList.remove('act'));
-  document.querySelectorAll('.login-tab')[1].classList.add('act');
-  document.getElementById('loginVendedor').style.display='none';
-  document.getElementById('loginAdmin').style.display='';
-  document.getElementById('loginError').classList.remove('show');
-  document.getElementById('loginEmail').focus();
-  verificarEstadoAdmin();
-}
-
-async function verificarEstadoAdmin(){
-  try{
-    const db = getAuthDb();
-    if(!db) return;
-    const snap = await db.ref('huevos/usuarios').orderByChild('rol').equalTo('admin').once('value');
-    if(snap.val()){
-      document.getElementById('loginEmailBtn').style.display='none';
-      document.getElementById('loginExistingBtn').style.display='';
-      document.getElementById('loginEmail').placeholder='Correo electrónico';
-      document.getElementById('loginEmail').type='email';
-      document.getElementById('loginExistingBtn').disabled = !(document.getElementById('loginEmail').value.trim() && document.getElementById('loginPass').value);
-    } else {
-      document.getElementById('loginEmailBtn').style.display='';
-      document.getElementById('loginExistingBtn').style.display='none';
-      document.getElementById('loginEmail').placeholder='Tu nombre';
-      document.getElementById('loginEmail').type='text';
-    }
-  }catch(e){}
-}
-
-function loginShowError(msg){
-  const el = document.getElementById('loginError');
-  el.textContent = msg;
-  el.classList.add('show');
-}
-
-async function loginConPin(){
-  const pin = document.getElementById('loginPin').value.trim();
-  if(pin.length < 4){ loginShowError('PIN debe tener al menos 4 dígitos'); return; }
-  document.getElementById('loginPinBtn').disabled = true;
-  document.getElementById('loginPinBtn').textContent = 'Entrando...';
-  try{
-    const db = getAuthDb();
-    if(!db){ loginShowError('Sin conexión a Firebase'); document.getElementById('loginPinBtn').disabled=false; document.getElementById('loginPinBtn').textContent='Entrar'; return; }
-    const snap = await db.ref('huevos/usuarios').orderByChild('pin').equalTo(pin).once('value');
-    const users = snap.val();
-    if(!users){
-      loginShowError('PIN incorrecto');
-      document.getElementById('loginPinBtn').disabled=false;
-      document.getElementById('loginPinBtn').textContent='Entrar';
-      return;
-    }
-    const key = Object.keys(users)[0];
-    const u = users[key];
-    if(u.activo === false){
-      loginShowError('Tu cuenta está desactivada');
-      document.getElementById('loginPinBtn').disabled=false;
-      document.getElementById('loginPinBtn').textContent='Entrar';
-      return;
-    }
-    currentUser = { uid: key, email: u.email||'', nombre: u.nombre, rol: u.rol||'vendedor', pin: pin };
-    localStorage.setItem('misHuevosSession', JSON.stringify(currentUser));
-    entrarApp();
-  }catch(e){
-    loginShowError('Error de conexión');
-    document.getElementById('loginPinBtn').disabled=false;
-    document.getElementById('loginPinBtn').textContent='Entrar';
-  }
-}
-
-async function loginConEmail(){
-  const input = document.getElementById('loginEmail').value.trim();
-  const pass = document.getElementById('loginPass').value;
-  if(!input || !pass){ loginShowError('Completa todos los campos'); return; }
-  document.getElementById('loginExistingBtn').disabled = true;
-  document.getElementById('loginExistingBtn').textContent = 'Entrando...';
-  try{
-    const db = getAuthDb();
-    if(!db){ loginShowError('Sin conexión a Firebase'); document.getElementById('loginExistingBtn').disabled=false; document.getElementById('loginExistingBtn').textContent='Ingresar'; return; }
-    let users = null;
-    let snap = await db.ref('huevos/usuarios').orderByChild('email').equalTo(input).once('value');
-    users = snap.val();
-    if(!users){
-      snap = await db.ref('huevos/usuarios').orderByChild('nombre').equalTo(input).once('value');
-      users = snap.val();
-    }
-    if(!users){
-      snap = await db.ref('huevos/usuarios').once('value');
-      const all = snap.val();
-      if(all){
-        const found = Object.keys(all).find(k => all[k].nombre && all[k].nombre.toLowerCase() === input.toLowerCase());
-        if(found){ users = { [found]: all[found] }; }
-      }
-    }
-    if(!users){
-      loginShowError('Usuario no encontrado');
-      document.getElementById('loginExistingBtn').disabled=false;
-      document.getElementById('loginExistingBtn').textContent='Ingresar';
-      return;
-    }
-    const key = Object.keys(users)[0];
-    const u = users[key];
-    if(u.activo === false){
-      loginShowError('Tu cuenta está desactivada');
-      document.getElementById('loginExistingBtn').disabled=false;
-      document.getElementById('loginExistingBtn').textContent='Ingresar';
-      return;
-    }
-    if(u.pass !== pass){
-      loginShowError('Contraseña incorrecta');
-      document.getElementById('loginExistingBtn').disabled=false;
-      document.getElementById('loginExistingBtn').textContent='Ingresar';
-      return;
-    }
-    currentUser = { uid: key, email: u.email||'', nombre: u.nombre, rol: u.rol||'admin' };
-    localStorage.setItem('misHuevosSession', JSON.stringify(currentUser));
-    entrarApp();
-  }catch(e){
-    loginShowError('Error de conexión');
-    document.getElementById('loginExistingBtn').disabled=false;
-    document.getElementById('loginExistingBtn').textContent='Ingresar';
-  }
-}
-
-function entrarApp(){
-  document.getElementById('loginScreen').classList.remove('show');
-  document.getElementById('loginScreen').style.display='none';
-  document.getElementById('appPrincipal').style.display='';
-  initApp();
-  pedirPermisoNotif();
-  if(isAdmin()){
-    const cfg = getFbConfig();
-    if(cfg && !fb){
-      conectarFirebase(cfg);
-      setTimeout(()=>escucharNotificaciones(), 3000);
-    } else {
-      escucharNotificaciones();
-    }
-  }
-}
-
-function logoutApp(){
-  currentUser = null;
-  localStorage.removeItem('misHuevosSession');
-  document.getElementById('appPrincipal').style.display='none';
-  document.getElementById('loginScreen').style.display='';
-  document.getElementById('loginScreen').classList.add('show');
-  document.getElementById('loginPin').value='';
-  document.getElementById('loginPinBtn').disabled=true;
-  document.getElementById('loginPinBtn').textContent='Entrar';
-  document.getElementById('loginError').classList.remove('show');
-  if(fbRef){ try{ fbRef.off(); }catch(e){} }
-}
-
-function isAdmin(){ return currentUser && currentUser.rol === 'admin'; }
-function isVendedor(){ return currentUser && currentUser.rol === 'vendedor'; }
-
-function aplicarRoles(){
-  if(!currentUser) return;
-  const vendedorBtns = ['modalCompra','modalMerma','modalGasto','modalDeudas','modalReportes','modalDatos','modalHistorial','modalAjustar','modalReset','modalClientes'];
-  const utilBtns = document.querySelectorAll('.util-btn');
-  utilBtns.forEach(btn=>{
-    const onclick = btn.getAttribute('onclick') || '';
-    const isAdminOnly = btn.classList.contains('admin-only');
-    let hide = false;
-    if(isVendedor()){
-      vendedorBtns.forEach(id=>{
-        if(onclick.includes(id)) hide = true;
-      });
-      if(onclick.includes('exportarExcel')) hide = true;
-      if(onclick.includes('guardarManual')) hide = true;
-      if(isAdminOnly) hide = true;
-    }
-    btn.style.display = hide ? 'none' : '';
-  });
-  const headerInfo = document.querySelector('header .top');
-  if(headerInfo){
-    let badge = document.getElementById('roleBadge');
-    if(!badge){
-      badge = document.createElement('span');
-      badge.id = 'roleBadge';
-      badge.className = 'role-badge '+(currentUser.rol==='admin'?'role-admin':'role-vendedor');
-      badge.textContent = currentUser.rol==='admin'?'ADMIN':'VENDEDOR';
-      headerInfo.querySelector('h1').appendChild(document.createTextNode(' '));
-      headerInfo.querySelector('h1').appendChild(badge);
-    }
-    let nombreEl = document.getElementById('userNombre');
-    if(!nombreEl){
-      nombreEl = document.createElement('span');
-      nombreEl.id = 'userNombre';
-      nombreEl.style.cssText = 'font-size:10px;color:#fff;opacity:.8;margin-left:6px;';
-      headerInfo.querySelector('h1').appendChild(nombreEl);
-    }
-    nombreEl.textContent = '· '+currentUser.nombre;
-  }
-}
-
-// ── PANEL ADMIN: GESTIONAR USUARIOS ──
-async function cargarUsuarios(){
-  const db = getAuthDb();
-  if(!db) return [];
-  const snap = await db.ref('huevos/usuarios').once('value');
-  const data = snap.val();
-  if(!data) return [];
-  return Object.keys(data).map(k=>({ uid:k, ...data[k] }));
-}
-
-async function abrirPanelUsuarios(){
-  if(!isAdmin()){ toast('❌ Solo admin puede gestionar usuarios'); return; }
-  const c = document.getElementById('usuariosLista');
-  c.innerHTML = '<div style="text-align:center;padding:20px;">Cargando...</div>';
-  abrirModal('modalUsuarios');
-  try{
-    const usuarios = await cargarUsuarios();
-    if(usuarios.length === 0){
-      c.innerHTML = '<div class="empty">No hay usuarios creados</div>';
-      return;
-    }
-    let html = '';
-    usuarios.forEach(u=>{
-      const rolColor = u.rol==='admin' ? '#7c3aed' : '#16a34a';
-      const activo = u.activo !== false;
-      html += '<div class="user-list-item" style="opacity:'+(activo?1:0.5)+';">';
-      html += '<div class="user-info"><div class="user-name">'+u.nombre+'</div>';
-      html += '<div class="user-email">'+(u.email||'PIN: '+(u.pin||'?'))+'</div></div>';
-      html += '<span class="user-role" style="background:'+rolColor+';color:#fff;">'+(u.rol||'vendedor').toUpperCase()+'</span>';
-      html += '<button class="user-del" title="'+(activo?'Desactivar':'Activar')+'" onclick="toggleUsuario(\''+u.uid+'\','+activo+')">'+(activo?'🚫':'✅')+'</button>';
-      if(u.rol !== 'admin'){
-        html += '<button class="user-del" title="Eliminar" onclick="eliminarUsuario(\''+u.uid+'\')">🗑</button>';
-      }
-      html += '</div>';
-    });
-    c.innerHTML = html;
-  }catch(e){ c.innerHTML = '<div class="empty">Error al cargar</div>'; }
-}
-
-async function crearUsuario(){
-  if(!isAdmin()){ toast('❌ Solo admin'); return; }
-  const nombre = document.getElementById('nuevoNombre').value.trim();
-  const email = document.getElementById('nuevoEmail').value.trim();
-  const pin = document.getElementById('nuevoPin').value.trim();
-  const pass = document.getElementById('nuevoPass').value;
-  const rol = document.getElementById('nuevoRol').value;
-  const comision = rol==='vendedor' ? parseInt(document.getElementById('nuevoComision').value)||5 : 0;
-  if(!nombre){ toast('❌ Nombre requerido'); return; }
-  if(rol==='vendedor' && !pin){ toast('❌ PIN requerido para vendedor'); return; }
-  if(rol==='admin' && !email){ toast('❌ Correo requerido para admin'); return; }
-  if(rol==='admin' && !pass){ toast('❌ Contraseña requerida para admin'); return; }
-  try{
-    const db = getAuthDb();
-    if(!db){ toast('❌ Sin conexión'); return; }
-    if(pin){
-      const existente = await db.ref('huevos/usuarios').orderByChild('pin').equalTo(pin).once('value');
-      if(existente.val()){ toast('❌ Ese PIN ya está en uso'); return; }
-    }
-    if(email){
-      const existente = await db.ref('huevos/usuarios').orderByChild('email').equalTo(email).once('value');
-      if(existente.val()){ toast('❌ Ese correo ya está registrado'); return; }
-    }
-    await db.ref('huevos/usuarios').push({ nombre, email, pin, pass, rol, comision, activo: true, creado: Date.now() });
-    toast('✅ Usuario "'+nombre+'" creado');
-    document.getElementById('nuevoNombre').value='';
-    document.getElementById('nuevoEmail').value='';
-    document.getElementById('nuevoPin').value='';
-    document.getElementById('nuevoPass').value='';
-    document.getElementById('nuevoComision').value='5';
-    abrirPanelUsuarios();
-  }catch(e){ toast('❌ Error al crear usuario'); }
-}
-
-async function toggleUsuario(uid, actual){
-  const db = getAuthDb();
-  if(!db) return;
-  await db.ref('huevos/usuarios/'+uid+'/activo').set(!actual);
-  toast(actual?'🚫 Usuario desactivado':'✅ Usuario activado');
-  abrirPanelUsuarios();
-}
-
-async function eliminarUsuario(uid){
-  if(!confirm('¿Eliminar este usuario permanentemente?')) return;
-  const db = getAuthDb();
-  if(!db) return;
-  await db.ref('huevos/usuarios/'+uid).remove();
-  toast('🗑 Usuario eliminado');
-  abrirPanelUsuarios();
-}
-
-// ── AUTO-LOGOUT POR INACTIVIDAD ──
-let inactividadTimer = null;
-function reiniciarInactividad(){
-  clearTimeout(inactividadTimer);
-  inactividadTimer = setTimeout(()=>{
-    if(currentUser && currentUser.rol === 'vendedor'){
-      toast('⏰ Sesión expirada por inactividad');
-      logoutApp();
-    }
-  }, 30 * 60 * 1000); // 30 min solo para vendedores
-}
-['click','touchstart','keydown','scroll'].forEach(evt=>{
-  document.addEventListener(evt, ()=>{ if(currentUser) reiniciarInactividad(); }, {passive:true});
-});
-
-function toggleCamposRol(){
-  const rol = document.getElementById('nuevoRol').value;
-  document.getElementById('camposVendedor').style.display = rol==='vendedor'?'':'none';
-  document.getElementById('camposAdmin').style.display = rol==='admin'?'':'none';
-}
-
-// ── CHECK SESSION ──
-function checkSession(){
-  const s = localStorage.getItem('misHuevosSession');
-  if(s){
-    try{
-      currentUser = JSON.parse(s);
-      entrarApp();
-      return;
-    }catch(e){}
-  }
-  verificarPrimeraVez();
-}
-
-async function verificarPrimeraVez(){
-  try{
-    const db = getAuthDb();
-    if(!db){
-      document.getElementById('loginScreen').style.display='';
-      document.getElementById('loginScreen').classList.add('show');
-      return;
-    }
-    const snap = await db.ref('huevos/usuarios').once('value');
-    if(!snap.val()){
-      document.getElementById('loginScreen').style.display='';
-      document.getElementById('loginScreen').classList.add('show');
-      document.getElementById('loginError').textContent='Primera vez: crea tu cuenta de admin';
-      document.getElementById('loginError').classList.add('show');
-      document.querySelectorAll('.login-tab')[1].click();
-      setTimeout(()=>{
-        document.getElementById('loginError').innerHTML='👋 <b>Primera vez</b> — Crea tu cuenta de administrador';
-      },500);
-    } else {
-      document.getElementById('loginScreen').style.display='';
-      document.getElementById('loginScreen').classList.add('show');
-    }
-  }catch(e){
-    document.getElementById('loginScreen').style.display='';
-    document.getElementById('loginScreen').classList.add('show');
-  }
-}
-
-async function setupAdmin(){
-  const nombre = document.getElementById('loginEmail').value.trim();
-  const pass = document.getElementById('loginPass').value;
-  if(!nombre || !pass){ loginShowError('Completa nombre y contraseña'); return; }
-  document.getElementById('loginEmailBtn').disabled = true;
-  document.getElementById('loginEmailBtn').textContent = 'Creando...';
-  try{
-    const db = getAuthDb();
-    if(!db){ loginShowError('Sin conexión'); document.getElementById('loginEmailBtn').disabled=false; document.getElementById('loginEmailBtn').textContent='Ingresar'; return; }
-    const snap = await db.ref('huevos/usuarios').once('value');
-    if(snap.val()){
-      loginShowError('Ya existe una cuenta. Inicia sesión normalmente.');
-      document.getElementById('loginEmailBtn').disabled=false;
-      document.getElementById('loginEmailBtn').textContent='Ingresar';
-      return;
-    }
-    await db.ref('huevos/usuarios').push({
-      nombre: nombre,
-      email: nombre + '@admin.mishuevos',
-      pin: '9999',
-      pass: pass,
-      rol: 'admin',
-      activo: true,
-      creado: Date.now()
-    });
-    currentUser = { uid: 'admin', email: nombre+'@admin.mishuevos', nombre: nombre, rol: 'admin' };
-    localStorage.setItem('misHuevosSession', JSON.stringify(currentUser));
-    toast('✅ Cuenta de admin "'+nombre+'" creada. PIN admin: 9999');
-    entrarApp();
-  }catch(e){
-    loginShowError('Error al crear cuenta');
-    document.getElementById('loginEmailBtn').disabled=false;
-    document.getElementById('loginEmailBtn').textContent='Ingresar';
-  }
-}
-
-// ── PIN INPUT LISTENER ──
-document.getElementById('loginPin').addEventListener('input', function(){
-  this.value = this.value.replace(/[^0-9]/g, '');
-  document.getElementById('loginPinBtn').disabled = this.value.length < 4;
-});
-document.getElementById('loginPin').addEventListener('keydown', function(e){
-  if(e.key === 'Enter' && this.value.length >= 4) loginConPin();
-});
-document.getElementById('loginEmail').addEventListener('input', function(){
-  const isSetup = document.getElementById('loginEmailBtn').style.display !== 'none';
-  if(isSetup){
-    document.getElementById('loginEmailBtn').disabled = !(this.value.trim() && document.getElementById('loginPass').value);
-  } else {
-    document.getElementById('loginExistingBtn').disabled = !(this.value.trim() && document.getElementById('loginPass').value);
-  }
-});
-document.getElementById('loginPass').addEventListener('input', function(){
-  const isSetup = document.getElementById('loginEmailBtn').style.display !== 'none';
-  if(isSetup){
-    document.getElementById('loginEmailBtn').disabled = !(document.getElementById('loginEmail').value.trim() && this.value);
-  } else {
-    document.getElementById('loginExistingBtn').disabled = !(document.getElementById('loginEmail').value.trim() && this.value);
-  }
-});
-document.getElementById('loginPass').addEventListener('keydown', function(e){
-  if(e.key === 'Enter' && this.value){
-    const isSetup = document.getElementById('loginEmailBtn').style.display !== 'none';
-    if(isSetup) setupAdmin(); else loginConEmail();
-  }
-});
-
 // ── INIT ──
 function actualizarTodo(){ actualizarStockUI(); actualizarPreciosUI(); actualizarHistorial(); actualizarBtnApertura(); }
 async function initApp(){
@@ -3478,11 +2757,12 @@ async function initApp(){
   aplicarTema(estado.tema);
   if(estado.darkMode) document.body.classList.add('dark');
   actualizarTodo();
-  aplicarRoles();
-  reiniciarInactividad();
+  actualizarBtnApertura();
+  // Backup automático: avisa si 7+ días
   if(respaldoPendiente()){
-    setTimeout(()=>toast('💾 Llevas '+respaldoPendiente()+' días sin respaldar. Hazlo desde 💾 Datos → 📤 Exportar.'),2000);
+    setTimeout(()=>toast('💾 Llevas '+respaldoPendiente()+' días sin respaldar. Hazlo desde 💾 Respaldar → 📤 Exportar.'),2000);
   }
+  // Auto-backup a IndexedDB cada vez que se guarda
   autoBackup();
   const venc = deudasVencidas();
   if(venc.length>0){
@@ -3492,7 +2772,7 @@ async function initApp(){
     },3500);
   }
 }
-checkSession();
+initApp();
 </script>
 </body>
 </html>
