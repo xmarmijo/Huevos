@@ -1000,9 +1000,8 @@ function conectarFirebase(cfg){
       if(d && !syncOcupado && !reiniciando){
         const fbTime = d.lastModified || 0;
         const localTime = estado.lastModified || 0;
-        if(fbTime >= localTime){
+        if(fbTime > localTime){
           estado = JSON.parse(JSON.stringify(d));
-          guardar();
           aplicarTema(estado.tema); actualizarTodo();
         }
       }
