@@ -178,7 +178,18 @@ body.dark .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316;
   <div class="top">
     <h1>🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span></h1>
     <div>
-      <div class="hoy"><button id="btnTema" onclick="toggleTema()" style="background:none;border:1px solid rgba(255,255,255,.4);color:#fff;padding:3px 8px;border-radius:12px;font-size:11px;cursor:pointer;margin-bottom:3px;">🌙</button> <span id="fechaHoy"></span></div>
+      <div class="hoy">
+        <select id="selectorTema" onchange="cambiarTema(this.value)" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;padding:3px 6px;border-radius:8px;font-size:11px;cursor:pointer;margin-right:4px;">
+          <option value="naranja">🟠</option>
+          <option value="verde">🟢</option>
+          <option value="azul">🔵</option>
+          <option value="morado">🟣</option>
+          <option value="rojo">🔴</option>
+          <option value="pastel">🌸</option>
+        </select>
+        <button id="btnTema" onclick="toggleTema()" style="background:none;border:1px solid rgba(255,255,255,.4);color:#fff;padding:3px 8px;border-radius:12px;font-size:11px;cursor:pointer;">🌙</button>
+        <span id="fechaHoy"></span>
+      </div>
       <div class="gan">Ganancia hoy: <span id="ganHoy">$0</span></div>
     </div>
   </div>
@@ -390,6 +401,10 @@ if ('serviceWorker' in navigator) {
       <div><div class="num" id="feriaCant">1</div><div class="unid" id="feriaCantUnid">bandeja(s)</div></div>
       <button class="mas" onclick="feriaCant(1)">+</button>
     </div>
+    <div style="display:flex;gap:6px;margin-bottom:8px;">
+      <div class="pago-op act" id="feriaPagoEfectivo" onclick="feriaPago('efectivo')" style="flex:1;text-align:center;">💵 Efectivo</div>
+      <div class="pago-op" id="feriaPagoTransferencia" onclick="feriaPago('transferencia')" style="flex:1;text-align:center;">🏦 Transferencia</div>
+    </div>
     <div class="paso-titulo">Precio <span id="feriaPrecioPorLbl">por bandeja</span></div>
     <input type="number" class="field" id="feriaPrecioModal" value="6000" min="0" style="font-size:18px;font-weight:800;">
     <div class="fast-info">
@@ -508,8 +523,18 @@ if ('serviceWorker' in navigator) {
         <button class="btn-ok" style="flex:none;padding:0 14px;" onclick="registrarDarEfectivo()">✓</button>
       </div>
     </div>
-    <div style="font-size:12px;font-weight:800;color:#555;margin-bottom:6px;">📋 Lista de deudas</div>
-    <div id="deudasLista" style="max-height:50vh;overflow-y:auto;"></div>
+    <div style="display:flex;gap:4px;margin-bottom:10px;">
+      <button onclick="deudasTab('activas')" id="dTabActivas" style="flex:1;padding:8px;border:2px solid #2563eb;background:#eff6ff;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;">📋 Activas</button>
+      <button onclick="deudasTab('historial')" id="dTabHistorial" style="flex:1;padding:8px;border:2px solid #e5e7eb;background:#fff;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;">📜 Historial cobros</button>
+    </div>
+    <div id="deudasPanelActivas">
+      <div style="font-size:12px;font-weight:800;color:#555;margin-bottom:6px;">📋 Lista de deudas</div>
+      <div id="deudasLista" style="max-height:50vh;overflow-y:auto;"></div>
+    </div>
+    <div id="deudasPanelHistorial" style="display:none;">
+      <div style="font-size:12px;font-weight:800;color:#555;margin-bottom:6px;">📜 Historial de cobros</div>
+      <div id="historialCobrosLista" style="max-height:50vh;overflow-y:auto;"></div>
+    </div>
     <div class="modal-btns"><button class="btn-cancel" onclick="cerrarModal('modalDeudas')">Cerrar</button></div>
   </div>
 </div>
@@ -537,11 +562,16 @@ if ('serviceWorker' in navigator) {
       <button onclick="reportesTab('graficas')" id="rTabGrafic" style="flex:1;padding:8px;border:2px solid #e5e7eb;background:#fff;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;">📊 Gráficas</button>
     </div>
     <div id="repoPanelResumen">
-      <div class="paso-titulo">Ganancias</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;">
+        <span style="font-size:12px;font-weight:700;color:#475569;">📅 Ver día:</span>
+        <input type="date" id="repoFechaFiltro" style="flex:1;border:1px solid #d1d5db;border-radius:6px;padding:4px 8px;font-size:12px;" onchange="llenarResumen()">
+        <button onclick="repoLimpiarFecha()" style="padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:11px;cursor:pointer;background:#fff;">Hoy</button>
+      </div>
+      <div class="paso-titulo" id="repoResumenTitulo">Ganancias</div>
       <div class="stat3">
-        <div class="s"><div class="v" id="rsHoy"></div><div class="l">Hoy</div></div>
-        <div class="s"><div class="v" id="rsSemana"></div><div class="l">Semana</div></div>
-        <div class="s"><div class="v" id="rsMes"></div><div class="l">Mes</div></div>
+        <div class="s"><div class="v" id="rsHoy"></div><div class="l" id="lblRsHoy">Hoy</div></div>
+        <div class="s"><div class="v" id="rsSemana"></div><div class="l" id="lblRsSemana">Semana</div></div>
+        <div class="s"><div class="v" id="rsMes"></div><div class="l" id="lblRsMes">Mes</div></div>
       </div>
       <div style="height:10px"></div>
       <div class="paso-titulo">Actividad</div>
@@ -846,7 +876,8 @@ let estado = {
   cuadratura: {},
   darkMode: false,
   stockParcial: {},
-  lastModified: Date.now()
+  lastModified: Date.now(),
+  historialCobros: []
 };
 
 const TEMAS = {
@@ -854,11 +885,12 @@ const TEMAS = {
   verde:    { h1:'#16a34a', h2:'#15803d', v1:'#059669', v2:'#047857', a1:'#059669', a2:'#047857', t1:'#065f46', bg:'#ecfdf5', lbl:'🟢 Verde' },
   azul:     { h1:'#2563eb', h2:'#1d4ed8', v1:'#0ea5e9', v2:'#0284c7', a1:'#2563eb', a2:'#1d4ed8', t1:'#1e40af', bg:'#eff6ff', lbl:'🔵 Azul' },
   morado:   { h1:'#7c3aed', h2:'#6d28d9', v1:'#8b5cf6', v2:'#7c3aed', a1:'#7c3aed', a2:'#6d28d9', t1:'#5b21b6', bg:'#f5f3ff', lbl:'🟣 Morado' },
-  rojo:     { h1:'#dc2626', h2:'#b91c1c', v1:'#f97316', v2:'#ea580c', a1:'#dc2626', a2:'#b91c1c', t1:'#991b1b', bg:'#fef2f2', lbl:'🔴 Rojo' }
+  rojo:     { h1:'#dc2626', h2:'#b91c1c', v1:'#f97316', v2:'#ea580c', a1:'#dc2626', a2:'#b91c1c', t1:'#991b1b', bg:'#fef2f2', lbl:'🔴 Rojo' },
+  pastel:   { h1:'#f9a8d4', h2:'#f472b6', v1:'#86efac', v2:'#4ade80', a1:'#f9a8d4', a2:'#ec4899', t1:'#db2777', bg:'#fdf2f8', lbl:'🌸 Pastel' }
 };
 
 let venta = { producto:'Primera', tipo:'bandeja', cant:1, pago:'efectivo', sesion:[] };
-let feria = { producto:'Primera', cant:1, sesion:[] };
+let feria = { producto:'Primera', cant:1, sesion:[], pago:'efectivo' };
 const merma = { prod:'Primera', cant:1 };
 
 // ── ALMACENAMIENTO ROBUSTO (3 copias: localStorage, IndexedDB, sessionStorage) ──
@@ -869,6 +901,7 @@ function aplicarDefaults(d){
   if(d.tema===undefined) d.tema='naranja';
   if(d.umbral===undefined) d.umbral=2;
   if(!d.deudas) d.deudas=[];
+  if(!d.historialCobros) d.historialCobros=[];
   if(!d.ventas) d.ventas=[];
   if(d.arqueoInicial===undefined) d.arqueoInicial=0;
   if(d.arqueoFecha===undefined) d.arqueoFecha='';
@@ -1383,6 +1416,8 @@ function aplicarTema(t){
   r.setProperty('--v1',th.v1); r.setProperty('--v2',th.v2);
   r.setProperty('--a1',th.a1); r.setProperty('--a2',th.a2);
   r.setProperty('--t1',th.t1); r.setProperty('--bg',th.bg);
+  const sel = document.getElementById('selectorTema');
+  if(sel) sel.value = t;
 }
 
 // ── HISTORIAL VENTAS ──
@@ -1537,11 +1572,18 @@ function actualizarSesionVenta(){
 }
 
 // ── FERIA ──
+function feriaPago(p){
+  feria.pago = p;
+  document.getElementById('feriaPagoEfectivo').classList.toggle('act', p==='efectivo');
+  document.getElementById('feriaPagoTransferencia').classList.toggle('act', p==='transferencia');
+}
 function abrirFeria(){
-  feria = { producto:'Primera', cant:1, tipo:'bandeja', sesion:[] };
+  feria = { producto:'Primera', cant:1, tipo:'bandeja', sesion:[], pago:'efectivo' };
   document.getElementById('feriaPrecioModal').value = estado.precios.Primera;
   document.getElementById('feriaTipoBandeja').classList.add('act');
   document.getElementById('feriaTipoCaja').classList.remove('act');
+  document.getElementById('feriaPagoEfectivo').classList.add('act');
+  document.getElementById('feriaPagoTransferencia').classList.remove('act');
   document.getElementById('feriaCantUnid').textContent = 'bandeja(s)';
   document.getElementById('feriaPrecioPorLbl').textContent = 'por bandeja';
   document.getElementById('feriaPrecioLbl2').textContent = 'bandeja';
@@ -1632,7 +1674,7 @@ function confirmarFeria(){
   }
   
   const costoTotal = bandejas * costoBtx(prod);
-  const vReg = { id:Date.now()+'-'+Math.random().toString(36).slice(2,7), f:Date.now(), prod:prod, tipo:feria.tipo, cant:feria.cant, bandejas:bandejas, precio:precio, gan:precio - costoTotal, pago:'efectivo', quien:'Feria' };
+  const vReg = { id:Date.now()+'-'+Math.random().toString(36).slice(2,7), f:Date.now(), prod:prod, tipo:feria.tipo, cant:feria.cant, bandejas:bandejas, precio:precio, gan:precio - costoTotal, pago:feria.pago, quien:'Feria' };
   estado.ventas.push(vReg);
   feria.sesion.push(vReg);
   guardar(); actualizarTodo(); actualizarSesionFeria();
@@ -1658,7 +1700,7 @@ function agregarOtro(dest){
   if(!nombre){ toast('Escribe qué vendiste'); return; }
   if(precio<=0){ toast('Ingresa el precio'); return; }
   const quien = esFeria ? 'Feria' : (document.getElementById('ventaQuien').value.trim() || 'Venta suelta');
-  const pago = esFeria ? 'efectivo' : venta.pago;
+  const pago = esFeria ? feria.pago : venta.pago;
   const vReg = { id:Date.now()+'-'+Math.random().toString(36).slice(2,7), f:Date.now(), prod:'Otro', nombre:nombre, tipo:'otro', cant:1, bandejas:0, precio:precio, gan:precio, pago:pago, quien:quien };
   estado.ventas.push(vReg);
   (esFeria?feria.sesion:venta.sesion).push(vReg);
@@ -1840,6 +1882,8 @@ function confirmarPagoDeuda(){
   if(!d) return;
   const pago = parseInt(document.getElementById('pagoDeudaInput').value)||0;
   if(pago<=0){ toast('Ingresa un monto válido'); return; }
+  if(!estado.historialCobros) estado.historialCobros = [];
+  estado.historialCobros.push({ nombre, monto: pago, fecha: Date.now(), restante: Math.max(0, d.monto - pago) });
   d.monto = Math.max(0, d.monto - pago);
   if(d.monto===0) estado.deudas = estado.deudas.filter(x=>x.nombre!==nombre);
   guardar(); llenarDeudas(); actualizarTodo(); cerrarModal('pagoDeudaModal');
@@ -1847,6 +1891,31 @@ function confirmarPagoDeuda(){
 }
 function borrarDeuda(nombre){
   miConfirmar('¿Quitar la deuda de '+nombre+'?', ()=>{ estado.deudas = estado.deudas.filter(x=>x.nombre!==nombre); guardar(); llenarDeudas(); actualizarTodo(); toast('Deuda eliminada'); });
+}
+function deudasTab(tab){
+  const panels = {activas:'deudasPanelActivas', historial:'deudasPanelHistorial'};
+  const ids = {activas:'dTabActivas', historial:'dTabHistorial'};
+  Object.values(panels).forEach(p=>document.getElementById(p).style.display='none');
+  Object.entries(ids).forEach(([k,id])=>{
+    const btn = document.getElementById(id);
+    if(k===tab){ btn.style.borderColor='#2563eb'; btn.style.background='#eff6ff'; }
+    else { btn.style.borderColor='#e5e7eb'; btn.style.background='#fff'; }
+  });
+  document.getElementById(panels[tab]).style.display='block';
+  if(tab==='activas') llenarDeudas();
+  if(tab==='historial') llenarHistorialCobros();
+}
+function llenarHistorialCobros(){
+  const c = document.getElementById('historialCobrosLista');
+  const hist = (estado.historialCobros||[]).slice().reverse();
+  if(hist.length===0){ c.innerHTML='<div class="empty">Aún no hay cobros registrados</div>'; return; }
+  c.innerHTML = hist.map(h=>{
+    const fecha = new Date(h.fecha);
+    const fechaStr = fecha.toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit',year:'2-digit'})+' '+fecha.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
+    return '<div class="gan-line"><span class="k"><b>'+h.nombre+'</b><br><span style="font-size:10px;color:#999;">'+fechaStr+'</span></span><span style="text-align:right;"><span style="color:#16a34a;font-weight:800;">+'+fmt(h.monto)+'</span>'+(h.restante!==undefined?'<br><span style="font-size:10px;color:#999;">Debe: '+fmt(h.restante)+'</span>':'')+'</span></div>';
+  }).join('');
+  const totalMes = hist.filter(h=>{ const f=new Date(h.fecha); const m=new Date(); return f.getMonth()===m.getMonth() && f.getFullYear()===m.getFullYear(); }).reduce((a,h)=>a+h.monto,0);
+  c.innerHTML += '<div class="gan-line"><span class="k">Cobrado este mes</span><span class="v" style="color:#16a34a;">'+fmt(totalMes)+'</span></div>';
 }
 function registrarDarEfectivo(){
   if(!verificarBloqueo()) return;
@@ -2040,22 +2109,57 @@ function cerrarDia(){
 }
 
 // ── RESUMEN ──
+function repoLimpiarFecha(){
+  document.getElementById('repoFechaFiltro').value='';
+  llenarResumen();
+}
 function llenarResumen(){
+  const fechaInput = document.getElementById('repoFechaFiltro').value;
   const hoy0 = new Date(); hoy0.setHours(0,0,0,0);
   const semana0 = new Date(hoy0); semana0.setDate(hoy0.getDate()-hoy0.getDay());
   const mes0 = new Date(hoy0.getFullYear(), hoy0.getMonth(), 1);
   const sum = arr => arr.reduce((a,v)=>a+v.gan,0);
-  document.getElementById('rsHoy').textContent = fmt(sum(estado.ventas.filter(v=>v.f>=hoy0.getTime())));
-  document.getElementById('rsSemana').textContent = fmt(sum(estado.ventas.filter(v=>v.f>=semana0.getTime())));
-  document.getElementById('rsMes').textContent = fmt(sum(estado.ventas.filter(v=>v.f>=mes0.getTime())));
-  let btx=0, cajas=0;
-  estado.ventas.forEach(v=>{ if(v.tipo==='caja') cajas+=v.cant; else btx+=v.cant; });
-  document.getElementById('rsBandejas').textContent = btx;
-  document.getElementById('rsCajas').textContent = cajas;
-  document.getElementById('rsVentas').textContent = estado.ventas.length;
-  document.getElementById('rsMerma').textContent = estado.mermas.reduce((a,m)=>a+m.huevos,0);
-  document.getElementById('rsGastos').textContent = fmt(estado.gastos.filter(g=>g.f>=mes0.getTime()).reduce((a,g)=>a+g.monto,0));
-  document.getElementById('rsInversion').textContent = fmt(estado.compras.reduce((a,c)=>a+c.total,0));
+
+  if(fechaInput){
+    const dia0 = new Date(fechaInput+'T00:00:00');
+    const diaFin = new Date(dia0); diaFin.setDate(diaFin.getDate()+1);
+    const vDia = estado.ventas.filter(v=>v.f>=dia0.getTime() && v.f<diaFin.getTime());
+    const gDia = vDia.reduce((a,v)=>a+v.precio,0);
+    const ganDia = sum(vDia);
+    const gastosDia = estado.gastos.filter(g=>g.f>=dia0.getTime() && g.f<diaFin.getTime()).reduce((a,g)=>a+g.monto,0);
+    const mermasDia = estado.mermas.filter(m=>m.f>=dia0.getTime() && m.f<diaFin.getTime());
+    let btx=0, cajas=0;
+    vDia.forEach(v=>{ if(v.tipo==='caja') cajas+=v.cant; else btx+=v.cant; });
+    document.getElementById('repoResumenTitulo').innerHTML = '📅 '+dia0.toLocaleDateString('es-CL',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+    document.getElementById('lblRsHoy').textContent = 'Ganancia';
+    document.getElementById('lblRsSemana').textContent = 'Gastos';
+    document.getElementById('lblRsMes').textContent = 'Ventas';
+    document.getElementById('rsHoy').textContent = fmt(ganDia);
+    document.getElementById('rsSemana').textContent = fmt(gastosDia);
+    document.getElementById('rsMes').textContent = fmt(gDia);
+    document.getElementById('rsBandejas').textContent = btx;
+    document.getElementById('rsCajas').textContent = cajas;
+    document.getElementById('rsVentas').textContent = vDia.length;
+    document.getElementById('rsMerma').textContent = mermasDia.reduce((a,m)=>a+m.huevos,0);
+    document.getElementById('rsGastos').textContent = fmt(gastosDia);
+    document.getElementById('rsInversion').textContent = fmt(estado.compras.filter(c=>c.f>=dia0.getTime() && c.f<diaFin.getTime()).reduce((a,c)=>a+c.total,0));
+  } else {
+    document.getElementById('repoResumenTitulo').innerHTML = 'Ganancias';
+    document.getElementById('lblRsHoy').textContent = 'Hoy';
+    document.getElementById('lblRsSemana').textContent = 'Semana';
+    document.getElementById('lblRsMes').textContent = 'Mes';
+    document.getElementById('rsHoy').textContent = fmt(sum(estado.ventas.filter(v=>v.f>=hoy0.getTime())));
+    document.getElementById('rsSemana').textContent = fmt(sum(estado.ventas.filter(v=>v.f>=semana0.getTime())));
+    document.getElementById('rsMes').textContent = fmt(sum(estado.ventas.filter(v=>v.f>=mes0.getTime())));
+    let btx=0, cajas=0;
+    estado.ventas.forEach(v=>{ if(v.tipo==='caja') cajas+=v.cant; else btx+=v.cant; });
+    document.getElementById('rsBandejas').textContent = btx;
+    document.getElementById('rsCajas').textContent = cajas;
+    document.getElementById('rsVentas').textContent = estado.ventas.length;
+    document.getElementById('rsMerma').textContent = estado.mermas.reduce((a,m)=>a+m.huevos,0);
+    document.getElementById('rsGastos').textContent = fmt(estado.gastos.filter(g=>g.f>=mes0.getTime()).reduce((a,g)=>a+g.monto,0));
+    document.getElementById('rsInversion').textContent = fmt(estado.compras.reduce((a,c)=>a+c.total,0));
+  }
   const partes = [];
   if(estado.stock.Primera > 0) partes.push(estado.stock.Primera + ' btx Primera');
   if(estado.stock.Segunda > 0) partes.push(estado.stock.Segunda + ' btx Segunda');
@@ -2532,6 +2636,11 @@ function restaurarVersion(idx){
 }
 
 // ── MODO OSCURO ──
+function cambiarTema(t){
+  estado.tema = t;
+  aplicarTema(t);
+  guardar();
+}
 function toggleTema(){
   estado.darkMode = !estado.darkMode;
   document.body.classList.toggle('dark', estado.darkMode);
