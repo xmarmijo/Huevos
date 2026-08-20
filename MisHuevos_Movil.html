@@ -2451,12 +2451,8 @@ function reiniciarTodo(){
   if(fbRef){
     try{ fbRef.off(); }catch(e){}
     const pending = JSON.parse(JSON.stringify(estado));
-    fbRef.set(null).then(()=>{
-      return new Promise(r=>setTimeout(r, 2000));
-    }).then(()=>{
-      return fbRef.set(pending);
-    }).then(()=>{
-      return new Promise(r=>setTimeout(r, 1500));
+    fbRef.set(pending).then(()=>{
+      return new Promise(r=>setTimeout(r, 1000));
     }).then(()=>{
       reiniciando = false;
       try{ fbRef.on('value', snap=>{ const d=snap.val(); if(d && !syncOcupado && !reiniciando){ estado=JSON.parse(JSON.stringify(d)); guardar(); actualizarTodo(); }}); }catch(e){}
