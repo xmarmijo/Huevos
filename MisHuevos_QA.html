@@ -178,7 +178,18 @@ body.dark .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316;
   <div class="top">
     <h1>🥚 Mis Huevos <span style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#f59e0b;color:#fff;font-weight:700;vertical-align:middle;">QA</span> <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span></h1>
     <div>
-      <div class="hoy"><button id="btnTema" onclick="toggleTema()" style="background:none;border:1px solid rgba(255,255,255,.4);color:#fff;padding:3px 8px;border-radius:12px;font-size:11px;cursor:pointer;margin-bottom:3px;">🌙</button> <span id="fechaHoy"></span></div>
+      <div class="hoy">
+        <select id="selectorTema" onchange="cambiarTema(this.value)" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;padding:3px 6px;border-radius:8px;font-size:11px;cursor:pointer;margin-right:4px;">
+          <option value="naranja">🟠</option>
+          <option value="verde">🟢</option>
+          <option value="azul">🔵</option>
+          <option value="morado">🟣</option>
+          <option value="rojo">🔴</option>
+          <option value="pastel">🌸</option>
+        </select>
+        <button id="btnTema" onclick="toggleTema()" style="background:none;border:1px solid rgba(255,255,255,.4);color:#fff;padding:3px 8px;border-radius:12px;font-size:11px;cursor:pointer;">🌙</button>
+        <span id="fechaHoy"></span>
+      </div>
       <div class="gan">Ganancia hoy: <span id="ganHoy">$0</span></div>
     </div>
   </div>
@@ -1405,6 +1416,8 @@ function aplicarTema(t){
   r.setProperty('--v1',th.v1); r.setProperty('--v2',th.v2);
   r.setProperty('--a1',th.a1); r.setProperty('--a2',th.a2);
   r.setProperty('--t1',th.t1); r.setProperty('--bg',th.bg);
+  const sel = document.getElementById('selectorTema');
+  if(sel) sel.value = t;
 }
 
 // ── HISTORIAL VENTAS ──
@@ -2623,6 +2636,11 @@ function restaurarVersion(idx){
 }
 
 // ── MODO OSCURO ──
+function cambiarTema(t){
+  estado.tema = t;
+  aplicarTema(t);
+  guardar();
+}
 function toggleTema(){
   estado.darkMode = !estado.darkMode;
   document.body.classList.toggle('dark', estado.darkMode);
