@@ -1007,7 +1007,7 @@ function syncFirebase(){
   if(!fbRef || syncOcupado || reiniciando) return;
   syncOcupado = true;
   ultimaSyncLocal = Date.now();
-  fbRef.set(JSON.parse(JSON.stringify(estado))).catch(()=>{}).finally(()=>{ syncOcupado = false; });
+  fbRef.set(JSON.parse(JSON.stringify(estado))).catch(()=>{}).finally(()=>{ setTimeout(()=>{ syncOcupado = false; }, 3000); });
 }
 function conectarFirebase(cfg){
   try{
@@ -1033,7 +1033,7 @@ function conectarFirebase(cfg){
     fbRef.on('value', snap=>{
       const d = snap.val();
       if(d && !syncOcupado && !reiniciando){
-        if(Date.now() - ultimaSyncLocal < 2000) return;
+        if(Date.now() - ultimaSyncLocal < 5000) return;
         const fbTime = d.lastModified || 0;
         const localTime = estado.lastModified || 0;
         if(fbTime > localTime){
