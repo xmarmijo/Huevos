@@ -897,7 +897,7 @@ function cargar(){
   let s = null;
   try{ s = localStorage.getItem('misHuevos'); }catch(e){}
   if(!s){ try{ s = sessionStorage.getItem('misHuevos'); }catch(e){} }
-  if(s){ try{ const d=JSON.parse(s); aplicarDefaults(d); estado=Object.assign(estado,d); }catch(e){} }
+  if(s){ try{ const d=JSON.parse(s); aplicarDefaults(d); if(!d.lastModified) d.lastModified = Date.now(); estado=Object.assign(estado,d); }catch(e){} }
   return s;
 }
 async function recuperarIndexedDB(){
@@ -906,6 +906,7 @@ async function recuperarIndexedDB(){
     if(idb){
       const d = JSON.parse(idb);
       aplicarDefaults(d);
+      if(!d.lastModified) d.lastModified = Date.now();
       estado = Object.assign(estado, d);
       try{ localStorage.setItem('misHuevos', JSON.stringify(estado)); }catch(e){}
       return true;
