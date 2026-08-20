@@ -403,6 +403,10 @@ if ('serviceWorker' in navigator) {
       <button class="btn-ok" style="flex:none;padding:0 16px;" onclick="agregarOtro('feria')">➕</button>
     </div>
     <button class="fast-reg" onclick="confirmarFeria()">⚡ REGISTRAR VENTA</button>
+    <div style="display:flex;gap:6px;margin-bottom:8px;">
+      <div class="pago-op act" id="feriaPagoEfectivo" onclick="feriaPago('efectivo')" style="flex:1;text-align:center;">💵 Efectivo</div>
+      <div class="pago-op" id="feriaPagoTransferencia" onclick="feriaPago('transferencia')" style="flex:1;text-align:center;">🏦 Transferencia</div>
+    </div>
     <div class="sesion-resumen">
       <div><div class="v" id="feriaCount">0</div><div class="l">ventas ahora</div></div>
       <div><div class="v" id="feriaTotal2">$0</div><div class="l">total vendido</div></div>
@@ -875,7 +879,7 @@ const TEMAS = {
 };
 
 let venta = { producto:'Primera', tipo:'bandeja', cant:1, pago:'efectivo', sesion:[] };
-let feria = { producto:'Primera', cant:1, sesion:[] };
+let feria = { producto:'Primera', cant:1, sesion:[], pago:'efectivo' };
 const merma = { prod:'Primera', cant:1 };
 
 // ── ALMACENAMIENTO ROBUSTO (3 copias: localStorage, IndexedDB, sessionStorage) ──
@@ -1555,11 +1559,18 @@ function actualizarSesionVenta(){
 }
 
 // ── FERIA ──
+function feriaPago(p){
+  feria.pago = p;
+  document.getElementById('feriaPagoEfectivo').classList.toggle('act', p==='efectivo');
+  document.getElementById('feriaPagoTransferencia').classList.toggle('act', p==='transferencia');
+}
 function abrirFeria(){
-  feria = { producto:'Primera', cant:1, tipo:'bandeja', sesion:[] };
+  feria = { producto:'Primera', cant:1, tipo:'bandeja', sesion:[], pago:'efectivo' };
   document.getElementById('feriaPrecioModal').value = estado.precios.Primera;
   document.getElementById('feriaTipoBandeja').classList.add('act');
   document.getElementById('feriaTipoCaja').classList.remove('act');
+  document.getElementById('feriaPagoEfectivo').classList.add('act');
+  document.getElementById('feriaPagoTransferencia').classList.remove('act');
   document.getElementById('feriaCantUnid').textContent = 'bandeja(s)';
   document.getElementById('feriaPrecioPorLbl').textContent = 'por bandeja';
   document.getElementById('feriaPrecioLbl2').textContent = 'bandeja';
@@ -1650,7 +1661,7 @@ function confirmarFeria(){
   }
   
   const costoTotal = bandejas * costoBtx(prod);
-  const vReg = { id:Date.now()+'-'+Math.random().toString(36).slice(2,7), f:Date.now(), prod:prod, tipo:feria.tipo, cant:feria.cant, bandejas:bandejas, precio:precio, gan:precio - costoTotal, pago:'efectivo', quien:'Feria' };
+  const vReg = { id:Date.now()+'-'+Math.random().toString(36).slice(2,7), f:Date.now(), prod:prod, tipo:feria.tipo, cant:feria.cant, bandejas:bandejas, precio:precio, gan:precio - costoTotal, pago:feria.pago, quien:'Feria' };
   estado.ventas.push(vReg);
   feria.sesion.push(vReg);
   guardar(); actualizarTodo(); actualizarSesionFeria();
@@ -1676,7 +1687,7 @@ function agregarOtro(dest){
   if(!nombre){ toast('Escribe qué vendiste'); return; }
   if(precio<=0){ toast('Ingresa el precio'); return; }
   const quien = esFeria ? 'Feria' : (document.getElementById('ventaQuien').value.trim() || 'Venta suelta');
-  const pago = esFeria ? 'efectivo' : venta.pago;
+  const pago = esFeria ? feria.pago : venta.pago;
   const vReg = { id:Date.now()+'-'+Math.random().toString(36).slice(2,7), f:Date.now(), prod:'Otro', nombre:nombre, tipo:'otro', cant:1, bandejas:0, precio:precio, gan:precio, pago:pago, quien:quien };
   estado.ventas.push(vReg);
   (esFeria?feria.sesion:venta.sesion).push(vReg);
