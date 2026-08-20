@@ -948,7 +948,8 @@ let estado = {
   clientesPrecios: {},
   cuadratura: {},
   darkMode: false,
-  stockParcial: {}
+  stockParcial: {},
+  lastModified: Date.now()
 };
 
 const TEMAS = {
@@ -984,6 +985,7 @@ function aplicarDefaults(d){
   d.ventas.forEach((v,i)=>{ if(!v.id) v.id='v'+i+'-'+v.f; });
 }
 function guardar(){
+  estado.lastModified = Date.now();
   const json = JSON.stringify(estado);
   let lok = true;
   try{ localStorage.setItem('misHuevos', json); }catch(e){ lok = false; }
@@ -1141,9 +1143,19 @@ function conectarFirebase(cfg){
     fbRef = firebase.database(fb).ref('huevos/estado');
     fbRef.once('value', snap=>{
       if(snap.exists()){
-        estado = Object.assign(estado, snap.val());
-        guardar();
-        aplicarTema(estado.tema); actualizarTodo();
+        const d = snap.val();
+        const fbTime = d.lastModified || 0;
+        const localTime = estado.lastModified || 0;
+        if(fbTime > localTime){
+          Object.keys(d).forEach(k=>{
+            if(k==='lastModified') return;
+            estado[k] = d[k];
+          });
+          guardar();
+          aplicarTema(estado.tema); actualizarTodo();
+        } else {
+          fbRef.set(JSON.parse(JSON.stringify(estado)));
+        }
       } else {
         fbRef.set(JSON.parse(JSON.stringify(estado)));
       }
@@ -1151,9 +1163,16 @@ function conectarFirebase(cfg){
     fbRef.on('value', snap=>{
       const d = snap.val();
       if(d && !syncOcupado && !reiniciando){
-        estado = JSON.parse(JSON.stringify(d));
-        guardar();
-        aplicarTema(estado.tema); actualizarTodo();
+        const fbTime = d.lastModified || 0;
+        const localTime = estado.lastModified || 0;
+        if(fbTime > localTime){
+          Object.keys(d).forEach(k=>{
+            if(k==='lastModified') return;
+            estado[k] = d[k];
+          });
+          guardar();
+          aplicarTema(estado.tema); actualizarTodo();
+        }
       }
     });
     firebase.database(fb).ref('.info/connected').on('value', s=>{ fbConectado = !!s.val(); actualizarSyncUI(); });
