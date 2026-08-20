@@ -136,40 +136,12 @@ label.campo { font-size:12px; font-weight:700; color:#555; display:block; margin
 .caja-dia { background:#eff6ff; border:1.5px solid #bfdbfe; border-radius:12px; padding:10px 6px; margin-bottom:10px; display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:4px; text-align:center; }
 .caja-dia .v { font-size:14px; font-weight:900; color:#1d4ed8; overflow-wrap:anywhere; white-space:nowrap; }
 .caja-dia .l { font-size:9px; color:#6b7280; }
-/* ── MODO OSCURO ── */
-body.dark{ background:#111827; color:#e5e7eb; }
-body.dark .card{ background:#1f2937; box-shadow:0 1px 4px rgba(0,0,0,.3); }
-body.dark header{ background:linear-gradient(135deg,#b45309,#c2410c); }
-body.dark .util-btn{ background:#374151; border-color:#4b5563; color:#e5e7eb; }
-body.dark .util-btn:active{ background:#4b5563; border-color:#f97316; }
-body.dark input.field, body.dark input.quien{ background:#374151; border-color:#4b5563; color:#e5e7eb; }
-body.dark .modal{ background:#1f2937; color:#e5e7eb; }
-body.dark .modal h3{ color:#f3f4f6; }
-body.dark .modal-close{ border-color:#4b5563; background:#374151; color:#9ca3af; }
-body.dark .gan-line{ border-bottom-color:#374151; }
-body.dark .gan-line .k{ color:#9ca3af; }
-body.dark .precio-box{ background:#374151; border-color:#4b5563; }
-body.dark .precio-box .lb{ color:#9ca3af; }
-body.dark .precio-box input{ color:#f3f4f6; }
-body.dark .info-item{ background:#064e3b; border-color:#065f46; color:#6ee7b7; }
-body.dark .info-item span{ color:#6b7280; }
-body.dark table.tab td{ border-bottom-color:#374151; }
-body.dark .sel-prod{ background:#374151; border-color:#4b5563; color:#e5e7eb; }
-body.dark .pago-op{ background:#374151; border-color:#4b5563; color:#e5e7eb; }
-body.dark .step-btn{ background:#374151; border-color:#4b5563; color:#e5e7eb; }
-body.dark .feria-precio-row input{ background:#374151; border-color:#6d28d9; color:#c4b5fd; }
-body.dark .caja-dia{ background:#1e3a5f; border-color:#1e40af; }
-body.dark .alert-banner{ background:#450a0a; border-color:#7f1d1d; }
-body.dark .empty{ color:#6b7280; }
 /* ── GRÁFICO ── */
 .chart-wrap{ background:#fff; border-radius:12px; padding:12px; margin-bottom:12px; box-shadow:0 1px 4px rgba(0,0,0,.08); }
-body.dark .chart-wrap{ background:#1f2937; }
 /* ── FILTROS HISTORIAL ── */
 .filtros-wrap{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; }
 .filtro-btn{ padding:6px 12px; border:1.5px solid #ddd; border-radius:20px; font-size:11px; font-weight:700; cursor:pointer; background:#fff; color:#555; }
 .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316; }
-body.dark .filtro-btn{ background:#374151; border-color:#4b5563; color:#e5e7eb; }
-body.dark .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316; }
 </style>
 </head>
 <body>
@@ -179,15 +151,6 @@ body.dark .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316;
     <h1>🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span></h1>
     <div>
       <div class="hoy">
-        <select id="selectorTema" onchange="cambiarTema(this.value)" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;padding:3px 6px;border-radius:8px;font-size:11px;cursor:pointer;margin-right:4px;">
-          <option value="naranja">🟠</option>
-          <option value="verde">🟢</option>
-          <option value="azul">🔵</option>
-          <option value="morado">🟣</option>
-          <option value="rojo">🔴</option>
-          <option value="pastel">🌸</option>
-        </select>
-        <button id="btnTema" onclick="toggleTema()" style="background:none;border:1px solid rgba(255,255,255,.4);color:#fff;padding:3px 8px;border-radius:12px;font-size:11px;cursor:pointer;">🌙</button>
         <span id="fechaHoy"></span>
       </div>
       <div class="gan">Ganancia hoy: <span id="ganHoy">$0</span></div>
@@ -856,7 +819,6 @@ let estado = {
   precios: { Primera: Math.round(COSTO_BTX.Primera*(1+18/100)), Segunda: Math.round(COSTO_BTX.Segunda*(1+18/100)) },
   feriaPrecio: 6000,
   margen: 18,
-  tema: 'naranja',
   umbral: 2,
   ventas: [],
   compras: [],
@@ -874,19 +836,9 @@ let estado = {
   versiones: [],
   clientesPrecios: {},
   cuadratura: {},
-  darkMode: false,
   stockParcial: {},
   lastModified: Date.now(),
   historialCobros: []
-};
-
-const TEMAS = {
-  naranja:  { h1:'#f59e0b', h2:'#f97316', v1:'#16a34a', v2:'#15803d', a1:'#f97316', a2:'#c2410c', t1:'#2F5496', bg:'#f0f2f5', lbl:'🟠 Naranja' },
-  verde:    { h1:'#16a34a', h2:'#15803d', v1:'#059669', v2:'#047857', a1:'#059669', a2:'#047857', t1:'#065f46', bg:'#ecfdf5', lbl:'🟢 Verde' },
-  azul:     { h1:'#2563eb', h2:'#1d4ed8', v1:'#0ea5e9', v2:'#0284c7', a1:'#2563eb', a2:'#1d4ed8', t1:'#1e40af', bg:'#eff6ff', lbl:'🔵 Azul' },
-  morado:   { h1:'#7c3aed', h2:'#6d28d9', v1:'#8b5cf6', v2:'#7c3aed', a1:'#7c3aed', a2:'#6d28d9', t1:'#5b21b6', bg:'#f5f3ff', lbl:'🟣 Morado' },
-  rojo:     { h1:'#dc2626', h2:'#b91c1c', v1:'#f97316', v2:'#ea580c', a1:'#dc2626', a2:'#b91c1c', t1:'#991b1b', bg:'#fef2f2', lbl:'🔴 Rojo' },
-  pastel:   { h1:'#f9a8d4', h2:'#f472b6', v1:'#86efac', v2:'#4ade80', a1:'#f9a8d4', a2:'#ec4899', t1:'#db2777', bg:'#fdf2f8', lbl:'🌸 Pastel' }
 };
 
 let venta = { producto:'Primera', tipo:'bandeja', cant:1, pago:'efectivo', sesion:[] };
@@ -898,7 +850,6 @@ function aplicarDefaults(d){
   if(d.stock.Primera===undefined||d.stock.Primera>100) d.stock={...STOCK_INI};
   if(d.feriaPrecio===undefined) d.feriaPrecio=6000;
   if(d.margen===undefined) d.margen=18;
-  if(d.tema===undefined) d.tema='naranja';
   if(d.umbral===undefined) d.umbral=2;
   if(!d.deudas) d.deudas=[];
   if(!d.historialCobros) d.historialCobros=[];
@@ -1022,7 +973,7 @@ function conectarFirebase(cfg){
         if(fbTime > localTime){
           estado = Object.assign(estado, d);
           guardar();
-          aplicarTema(estado.tema); actualizarTodo();
+          actualizarTodo();
         } else {
           fbRef.set(JSON.parse(JSON.stringify(estado)));
         }
@@ -1038,7 +989,7 @@ function conectarFirebase(cfg){
         const localTime = estado.lastModified || 0;
         if(fbTime > localTime){
           estado = JSON.parse(JSON.stringify(d));
-          aplicarTema(estado.tema); actualizarTodo();
+          actualizarTodo();
         }
       }
     });
@@ -1409,17 +1360,6 @@ function feriaSugerirPrincipal(){
 }
 
 // ── TEMA ──
-function aplicarTema(t){
-  const th = TEMAS[t] || TEMAS.naranja;
-  const r = document.documentElement.style;
-  r.setProperty('--h1',th.h1); r.setProperty('--h2',th.h2);
-  r.setProperty('--v1',th.v1); r.setProperty('--v2',th.v2);
-  r.setProperty('--a1',th.a1); r.setProperty('--a2',th.a2);
-  r.setProperty('--t1',th.t1); r.setProperty('--bg',th.bg);
-  const sel = document.getElementById('selectorTema');
-  if(sel) sel.value = t;
-}
-
 // ── HISTORIAL VENTAS ──
 function llenarHistorialVentas(){
   const v = estado.ventas;
@@ -2636,18 +2576,6 @@ function restaurarVersion(idx){
 }
 
 // ── MODO OSCURO ──
-function cambiarTema(t){
-  estado.tema = t;
-  aplicarTema(t);
-  guardar();
-}
-function toggleTema(){
-  estado.darkMode = !estado.darkMode;
-  document.body.classList.toggle('dark', estado.darkMode);
-  document.getElementById('btnTema').textContent = estado.darkMode ? '☀️' : '🌙';
-  guardar();
-}
-
 // ── DÍA CERRADO (ya no bloquea, solo recuerda) ──
 function diaBloqueado(){
   if(!estado.arqueoFecha) return false;
@@ -2874,8 +2802,6 @@ async function initApp(){
     guardar();
   }
   if(!localStorage.getItem('misHuevos')){ guardar(); }
-  aplicarTema(estado.tema);
-  if(estado.darkMode) document.body.classList.add('dark');
   actualizarTodo();
   actualizarBtnApertura();
   // Backup automático: avisa si 7+ días
