@@ -1,4 +1,5 @@
 node_modules/
 Backups/
+*.zip
 *.backup_*
 .gitattributes

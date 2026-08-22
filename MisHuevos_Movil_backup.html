@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Mis Huevos</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+:root {
+  --h1:#f59e0b; --h2:#f97316;
+  --v1:#16a34a; --v2:#15803d;
+  --f1:#7c3aed; --f2:#6d28d9;
+  --a1:#f97316; --a2:#c2410c;
+  --t1:#2F5496;
+  --bg:#f0f2f5;
+}
+body { font-family:system-ui,-apple-system,sans-serif; background:var(--bg); color:#1a1a1a; padding-bottom:80px; overflow-x:hidden; }
+header { background:linear-gradient(135deg,var(--h1),var(--h2)); color:#fff; padding:14px 16px; position:sticky; top:0; z-index:100; box-shadow:0 2px 10px rgba(0,0,0,.15); }
+header .top { display:flex; justify-content:space-between; align-items:center; }
+header h1 { font-size:19px; font-weight:800; }
+header .hoy { font-size:11px; opacity:.9; text-align:right; }
+header .gan { font-size:15px; font-weight:800; margin-top:2px; text-align:right; }
+main { max-width:520px; margin:0 auto; padding:12px; }
+.card { background:#fff; border-radius:14px; padding:14px; margin-bottom:12px; box-shadow:0 1px 4px rgba(0,0,0,.08); }
+.card-titulo { font-size:13px; font-weight:800; color:#555; text-transform:uppercase; letter-spacing:.5px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; }
+.stock-wrap { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.stock-box { border-radius:14px; padding:14px; text-align:center; color:#fff; }
+.stock-box.prim { background:linear-gradient(135deg,#f59e0b,#d97706); }
+.stock-box.seg { background:linear-gradient(135deg,#9ca3af,#6b7280); }
+.stock-box .lbl { font-size:11px; font-weight:700; opacity:.9; text-transform:uppercase; }
+.stock-box .cant { font-size:42px; font-weight:900; line-height:1.1; }
+.stock-box .u { font-size:12px; opacity:.85; font-weight:600; }
+.stock-box .sub { font-size:10px; opacity:.7; margin-top:3px; }
+.stock-box.baja { animation:parpadea 1s infinite; }
+@keyframes parpadea { 50% { opacity:.55; } }
+.big-vender { width:100%; padding:20px; border:none; border-radius:16px; background:linear-gradient(135deg,var(--v1),var(--v2)); color:#fff; font-size:21px; font-weight:900; cursor:pointer; box-shadow:0 4px 14px rgba(22,163,74,.35); }
+.big-vender:active { transform:scale(.98); }
+.big-vender .sub { display:block; font-size:12px; font-weight:600; opacity:.85; margin-top:3px; }
+.big-feria { width:100%; padding:16px; border:none; border-radius:14px; background:linear-gradient(135deg,var(--f1),var(--f2)); color:#fff; font-size:18px; font-weight:900; cursor:pointer; margin-top:10px; box-shadow:0 4px 14px rgba(124,58,237,.3); }
+.big-feria:active { transform:scale(.98); }
+.big-feria .sub { display:block; font-size:12px; font-weight:600; opacity:.85; margin-top:2px; }
+.ia-precio-row { display:flex; gap:8px; align-items:center; margin-top:8px; }
+.feria-precio-row .lb { font-size:11px; font-weight:800; color:#6d28d9; white-space:nowrap; }
+.feria-precio-row input { flex:1; padding:10px; border:1.5px solid #ddd6fe; border-radius:10px; font-size:17px; font-weight:800; color:#6d28d9; background:#faf5ff; }
+.feria-precio-row .sug { padding:10px 12px; border:none; border-radius:10px; background:#eef2ff; color:#4338ca; font-weight:800; font-size:12px; cursor:pointer; border:1.5px dashed #4338ca; }
+.info-precios { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px; }
+.info-item { background:#f0fdf4; border:1.5px solid #bbf7d0; border-radius:10px; padding:8px 10px; font-size:12px; color:#15803d; display:flex; justify-content:space-between; align-items:center; }
+.info-item span { color:#6b7280; font-weight:600; }
+.info-item b { font-weight:900; }
+.feria-gan { padding:8px 10px; border-radius:10px; background:#f0fdf4; border:1.5px solid #bbf7d0; color:#15803d; font-weight:900; font-size:13px; text-align:center; }
+.step-btn { width:40px; height:44px; border:none; border-radius:10px; background:#f8f9fb; border:1.5px solid #ccc; font-size:15px; font-weight:900; color:#374151; cursor:pointer; }
+.step-btn:active { background:#e5e7eb; }
+.alert-banner { margin-top:10px; background:#fef2f2; border:1.5px solid #fecaca; color:#b91c1c; border-radius:10px; padding:10px 12px; font-size:12px; font-weight:700; }
+.precios { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:8px; margin-top:12px; }
+.precio-box { background:#f8f9fb; border:1.5px solid #ccc; border-radius:10px; padding:8px 10px; }
+.precio-box .lb { font-size:10px; font-weight:700; color:#777; text-transform:uppercase; }
+.precio-box input { width:100%; border:none; background:none; font-size:20px; font-weight:800; margin-top:2px; }
+.btn-sugerir { width:100%; margin-bottom:8px; padding:10px; background:#eef2ff; color:#4338ca; border:1.5px dashed #4338ca; border-radius:10px; font-size:13px; font-weight:700; cursor:pointer; }
+.btn-sugerir:active { background:#e0e7ff; }
+.historial { max-height:200px; overflow-y:auto; }
+.h-item { display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px dashed #eee; font-size:13px; }
+.h-item .d { color:#777; font-size:11px; }
+.h-item .t { font-weight:800; }
+.util-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
+.util-btn { background:#f8f9fb; border:1.5px solid #e5e7eb; border-radius:12px; padding:13px 6px; text-align:center; cursor:pointer; font-size:11px; font-weight:700; color:#374151; }
+.util-btn:active { background:#eef2ff; border-color:#4338ca; }
+.util-btn .ic { font-size:20px; display:block; margin-bottom:3px; }
+.empty { color:#9ca3af; text-align:center; padding:12px; font-size:13px; }
+.toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(80px); background:#1f2937; color:#fff; padding:12px 22px; border-radius:30px; font-size:15px; font-weight:600; z-index:300; transition:transform .25s; max-width:92%; text-align:center; }
+.toast.show { transform:translateX(-50%) translateY(0); }
+.modal-back { position:fixed; inset:0; background:rgba(0,0,0,.5); display:none; z-index:250; align-items:flex-end; }
+.modal-back.show { display:flex; }
+.modal { background:#fff; width:100%; max-width:520px; margin:0 auto; border-radius:18px 18px 0 0; padding:18px; padding-bottom:28px; max-height:92vh; overflow-y:auto; overflow-x:hidden; }
+.modal h3 { font-size:16px; margin-bottom:12px; color:#333; }
+.modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+.modal-header h3 { margin-bottom:0; }
+.modal-close { width:38px; height:38px; border-radius:50%; border:2px solid #e5e7eb; background:#f8f9fb; font-size:18px; font-weight:900; color:#6b7280; cursor:pointer; line-height:1; }
+.modal-close:active { background:#e5e7eb; }
+.gan-line { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px dashed #ddd; font-size:14px; }
+.gan-line .k { color:#666; } .gan-line .v { font-weight:800; }
+.big-result { font-size:34px; font-weight:900; color:#f97316; text-align:center; padding:14px 0; }
+.modal-btns { display:flex; gap:10px; margin-top:16px; }
+.modal-btns button { flex:1; padding:14px; border:none; border-radius:12px; font-size:15px; font-weight:800; color:#fff; cursor:pointer; }
+.btn-cancel { background:#9ca3af !important; }
+.btn-ok { background:#16a34a !important; }
+.stat3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+.caja-mini { background:#f8f9fb; border:1.5px solid #ddd; border-radius:12px; padding:10px 12px; text-align:center; }
+.caja-mini .v { font-size:18px; font-weight:800; }
+.caja-mini .l { font-size:10px; color:#777; margin-top:2px; }
+.stat3 .s { background:#f8f9fb; border-radius:10px; padding:10px 6px; text-align:center; }
+.stat3 .s .v { font-size:17px; font-weight:800; color:#f97316; }
+.stat3 .s .l { font-size:10px; color:#777; }
+table.tab { width:100%; border-collapse:collapse; font-size:12px; margin-top:8px; }
+table.tab th { background:#f97316; color:#fff; padding:7px 5px; text-align:left; }
+table.tab td { padding:7px 5px; border-bottom:1px solid #eee; }
+.paso-titulo { font-size:12px; font-weight:800; color:var(--t1); text-transform:uppercase; letter-spacing:.5px; margin:14px 0 8px; }
+.selector-producto { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.sel-prod { padding:14px; border-radius:12px; border:2.5px solid #ddd; background:#fff; text-align:center; cursor:pointer; font-weight:800; font-size:14px; color:#555; }
+.sel-prod.act { border-color:var(--a1); background:#fff7ed; color:var(--a2); }
+.sel-tipo { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.sel-tipo2 { padding:13px; border-radius:12px; border:2.5px solid #ddd; background:#fff; text-align:center; cursor:pointer; font-weight:700; font-size:13px; color:#555; }
+.sel-tipo2.act { border-color:#16a34a; background:#f0fdf4; color:#15803d; }
+.cant-box { display:flex; align-items:center; gap:12px; justify-content:center; background:#f8f9fb; border-radius:12px; padding:10px; margin:10px 0; }
+.cant-box button { width:52px; height:52px; border:none; border-radius:12px; font-size:28px; font-weight:900; cursor:pointer; color:#fff; }
+.cant-box .menos { background:#dc2626; } .cant-box .mas { background:#16a34a; }
+.cant-box .num { font-size:34px; font-weight:900; min-width:70px; text-align:center; }
+.cant-box .unid { font-size:12px; color:#777; }
+.pago-opts { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; }
+.pago-op { padding:13px 6px; border-radius:10px; border:2.5px solid #ddd; background:#fff; text-align:center; cursor:pointer; font-size:13px; font-weight:800; color:#555; }
+.pago-op.act { border-color:var(--a1); background:#fff7ed; color:var(--a2); }
+input.quien { width:100%; padding:12px; border:1.5px solid #ccc; border-radius:10px; font-size:15px; margin:6px 0 0; }
+input.field { width:100%; padding:11px; border:1.5px solid #ccc; border-radius:10px; font-size:15px; }
+label.campo { font-size:12px; font-weight:700; color:#555; display:block; margin-bottom:4px; }
+.registrar-btn { width:100%; padding:18px; border:none; border-radius:16px; background:linear-gradient(135deg,var(--v1),var(--v2)); color:#fff; font-size:21px; font-weight:900; cursor:pointer; box-shadow:0 4px 14px rgba(22,163,74,.35); margin-top:12px; }
+.registrar-btn:active { transform:scale(.98); }
+.registrar-btn .sub { display:block; font-size:12px; font-weight:600; opacity:.85; margin-top:3px; }
+.fast-reg { width:100%; padding:20px; border:none; border-radius:16px; background:linear-gradient(135deg,var(--f1),var(--f2)); color:#fff; font-size:23px; font-weight:900; cursor:pointer; box-shadow:0 4px 14px rgba(124,58,237,.35); margin-top:12px; }
+.fast-reg:active { transform:scale(.97); }
+.fast-reg .sub { display:block; font-size:13px; font-weight:600; opacity:.85; margin-top:3px; }
+.fast-info { display:flex; justify-content:space-between; align-items:center; background:#f5f3ff; border:1.5px solid #ddd6fe; border-radius:12px; padding:12px; margin-top:12px; }
+.fast-info .precio { font-size:22px; font-weight:900; color:var(--f2); }
+.fast-info .det { font-size:12px; color:#6b7280; }
+.venta-list { max-height:130px; overflow-y:auto; margin-top:10px; }
+.sesion-resumen { background:#f0fdf4; border:1.5px solid #bbf7d0; border-radius:12px; padding:12px; margin-top:12px; display:flex; justify-content:space-around; text-align:center; }
+.sesion-resumen .v { font-size:18px; font-weight:900; color:#15803d; }
+.sesion-resumen .l { font-size:10px; color:#6b7280; }
+/* ── MODO OSCURO ── */
+body.dark{ background:#111827; color:#e5e7eb; }
+body.dark .card{ background:#1f2937; box-shadow:0 1px 4px rgba(0,0,0,.3); }
+body.dark header{ background:linear-gradient(135deg,#b45309,#c2410c); }
+body.dark .util-btn{ background:#374151; border-color:#4b5563; color:#e5e7eb; }
+body.dark .util-btn:active{ background:#4b5563; border-color:#f97316; }
+body.dark input.field, body.dark input.quien{ background:#374151; border-color:#4b5563; color:#e5e7eb; }
+body.dark .modal{ background:#1f2937; color:#e5e7eb; }
+body.dark .modal h3{ color:#f3f4f6; }
+body.dark .modal-close{ border-color:#4b5563; background:#374151; color:#9ca3af; }
+body.dark .gan-line{ border-bottom-color:#374151; }
+body.dark .gan-line .k{ color:#9ca3af; }
+body.dark .precio-box{ background:#374151; border-color:#4b5563; }
+body.dark .precio-box .lb{ color:#9ca3af; }
+body.dark .precio-box input{ color:#f3f4f6; }
+body.dark .info-item{ background:#064e3b; border-color:#065f46; color:#6ee7b7; }
+body.dark .info-item span{ color:#6b7280; }
+body.dark table.tab td{ border-bottom-color:#374151; }
+body.dark .sel-prod{ background:#374151; border-color:#4b5563; color:#e5e7eb; }
+body.dark .pago-op{ background:#374151; border-color:#4b5563; color:#e5e7eb; }
+body.dark .step-btn{ background:#374151; border-color:#4b5563; color:#e5e7eb; }
+body.dark .feria-precio-row input{ background:#374151; border-color:#6d28d9; color:#c4b5fd; }
+body.dark .caja-dia{ background:#1e3a5f; border-color:#1e40af; }
+body.dark .alert-banner{ background:#450a0a; border-color:#7f1d1d; }
+body.dark .empty{ color:#6b7280; }
+/* ── GRÁFICO ── */
+.chart-wrap{ background:#fff; border-radius:12px; padding:12px; margin-bottom:12px; box-shadow:0 1px 4px rgba(0,0,0,.08); }
+body.dark .chart-wrap{ background:#1f2937; }
+/* ── FILTROS HISTORIAL ── */
+.filtros-wrap{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; }
+.filtro-btn{ padding:6px 12px; border:1.5px solid #ddd; border-radius:20px; font-size:11px; font-weight:700; cursor:pointer; background:#fff; color:#555; }
+.filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316; }
+body.dark .filtro-btn{ background:#374151; border-color:#4b5563; color:#e5e7eb; }
+body.dark .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316; }
+</style>
+<link rel="manifest" href="manifest.json">
+</head>
+<body>
+<header>
+<div class="top">
+<h1>🥚 Mis Huevos</h1>
+<div>
+<div class="hoy"><button id="btnTema" onclick="toggleTema()" style="background:none;border:1px solid rgba(255,255,255,.4);color:#fff;padding:3px 8px;border-radius:12px;font-size:11px;cursor:pointer;margin-bottom:3px;">🌙</button> <span id="fechaHoy"></span></div>
+<div class="gan">Ganancia hoy: <span id="ganHoy">$0</span></div>
+</div>
+</div>
+</header>
+<main>
+<!-- ═══ STOCK ═══ -->
+<div class="card">
+<div class="card-titulo">
+<span>Stock</span>
+<button id="btnTerceraToggle" style="padding:6px 12px;border:none;border-radius:8px;background:#84cc16;color:#fff;font-weight:800;cursor:pointer;font-size:11px;" onclick="toggleTercera()">🥚 Tercera: OFF</button>
+</div>
+<div id="stockAlerta"></div>
+<div class="stock-wrap">
+<div class="stock-box prim" id="stockPrimBox">
+<div class="lbl">🥚 Primera</div>
+<div class="cant" id="stockPrim">18</div>
+<div class="u">bandejas</div>
+<div class="sub" id="stockPrimHuevos">3 cajas</div>
+</div>
+<div class="stock-box seg" id="stockSegBox">
+<div class="lbl">🥚 Segunda</div>
+<div class="cant" id="stockSeg">12</div>
+<div class="u">bandejas</div>
+<div class="sub" id="stockSegHuevos">2 cajas</div>
+</div>
+<div class="stock-box" id="stockTerceraBox" style="display:none;background:linear-gradient(135deg,#84cc16,#65a30d);">
+<div class="lbl">🥚 Tercera</div>
+<div class="cant" id="stockTercera">0</div>
+<div class="u">bandejas</div>
+<div class="sub" id="stockTerceraHuevos">0 cajas</div>
+</div>
+</div>
+</div>
+<!-- ═══ GRÁFICO ═══ -->
+<div class="chart-wrap">
+<div class="card-titulo">📊 Ventas últimos 7 días</div>
+<canvas id="graficoVentas" style="width:100%;height:120px;"></canvas>
+</div>
+<!-- ═══ VENDER ═══ -->
+<div class="card">
+<div class="caja-dia">
+<div><div class="v" id="cajaDiaVentas">$0</div><div class="l">Vendido hoy</div></div>
+<div><div class="v" id="cajaDiaEfectivo">$0</div><div class="l">💵 Efectivo</div></div>
+<div><div class="v" id="cajaDiaTransf">$0</div><div class="l">🏦 Transfer.</div></div>
+<div><div class="v" id="cajaDiaGasto">$0</div><div class="l">💸 Gastos</div></div>
+<div><div class="v" id="cajaDiaSaldo">$0</div><div class="l">💰 Neto</div></div>
+</div>
+<button class="big-vender" onclick="abrirVenta()">➕ VENDER <span class="sub">registra varias ventas sin cerrar</span></button>
+<button class="big-feria" onclick="abrirFeria()">🎪 FERIA <span class="sub" id="feriaSub">rápido a $6.000 la bandeja</span></button>
+<div class="precios">
+<div class="precio-box"><div class="lb">Primera $/bandeja</div><input type="number" id="precioPrimBtx" inputmode="decimal"></div>
+<div class="precio-box"><div class="lb">Segunda $/bandeja</div><input type="number" id="precioSegBtx" inputmode="decimal"></div>
+<div class="precio-box" id="precioTerceraBox" style="display:none;"><div class="lb">Tercera $/bandeja</div><input type="number" id="precioTerceraBtx" inputmode="decimal"></div>
+</div>
+<div class="info-precios">
+<div class="info-item"><span>🥚 Primera:</span><b id="infoGanPrim">—</b></div>
+<div class="info-item"><span>🥚 Segunda:</span><b id="infoGanSeg">—</b></div>
+<div class="info-item" id="infoTerceraItem" style="display:none;"><span>🥚 Tercera:</span><b id="infoGanTercera">—</b></div>
+</div>
+<div class="feria-precio-row">
+<span class="lb">Precio FERIA</span>
+<input type="number" id="feriaPrecioPrincipal" inputmode="decimal">
+</div>
+<div class="feria-gan" id="infoGanFeria" style="margin-top:6px;">—</div>
+<div id="alertaGuardado"></div>
+</div>
+<!-- ═══ ÚLTIMAS VENTAS + LOG ═══ -->
+<div class="card">
+<div class="card-titulo">Últimas ventas <span id="hoyCont"></span></div>
+<div class="historial" id="historialLista"><div class="empty">Aún no hay ventas</div></div>
+</div>
+<!-- ═══ UTILIDADES ═══ -->
+<div class="card">
+<div class="card-titulo">Utilidades</div>
+<button class="btn-ok" style="width:100%;padding:14px;border:none;border-radius:12px;color:#fff;font-weight:800;font-size:15px;cursor:pointer;margin-bottom:10px;" onclick="guardarManual()">💾 GUARDAR AHORA</button>
+<div class="util-grid">
+<button class="util-btn" onclick="abrirModal('modalCompra')"><span class="ic">🛒</span>Nueva compra</button>
+<button class="util-btn" onclick="abrirModal('modalHistCompras')"><span class="ic">📦</span>Compras</button>
+<button class="util-btn" onclick="abrirModal('modalMerma')"><span class="ic">🥚</span>Merma</button>
+<button class="util-btn" onclick="abrirModal('modalGasto')"><span class="ic">💸</span>Gastos</button>
+<button class="util-btn" onclick="abrirModal('modalCaja')"><span class="ic">💵</span>Caja</button>
+<button class="util-btn" onclick="abrirModal('modalDeudas')"><span class="ic">📒</span>Deudas</button>
+<button class="util-btn" onclick="abrirModal('modalCierre')"><span class="ic">🌙</span>Cierre día</button>
+<button class="util-btn" onclick="abrirModal('modalResumen')"><span class="ic">📈</span>Resumen</button>
+<button class="util-btn" onclick="exportarExcel()"><span class="ic">📊</span>Excel</button>
+<button class="util-btn" onclick="abrirModal('modalCambio')"><span class="ic">🪙</span>Cambio</button>
+<button class="util-btn" onclick="abrirModal('modalCuadratura')"><span class="ic">🧮</span>Cuadratura</button>
+<button class="util-btn" onclick="abrirModal('modalAjustar')"><span class="ic">🔧</span>Stock</button>
+<button class="util-btn" onclick="abrirModal('modalArqueo')"><span class="ic">💰</span>Arqueo</button>
+<button class="util-btn" onclick="abrirModal('modalSync')"><span class="ic">☁️</span>Sincronizar</button>
+<button class="util-btn" onclick="abrirModal('modalDatos')"><span class="ic">💾</span>Respaldar</button>
+<button class="util-btn" onclick="abrirModal('modalVersiones')"><span class="ic">↩️</span>Versiones</button>
+<button class="util-btn" onclick="abrirModal('modalLog')"><span class="ic">📋</span>Log cambios</button>
+<button class="util-btn" onclick="abrirModal('modalReset')"><span class="ic">🗑️</span>Reiniciar</button>
+</div>
+</div>
+</main>
+<script>
+// Register service worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -136,23 +136,49 @@ label.campo { font-size:12px; font-weight:700; color:#555; display:block; margin
 .caja-dia { background:#eff6ff; border:1.5px solid #bfdbfe; border-radius:12px; padding:10px 6px; margin-bottom:10px; display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:4px; text-align:center; }
 .caja-dia .v { font-size:14px; font-weight:900; color:#1d4ed8; overflow-wrap:anywhere; white-space:nowrap; }
 .caja-dia .l { font-size:9px; color:#6b7280; }
-/* ── GRÁFICO ── */
+/* â”€â”€ MODO OSCURO â”€â”€ */
+body.dark{ background:#111827; color:#e5e7eb; }
+body.dark .card{ background:#1f2937; box-shadow:0 1px 4px rgba(0,0,0,.3); }
+body.dark header{ background:linear-gradient(135deg,#b45309,#c2410c); }
+body.dark .util-btn{ background:#374151; border-color:#4b5563; color:#e5e7eb; }
+body.dark .util-btn:active{ background:#4b5563; border-color:#f97316; }
+body.dark input.field, body.dark input.quien{ background:#374151; border-color:#4b5563; color:#e5e7eb; }
+body.dark .modal{ background:#1f2937; color:#e5e7eb; }
+body.dark .modal h3{ color:#f3f4f6; }
+body.dark .modal-close{ border-color:#4b5563; background:#374151; color:#9ca3af; }
+body.dark .gan-line{ border-bottom-color:#374151; }
+body.dark .gan-line .k{ color:#9ca3af; }
+body.dark .precio-box{ background:#374151; border-color:#4b5563; }
+body.dark .precio-box .lb{ color:#9ca3af; }
+body.dark .precio-box input{ color:#f3f4f6; }
+body.dark .info-item{ background:#064e3b; border-color:#065f46; color:#6ee7b7; }
+body.dark .info-item span{ color:#6b7280; }
+body.dark table.tab td{ border-bottom-color:#374151; }
+body.dark .sel-prod{ background:#374151; border-color:#4b5563; color:#e5e7eb; }
+body.dark .pago-op{ background:#374151; border-color:#4b5563; color:#e5e7eb; }
+body.dark .step-btn{ background:#374151; border-color:#4b5563; color:#e5e7eb; }
+body.dark .feria-precio-row input{ background:#374151; border-color:#6d28d9; color:#c4b5fd; }
+body.dark .caja-dia{ background:#1e3a5f; border-color:#1e40af; }
+body.dark .alert-banner{ background:#450a0a; border-color:#7f1d1d; }
+body.dark .empty{ color:#6b7280; }
+/* â”€â”€ GRÃFICO â”€â”€ */
 .chart-wrap{ background:#fff; border-radius:12px; padding:12px; margin-bottom:12px; box-shadow:0 1px 4px rgba(0,0,0,.08); }
-/* ── FILTROS HISTORIAL ── */
+body.dark .chart-wrap{ background:#1f2937; }
+/* â”€â”€ FILTROS HISTORIAL â”€â”€ */
 .filtros-wrap{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; }
 .filtro-btn{ padding:6px 12px; border:1.5px solid #ddd; border-radius:20px; font-size:11px; font-weight:700; cursor:pointer; background:#fff; color:#555; }
 .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316; }
+body.dark .filtro-btn{ background:#374151; border-color:#4b5563; color:#e5e7eb; }
+body.dark .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316; }
 </style>
 </head>
 <body>
 
 <header>
   <div class="top">
-    <h1>🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span></h1>
+    <h1>ðŸ¥š Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span></h1>
     <div>
-      <div class="hoy">
-        <span id="fechaHoy"></span>
-      </div>
+      <div class="hoy"><button id="btnTema" onclick="toggleTema()" style="background:none;border:1px solid rgba(255,255,255,.4);color:#fff;padding:3px 8px;border-radius:12px;font-size:11px;cursor:pointer;margin-bottom:3px;">ðŸŒ™</button> <span id="fechaHoy"></span></div>
       <div class="gan">Ganancia hoy: <span id="ganHoy">$0</span></div>
     </div>
   </div>
@@ -160,7 +186,7 @@ label.campo { font-size:12px; font-weight:700; color:#555; display:block; margin
 
 <main>
 
-  <!-- ═══ STOCK ═══ -->
+  <!-- â•â•â• STOCK â•â•â• -->
   <div class="card">
     <div class="card-titulo">
       <span>Stock</span>
@@ -168,19 +194,19 @@ label.campo { font-size:12px; font-weight:700; color:#555; display:block; margin
     <div id="stockAlerta"></div>
     <div class="stock-wrap">
       <div class="stock-box prim" id="stockPrimBox">
-        <div class="lbl">🥚 Primera</div>
+        <div class="lbl">ðŸ¥š Primera</div>
         <div class="cant" id="stockPrim">18</div>
         <div class="u">bandejas</div>
         <div class="sub" id="stockPrimHuevos">3 cajas</div>
       </div>
       <div class="stock-box seg" id="stockSegBox">
-        <div class="lbl">🥚 Segunda</div>
+        <div class="lbl">ðŸ¥š Segunda</div>
         <div class="cant" id="stockSeg">12</div>
         <div class="u">bandejas</div>
         <div class="sub" id="stockSegHuevos">2 cajas</div>
       </div>
       <div class="stock-box" id="stockTerceraBox" style="display:none;background:linear-gradient(135deg,#84cc16,#65a30d);">
-        <div class="lbl">🥚 Tercera</div>
+        <div class="lbl">ðŸ¥š Tercera</div>
         <div class="cant" id="stockTercera">0</div>
         <div class="u">bandejas</div>
         <div class="sub" id="stockTerceraHuevos">0 cajas</div>
@@ -188,61 +214,61 @@ label.campo { font-size:12px; font-weight:700; color:#555; display:block; margin
     </div>
   </div>
 
-  <!-- ═══ VENDER ═══ -->
+  <!-- â•â•â• VENDER â•â•â• -->
   <div class="card">
     <div class="caja-dia">
       <div><div class="v" id="cajaDiaVentas">$0</div><div class="l">Vendido hoy</div></div>
-      <div><div class="v" id="cajaDiaEfectivo">$0</div><div class="l">💵 Efectivo</div></div>
-      <div><div class="v" id="cajaDiaTransf">$0</div><div class="l">🏦 Transferencia</div></div>
-      <div><div class="v" id="cajaDiaGasto">$0</div><div class="l">💸 Gastos</div></div>
+      <div><div class="v" id="cajaDiaEfectivo">$0</div><div class="l">ðŸ’µ Efectivo</div></div>
+      <div><div class="v" id="cajaDiaTransf">$0</div><div class="l">ðŸ¦ Transferencia</div></div>
+      <div><div class="v" id="cajaDiaGasto">$0</div><div class="l">ðŸ’¸ Gastos</div></div>
     </div>
-    <button class="big-vender" onclick="abrirVenta()">➕ VENDER <span class="sub">registra varias ventas sin cerrar</span></button>
-    <button class="big-feria" onclick="abrirFeria()">🎪 FERIA <span class="sub" id="feriaSub">rápido a $6.000 la bandeja</span></button>
+    <button class="big-vender" onclick="abrirVenta()">âž• VENDER <span class="sub">registra varias ventas sin cerrar</span></button>
+    <button class="big-feria" onclick="abrirFeria()">ðŸŽª FERIA <span class="sub" id="feriaSub">rÃ¡pido a $6.000 la bandeja</span></button>
     <div class="precios">
       <div class="precio-box" id="precioPrimBox"><div class="lb">Primera $/bandeja</div><input type="number" id="precioPrimBtx" inputmode="decimal"></div>
       <div class="precio-box" id="precioSegBox"><div class="lb">Segunda $/bandeja</div><input type="number" id="precioSegBtx" inputmode="decimal"></div>
       <div class="precio-box" id="precioTerceraBox" style="display:none;"><div class="lb">Tercera $/bandeja</div><input type="number" id="precioTerceraBtx" inputmode="decimal"></div>
     </div>
     <div class="info-precios">
-      <div class="info-item" id="infoPrimItem"><span>🥚 Primera:</span><b id="infoGanPrim">—</b></div>
-      <div class="info-item" id="infoSegItem"><span>🥚 Segunda:</span><b id="infoGanSeg">—</b></div>
-      <div class="info-item" id="infoTerceraItem" style="display:none;"><span>🥚 Tercera:</span><b id="infoGanTercera">—</b></div>
+      <div class="info-item" id="infoPrimItem"><span>ðŸ¥š Primera:</span><b id="infoGanPrim">â€”</b></div>
+      <div class="info-item" id="infoSegItem"><span>ðŸ¥š Segunda:</span><b id="infoGanSeg">â€”</b></div>
+      <div class="info-item" id="infoTerceraItem" style="display:none;"><span>ðŸ¥š Tercera:</span><b id="infoGanTercera">â€”</b></div>
     </div>
     <div class="feria-precio-row">
       <span class="lb">Precio FERIA</span>
       <input type="number" id="feriaPrecioPrincipal" inputmode="decimal">
     </div>
-    <div class="feria-gan" id="infoGanFeria" style="margin-top:6px;">—</div>
+    <div class="feria-gan" id="infoGanFeria" style="margin-top:6px;">â€”</div>
     <div id="alertaGuardado"></div>
   </div>
 
-  <!-- ═══ ÚLTIMAS VENTAS + LOG ═══ -->
+  <!-- â•â•â• ÃšLTIMAS VENTAS + LOG â•â•â• -->
   <div class="card">
-    <div class="card-titulo">Últimas ventas <span id="hoyCont"></span></div>
-    <div class="historial" id="historialLista"><div class="empty">Aún no hay ventas</div></div>
+    <div class="card-titulo">Ãšltimas ventas <span id="hoyCont"></span></div>
+    <div class="historial" id="historialLista"><div class="empty">AÃºn no hay ventas</div></div>
   </div>
 
-  <!-- ═══ UTILIDADES ═══ -->
+  <!-- â•â•â• UTILIDADES â•â•â• -->
   <div class="card">
     <div class="card-titulo">Utilidades</div>
-    <button class="btn-ok" style="width:100%;padding:14px;border:none;border-radius:12px;color:#fff;font-weight:800;font-size:15px;cursor:pointer;margin-bottom:10px;" onclick="guardarManual()">💾 GUARDAR AHORA</button>
+    <button class="btn-ok" style="width:100%;padding:14px;border:none;border-radius:12px;color:#fff;font-weight:800;font-size:15px;cursor:pointer;margin-bottom:10px;" onclick="guardarManual()">ðŸ’¾ GUARDAR AHORA</button>
     <div class="util-grid">
-      <button class="util-btn" id="btnApertura" onclick="abrirModal('modalApertura')" style="background:#dcfce7;border:2px solid #16a34a;"><span class="ic">☀️</span>Abrir día</button>
-      <button class="util-btn" onclick="abrirModal('modalCierre')" style="background:#fef2f2;border:2px solid #dc2626;"><span class="ic">🔒</span>Cerrar día</button>
-      <button class="util-btn" onclick="abrirModal('modalCompra')"><span class="ic">🛒</span>Nueva compra</button>
-      <button class="util-btn" onclick="abrirModal('modalMerma')"><span class="ic">🥚</span>Merma</button>
-      <button class="util-btn" onclick="abrirModal('modalGasto')"><span class="ic">💸</span>Gastos</button>
-      <button class="util-btn" onclick="abrirModal('modalDeudas')"><span class="ic">📒</span>Deudas</button>
-      <button class="util-btn" onclick="abrirModal('modalHistorialVentas');abrirHistorialFiltrado('ventas')"><span class="ic">🔍</span>Buscar</button>
-      <button class="util-btn" onclick="abrirModal('modalClientes')"><span class="ic">👤</span>Clientes</button>
-      <button class="util-btn" onclick="abrirModal('modalReportes')"><span class="ic">📊</span>Reportes</button>
-      <button class="util-btn" onclick="abrirModal('modalMiDinero')"><span class="ic">💵</span>Mi dinero</button>
-      <button class="util-btn" onclick="abrirModal('modalCalculadoras')"><span class="ic">🧮</span>Calculadoras</button>
-      <button class="util-btn" onclick="abrirModal('modalDatos')"><span class="ic">💾</span>Datos</button>
-      <button class="util-btn" onclick="abrirModal('modalHistorial')"><span class="ic">📋</span>Historial</button>
-      <button class="util-btn" onclick="exportarExcel()"><span class="ic">📊</span>Excel</button>
-      <button class="util-btn" onclick="abrirModal('modalAjustar')"><span class="ic">🔧</span>Ajustar</button>
-      <button class="util-btn" onclick="abrirModal('modalReset')"><span class="ic">🗑️</span>Reiniciar</button>
+      <button class="util-btn" id="btnApertura" onclick="abrirModal('modalApertura')" style="background:#dcfce7;border:2px solid #16a34a;"><span class="ic">â˜€ï¸</span>Abrir dÃ­a</button>
+      <button class="util-btn" onclick="abrirModal('modalCierre')" style="background:#fef2f2;border:2px solid #dc2626;"><span class="ic">ðŸ”’</span>Cerrar dÃ­a</button>
+      <button class="util-btn" onclick="abrirModal('modalCompra')"><span class="ic">ðŸ›’</span>Nueva compra</button>
+      <button class="util-btn" onclick="abrirModal('modalMerma')"><span class="ic">ðŸ¥š</span>Merma</button>
+      <button class="util-btn" onclick="abrirModal('modalGasto')"><span class="ic">ðŸ’¸</span>Gastos</button>
+      <button class="util-btn" onclick="abrirModal('modalDeudas')"><span class="ic">ðŸ“’</span>Deudas</button>
+      <button class="util-btn" onclick="abrirModal('modalHistorialVentas');abrirHistorialFiltrado('ventas')"><span class="ic">ðŸ”</span>Buscar</button>
+      <button class="util-btn" onclick="abrirModal('modalClientes')"><span class="ic">ðŸ‘¤</span>Clientes</button>
+      <button class="util-btn" onclick="abrirModal('modalReportes')"><span class="ic">ðŸ“Š</span>Reportes</button>
+      <button class="util-btn" onclick="abrirModal('modalMiDinero')"><span class="ic">ðŸ’µ</span>Mi dinero</button>
+      <button class="util-btn" onclick="abrirModal('modalCalculadoras')"><span class="ic">ðŸ§®</span>Calculadoras</button>
+      <button class="util-btn" onclick="abrirModal('modalDatos')"><span class="ic">ðŸ’¾</span>Datos</button>
+      <button class="util-btn" onclick="abrirModal('modalHistorial')"><span class="ic">ðŸ“‹</span>Historial</button>
+      <button class="util-btn" onclick="exportarExcel()"><span class="ic">ðŸ“Š</span>Excel</button>
+      <button class="util-btn" onclick="abrirModal('modalAjustar')"><span class="ic">ðŸ”§</span>Ajustar</button>
+      <button class="util-btn" onclick="abrirModal('modalReset')"><span class="ic">ðŸ—‘ï¸</span>Reiniciar</button>
     </div>
   </div>
 
@@ -254,7 +280,7 @@ if ('serviceWorker' in navigator) {
       const nw = reg.installing;
       nw.addEventListener('statechange', () => {
         if (nw.state === 'installed' && navigator.serviceWorker.controller) {
-          toast('🔄 Nueva versión disponible. Recarga para actualizar.');
+          toast('ðŸ”„ Nueva versiÃ³n disponible. Recarga para actualizar.');
         }
       });
     });
@@ -262,74 +288,74 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 
-<!-- ═══ MODAL VENTA ═══ -->
+<!-- â•â•â• MODAL VENTA â•â•â• -->
 <div class="modal-back" id="ventaModal">
   <div class="modal">
-    <div class="modal-header"><h3>🛒 Registrar ventas</h3><button class="modal-close" onclick="cerrarModal('ventaModal')">✕</button></div>
-    <div class="paso-titulo">1 · Producto</div>
+    <div class="modal-header"><h3>ðŸ›’ Registrar ventas</h3><button class="modal-close" onclick="cerrarModal('ventaModal')">âœ•</button></div>
+    <div class="paso-titulo">1 Â· Producto</div>
     <div class="selector-producto">
-      <div class="sel-prod act" id="selProdPrimera" onclick="selProducto('Primera')">🥚 PRIMERA</div>
-      <div class="sel-prod" id="selProdSegunda" onclick="selProducto('Segunda')">🥚 SEGUNDA</div>
+      <div class="sel-prod act" id="selProdPrimera" onclick="selProducto('Primera')">ðŸ¥š PRIMERA</div>
+      <div class="sel-prod" id="selProdSegunda" onclick="selProducto('Segunda')">ðŸ¥š SEGUNDA</div>
     </div>
     <div class="selector-producto" id="selTerceraRow" style="display:none;margin-top:8px;">
-      <div class="sel-prod" id="selProdTercera" onclick="selProducto('Tercera')" style="border-color:#84cc16;background:#f7fee7;color:#4d7c0f;">🥚 TERCERA</div>
+      <div class="sel-prod" id="selProdTercera" onclick="selProducto('Tercera')" style="border-color:#84cc16;background:#f7fee7;color:#4d7c0f;">ðŸ¥š TERCERA</div>
     </div>
-    <div class="paso-titulo">2 · Bandeja o caja</div>
+    <div class="paso-titulo">2 Â· Bandeja o caja</div>
     <div class="sel-tipo">
-      <div class="sel-tipo2 act" id="selTipoBandeja" onclick="selTipo('bandeja')">📄 Bandeja<br><small>30 huevos</small></div>
-      <div class="sel-tipo2" id="selTipoCaja" onclick="selTipo('caja')">📦 Caja<br><small>6 bandejas</small></div>
+      <div class="sel-tipo2 act" id="selTipoBandeja" onclick="selTipo('bandeja')">ðŸ“„ Bandeja<br><small>30 huevos</small></div>
+      <div class="sel-tipo2" id="selTipoCaja" onclick="selTipo('caja')">ðŸ“¦ Caja<br><small>6 bandejas</small></div>
     </div>
-    <div class="paso-titulo">3 · Cantidad</div>
+    <div class="paso-titulo">3 Â· Cantidad</div>
     <div class="cant-box">
-      <button class="menos" onclick="cambiarCant(-1)">−</button>
+      <button class="menos" onclick="cambiarCant(-1)">âˆ’</button>
       <div><div class="num" id="ventaCant">1</div><div class="unid" id="ventaUnid">bandeja</div></div>
       <button class="mas" onclick="cambiarCant(1)">+</button>
     </div>
-    <div class="paso-titulo">4 · ¿Cómo te pagan?</div>
+    <div class="paso-titulo">4 Â· Â¿CÃ³mo te pagan?</div>
     <div class="pago-opts">
-      <div class="pago-op act" id="pagoEfectivo" onclick="pagoMetodo('efectivo')">💵 Efectivo</div>
-      <div class="pago-op" id="pagoTransferencia" onclick="pagoMetodo('transferencia')">🏦 Transferencia</div>
-      <div class="pago-op" id="pagoDeuda" onclick="pagoMetodo('deuda')">📒 A deuda</div>
+      <div class="pago-op act" id="pagoEfectivo" onclick="pagoMetodo('efectivo')">ðŸ’µ Efectivo</div>
+      <div class="pago-op" id="pagoTransferencia" onclick="pagoMetodo('transferencia')">ðŸ¦ Transferencia</div>
+      <div class="pago-op" id="pagoDeuda" onclick="pagoMetodo('deuda')">ðŸ“’ A deuda</div>
     </div>
-    <div class="paso-titulo">¿A quién le vendes? <span id="quienObligatorio" style="color:#dc2626;display:none;">*</span><span id="quienOpcional" style="color:#9ca3af;text-transform:none;font-weight:600;">(opcional)</span></div>
-    <input type="text" class="quien" id="ventaQuien" placeholder="Ej: mamá, hermana, Daniel...">
-    <div class="paso-titulo">¿Vendiste otra cosa? <span style="color:#9ca3af;text-transform:none;font-weight:600;">(no huevos)</span></div>
+    <div class="paso-titulo">Â¿A quiÃ©n le vendes? <span id="quienObligatorio" style="color:#dc2626;display:none;">*</span><span id="quienOpcional" style="color:#9ca3af;text-transform:none;font-weight:600;">(opcional)</span></div>
+    <input type="text" class="quien" id="ventaQuien" placeholder="Ej: mamÃ¡, hermana, Daniel...">
+    <div class="paso-titulo">Â¿Vendiste otra cosa? <span style="color:#9ca3af;text-transform:none;font-weight:600;">(no huevos)</span></div>
     <div style="display:flex;gap:6px;">
       <input type="text" class="field" id="otroNombre" placeholder="Producto (ej: aguacate)" style="flex:1;" oninput="onOtroNombreInput('venta')">
       <input type="number" class="field" id="otroPrecio" placeholder="$" inputmode="decimal" style="width:100px;">
-      <button class="btn-ok" style="flex:none;padding:0 16px;" onclick="agregarOtro('venta')">➕</button>
+      <button class="btn-ok" style="flex:none;padding:0 16px;" onclick="agregarOtro('venta')">âž•</button>
     </div>
-    <div class="registrar-btn" onclick="confirmarVenta()">💾 REGISTRAR VENTA <span class="sub">queda abierto para la siguiente</span></div>
+    <div class="registrar-btn" onclick="confirmarVenta()">ðŸ’¾ REGISTRAR VENTA <span class="sub">queda abierto para la siguiente</span></div>
     <div class="sesion-resumen">
       <div><div class="v" id="sesionCount">0</div><div class="l">ventas ahora</div></div>
       <div><div class="v" id="sesionTotal">$0</div><div class="l">total vendido</div></div>
       <div><div class="v" id="sesionBandejas">0</div><div class="l">bandejas</div></div>
     </div>
-    <div class="venta-list" id="ventaList"><div class="empty">Aquí verás lo que vas registrando</div></div>
-    <button class="btn-cancel" style="width:100%;margin-top:8px;" onclick="abrirModal('modalHistorialVentas');abrirHistorialFiltrado('ventas')">📋 Ver historial completo</button>
-    <div class="modal-btns"><button class="btn-ok" onclick="cerrarModal('ventaModal')">✔ Terminar</button></div>
+    <div class="venta-list" id="ventaList"><div class="empty">AquÃ­ verÃ¡s lo que vas registrando</div></div>
+    <button class="btn-cancel" style="width:100%;margin-top:8px;" onclick="abrirModal('modalHistorialVentas');abrirHistorialFiltrado('ventas')">ðŸ“‹ Ver historial completo</button>
+    <div class="modal-btns"><button class="btn-ok" onclick="cerrarModal('ventaModal')">âœ” Terminar</button></div>
   </div>
 </div>
 
-<!-- ═══ MODAL HISTORIAL VENTAS ═══ -->
+<!-- â•â•â• MODAL HISTORIAL VENTAS â•â•â• -->
 <div class="modal-back" id="modalHistorialVentas">
   <div class="modal">
-    <div class="modal-header"><h3>🔍 Buscar en historial</h3><button class="modal-close" onclick="cerrarModal('modalHistorialVentas')">✕</button></div>
+    <div class="modal-header"><h3>ðŸ” Buscar en historial</h3><button class="modal-close" onclick="cerrarModal('modalHistorialVentas')">âœ•</button></div>
     <div style="background:#f8f9fb;border:1.5px solid #e5e7eb;border-radius:12px;padding:12px;margin-bottom:12px;">
-      <div style="font-size:12px;font-weight:800;color:#555;margin-bottom:8px;text-transform:uppercase;">📋 Tipo de registro</div>
+      <div style="font-size:12px;font-weight:800;color:#555;margin-bottom:8px;text-transform:uppercase;">ðŸ“‹ Tipo de registro</div>
       <div id="histFiltros" class="filtros-wrap" style="margin-bottom:10px;">
-        <button class="filtro-btn act" data-tipo="ventas" onclick="abrirHistorialFiltrado('ventas')">💰 Ventas</button>
-        <button class="filtro-btn" data-tipo="gastos" onclick="abrirHistorialFiltrado('gastos')">💸 Gastos</button>
-        <button class="filtro-btn" data-tipo="compras" onclick="abrirHistorialFiltrado('compras')">🛒 Compras</button>
-        <button class="filtro-btn" data-tipo="merma" onclick="abrirHistorialFiltrado('merma')">🥚 Merma</button>
-        <button class="filtro-btn" data-tipo="deudas" onclick="abrirHistorialFiltrado('deudas')">📒 Deudas</button>
+        <button class="filtro-btn act" data-tipo="ventas" onclick="abrirHistorialFiltrado('ventas')">ðŸ’° Ventas</button>
+        <button class="filtro-btn" data-tipo="gastos" onclick="abrirHistorialFiltrado('gastos')">ðŸ’¸ Gastos</button>
+        <button class="filtro-btn" data-tipo="compras" onclick="abrirHistorialFiltrado('compras')">ðŸ›’ Compras</button>
+        <button class="filtro-btn" data-tipo="merma" onclick="abrirHistorialFiltrado('merma')">ðŸ¥š Merma</button>
+        <button class="filtro-btn" data-tipo="deudas" onclick="abrirHistorialFiltrado('deudas')">ðŸ“’ Deudas</button>
       </div>
-      <div style="font-size:12px;font-weight:800;color:#555;margin-bottom:6px;">📅 Filtrar por fecha</div>
+      <div style="font-size:12px;font-weight:800;color:#555;margin-bottom:6px;">ðŸ“… Filtrar por fecha</div>
       <div style="display:flex;gap:6px;align-items:center;">
         <input type="date" id="histDesde" style="flex:1;padding:8px;border:1.5px solid #ccc;border-radius:8px;font-size:12px;">
-        <span style="color:#999;font-weight:700;">→</span>
+        <span style="color:#999;font-weight:700;">â†’</span>
         <input type="date" id="histHasta" style="flex:1;padding:8px;border:1.5px solid #ccc;border-radius:8px;font-size:12px;">
-        <button class="filtro-btn" onclick="applyDateFilter()" style="white-space:nowrap;">🔍 Buscar</button>
+        <button class="filtro-btn" onclick="applyDateFilter()" style="white-space:nowrap;">ðŸ” Buscar</button>
       </div>
     </div>
     <div id="histStats">
@@ -341,32 +367,28 @@ if ('serviceWorker' in navigator) {
   </div>
 </div>
 
-<!-- ═══ MODAL FERIA ═══ -->
+<!-- â•â•â• MODAL FERIA â•â•â• -->
 <div class="modal-back" id="feriaModal">
   <div class="modal">
-    <div class="modal-header"><h3>🎪 Registro rápido FERIA</h3><button class="modal-close" onclick="cerrarModal('feriaModal')">✕</button></div>
+    <div class="modal-header"><h3>ðŸŽª Registro rÃ¡pido FERIA</h3><button class="modal-close" onclick="cerrarModal('feriaModal')">âœ•</button></div>
     <div class="paso-titulo">Producto</div>
     <div class="selector-producto">
-      <div class="sel-prod act" id="feriaProdPrimera" onclick="feriaProducto('Primera')">🥚 PRIMERA</div>
-      <div class="sel-prod" id="feriaProdSegunda" onclick="feriaProducto('Segunda')">🥚 SEGUNDA</div>
+      <div class="sel-prod act" id="feriaProdPrimera" onclick="feriaProducto('Primera')">ðŸ¥š PRIMERA</div>
+      <div class="sel-prod" id="feriaProdSegunda" onclick="feriaProducto('Segunda')">ðŸ¥š SEGUNDA</div>
     </div>
     <div class="selector-producto" id="feriaTerceraRow" style="display:none;margin-top:8px;">
-      <div class="sel-prod" id="feriaProdTercera" onclick="feriaProducto('Tercera')" style="border-color:#84cc16;background:#f7fee7;color:#4d7c0f;">🥚 TERCERA</div>
+      <div class="sel-prod" id="feriaProdTercera" onclick="feriaProducto('Tercera')" style="border-color:#84cc16;background:#f7fee7;color:#4d7c0f;">ðŸ¥š TERCERA</div>
     </div>
-    <div class="paso-titulo">¿Qué vendes?</div>
+    <div class="paso-titulo">Â¿QuÃ© vendes?</div>
     <div class="selector-producto">
-      <div class="sel-prod act" id="feriaTipoBandeja" onclick="feriaTipo('bandeja')">📦 BANDEJA</div>
-      <div class="sel-prod" id="feriaTipoCaja" onclick="feriaTipo('caja')">🛍️ CAJA (6)</div>
+      <div class="sel-prod act" id="feriaTipoBandeja" onclick="feriaTipo('bandeja')">ðŸ“¦ BANDEJA</div>
+      <div class="sel-prod" id="feriaTipoCaja" onclick="feriaTipo('caja')">ðŸ›ï¸ CAJA (6)</div>
     </div>
     <div class="paso-titulo">Cantidad</div>
     <div class="cant-box">
-      <button class="menos" onclick="feriaCant(-1)">−</button>
+      <button class="menos" onclick="feriaCant(-1)">âˆ’</button>
       <div><div class="num" id="feriaCant">1</div><div class="unid" id="feriaCantUnid">bandeja(s)</div></div>
       <button class="mas" onclick="feriaCant(1)">+</button>
-    </div>
-    <div style="display:flex;gap:6px;margin-bottom:8px;">
-      <div class="pago-op act" id="feriaPagoEfectivo" onclick="feriaPago('efectivo')" style="flex:1;text-align:center;">💵 Efectivo</div>
-      <div class="pago-op" id="feriaPagoTransferencia" onclick="feriaPago('transferencia')" style="flex:1;text-align:center;">🏦 Transferencia</div>
     </div>
     <div class="paso-titulo">Precio <span id="feriaPrecioPorLbl">por bandeja</span></div>
     <input type="number" class="field" id="feriaPrecioModal" value="6000" min="0" style="font-size:18px;font-weight:800;">
@@ -374,32 +396,32 @@ if ('serviceWorker' in navigator) {
       <div class="det"><b>Precio</b><br><span id="feriaPrecioLbl2">bandeja</span> a <span id="feriaPrecioLbl">$6,000</span></div>
       <div class="precio" id="feriaTotal">$6,000</div>
     </div>
-    <div class="paso-titulo">¿Vendes otra cosa? <span style="color:#9ca3af;text-transform:none;font-weight:600;">(no huevos)</span></div>
+    <div class="paso-titulo">Â¿Vendes otra cosa? <span style="color:#9ca3af;text-transform:none;font-weight:600;">(no huevos)</span></div>
     <div style="display:flex;gap:6px;">
-      <input type="text" class="field" id="feriaOtroNombre" placeholder="Producto (ej: ají)" style="flex:1;" oninput="onOtroNombreInput('feria')">
+      <input type="text" class="field" id="feriaOtroNombre" placeholder="Producto (ej: ajÃ­)" style="flex:1;" oninput="onOtroNombreInput('feria')">
       <input type="number" class="field" id="feriaOtroPrecio" placeholder="$" inputmode="decimal" style="width:100px;">
-      <button class="btn-ok" style="flex:none;padding:0 16px;" onclick="agregarOtro('feria')">➕</button>
+      <button class="btn-ok" style="flex:none;padding:0 16px;" onclick="agregarOtro('feria')">âž•</button>
     </div>
-    <button class="fast-reg" onclick="confirmarFeria()">⚡ REGISTRAR VENTA</button>
+    <button class="fast-reg" onclick="confirmarFeria()">âš¡ REGISTRAR VENTA</button>
     <div class="sesion-resumen">
       <div><div class="v" id="feriaCount">0</div><div class="l">ventas ahora</div></div>
       <div><div class="v" id="feriaTotal2">$0</div><div class="l">total vendido</div></div>
       <div><div class="v" id="feriaBandejas">0</div><div class="l">bandejas</div></div>
     </div>
-    <div class="venta-list" id="feriaList"><div class="empty">Aquí verás lo que vas vendiendo</div></div>
-    <div class="modal-btns"><button class="btn-ok" onclick="cerrarModal('feriaModal')">✔ Terminar</button></div>
+    <div class="venta-list" id="feriaList"><div class="empty">AquÃ­ verÃ¡s lo que vas vendiendo</div></div>
+    <div class="modal-btns"><button class="btn-ok" onclick="cerrarModal('feriaModal')">âœ” Terminar</button></div>
   </div>
 </div>
 
-<!-- ═══ MODAL NUEVA COMPRA ═══ -->
+<!-- â•â•â• MODAL NUEVA COMPRA â•â•â• -->
 <div class="modal-back" id="modalCompra">
   <div class="modal">
-    <div class="modal-header"><h3>🛒 Compras de stock</h3><button class="modal-close" onclick="cerrarModal('modalCompra')">✕</button></div>
+    <div class="modal-header"><h3>ðŸ›’ Compras de stock</h3><button class="modal-close" onclick="cerrarModal('modalCompra')">âœ•</button></div>
     <div id="compraFormulario">
       <div class="paso-titulo">Fecha de compra</div>
       <input type="date" class="field" id="compraFecha">
       <div class="paso-titulo">Proveedor</div>
-      <input type="text" class="field" id="compraProveedor" placeholder="¿A quién le compraste?">
+      <input type="text" class="field" id="compraProveedor" placeholder="Â¿A quiÃ©n le compraste?">
       <div class="paso-titulo">Tipo de producto</div>
       <select class="field" id="compraCategoria" onchange="actualizarTotalCompra()">
         <option value="Primera">Primera</option>
@@ -421,46 +443,46 @@ if ('serviceWorker' in navigator) {
     <div id="compraResumen"></div>
       <div class="modal-btns">
         <button class="btn-cancel" onclick="cerrarModal('modalCompra')">Cerrar</button>
-        <button class="btn-ok" onclick="confirmarCompra()">✓ Registrar compra</button>
+        <button class="btn-ok" onclick="confirmarCompra()">âœ“ Registrar compra</button>
       </div>
     </div>
     <div style="margin-top:12px;border-top:2px dashed #eee;padding-top:12px;">
-      <button class="btn-cancel" style="width:100%;margin-bottom:8px;" onclick="toggleHistorialCompras()">📋 Ver historial de compras</button>
+      <button class="btn-cancel" style="width:100%;margin-bottom:8px;" onclick="toggleHistorialCompras()">ðŸ“‹ Ver historial de compras</button>
       <div id="histComprasContenedor" style="display:none;max-height:50vh;overflow-y:auto;"></div>
     </div>
   </div>
 </div>
 
-<!-- ═══ MODAL MERMA ═══ -->
+<!-- â•â•â• MODAL MERMA â•â•â• -->
 <div class="modal-back" id="modalMerma">
   <div class="modal">
-    <div class="modal-header"><h3>🥚 Merma / huevos quebrados</h3><button class="modal-close" onclick="cerrarModal('modalMerma')">✕</button></div>
+    <div class="modal-header"><h3>ðŸ¥š Merma / huevos quebrados</h3><button class="modal-close" onclick="cerrarModal('modalMerma')">âœ•</button></div>
     <div class="paso-titulo">Producto</div>
     <div class="selector-producto">
-      <div class="sel-prod act" id="mermaPrim" onclick="mermaProducto('Primera')">🥚 PRIMERA</div>
-      <div class="sel-prod" id="mermaSeg" onclick="mermaProducto('Segunda')">🥚 SEGUNDA</div>
+      <div class="sel-prod act" id="mermaPrim" onclick="mermaProducto('Primera')">ðŸ¥š PRIMERA</div>
+      <div class="sel-prod" id="mermaSeg" onclick="mermaProducto('Segunda')">ðŸ¥š SEGUNDA</div>
     </div>
     <div class="selector-producto" id="mermaTerceraRow" style="display:none;margin-top:8px;">
-      <div class="sel-prod" id="mermaTercera" onclick="mermaProducto('Tercera')" style="border-color:#84cc16;background:#f7fee7;color:#4d7c0f;">🥚 TERCERA</div>
+      <div class="sel-prod" id="mermaTercera" onclick="mermaProducto('Tercera')" style="border-color:#84cc16;background:#f7fee7;color:#4d7c0f;">ðŸ¥š TERCERA</div>
     </div>
     <div class="paso-titulo">Huevos quebrados</div>
     <div class="cant-box">
-      <button class="menos" onclick="mermaCant(-1)">−</button>
+      <button class="menos" onclick="mermaCant(-1)">âˆ’</button>
       <div><div class="num" id="mermaCant">1</div><div class="unid">huevo(s)</div></div>
       <button class="mas" onclick="mermaCant(1)">+</button>
     </div>
     <div id="mermaInfo"></div>
     <div class="modal-btns">
       <button class="btn-cancel" onclick="cerrarModal('modalMerma')">Cancelar</button>
-      <button class="btn-ok" onclick="confirmarMerma()">✓ Registrar merma</button>
+      <button class="btn-ok" onclick="confirmarMerma()">âœ“ Registrar merma</button>
     </div>
   </div>
 </div>
 
-<!-- ═══ MODAL GASTO ═══ -->
+<!-- â•â•â• MODAL GASTO â•â•â• -->
 <div class="modal-back" id="modalGasto">
   <div class="modal">
-    <div class="modal-header"><h3>💸 Registrar gasto</h3><button class="modal-close" onclick="cerrarModal('modalGasto')">✕</button></div>
+    <div class="modal-header"><h3>ðŸ’¸ Registrar gasto</h3><button class="modal-close" onclick="cerrarModal('modalGasto')">âœ•</button></div>
     <label class="campo">Concepto</label>
     <input type="text" class="field" id="gastoConcepto" placeholder="Ej: transporte, canasto, bolsas...">
     <div style="height:8px"></div>
@@ -468,80 +490,65 @@ if ('serviceWorker' in navigator) {
     <input type="number" class="field" id="gastoMonto" min="0" placeholder="">
     <div class="modal-btns">
       <button class="btn-cancel" onclick="cerrarModal('modalGasto')">Cancelar</button>
-      <button class="btn-ok" onclick="confirmarGasto()">✓ Registrar gasto</button>
+      <button class="btn-ok" onclick="confirmarGasto()">âœ“ Registrar gasto</button>
     </div>
   </div>
 </div>
 
-<!-- ═══ MODAL DEUDAS ═══ -->
+<!-- â•â•â• MODAL DEUDAS â•â•â• -->
 <div class="modal-back" id="modalDeudas">
   <div class="modal">
-    <div class="modal-header"><h3>📒 Deudas y préstamos</h3><button class="modal-close" onclick="cerrarModal('modalDeudas')">✕</button></div>
+    <div class="modal-header"><h3>ðŸ“’ Deudas y prÃ©stamos</h3><button class="modal-close" onclick="cerrarModal('modalDeudas')">âœ•</button></div>
     <div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:10px;padding:10px;margin-bottom:10px;">
-      <div style="font-size:12px;font-weight:800;color:#1d4ed8;margin-bottom:6px;">💰 Dar efectivo a alguien</div>
+      <div style="font-size:12px;font-weight:800;color:#1d4ed8;margin-bottom:6px;">ðŸ’° Dar efectivo a alguien</div>
       <p style="font-size:11px;color:#6b7280;margin-bottom:6px;">Si le pasaste plata a alguien y quieres recordarlo</p>
       <div style="display:flex;gap:6px;">
         <input type="text" class="field" id="darEfectivoNombre" placeholder="Nombre" style="flex:1;">
         <input type="number" class="field" id="darEfectivoMonto" placeholder="$" min="0" style="width:100px;">
-        <button class="btn-ok" style="flex:none;padding:0 14px;" onclick="registrarDarEfectivo()">✓</button>
+        <button class="btn-ok" style="flex:none;padding:0 14px;" onclick="registrarDarEfectivo()">âœ“</button>
       </div>
     </div>
-    <div style="display:flex;gap:4px;margin-bottom:10px;">
-      <button onclick="deudasTab('activas')" id="dTabActivas" style="flex:1;padding:8px;border:2px solid #2563eb;background:#eff6ff;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;">📋 Activas</button>
-      <button onclick="deudasTab('historial')" id="dTabHistorial" style="flex:1;padding:8px;border:2px solid #e5e7eb;background:#fff;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;">📜 Historial cobros</button>
-    </div>
-    <div id="deudasPanelActivas">
-      <div style="font-size:12px;font-weight:800;color:#555;margin-bottom:6px;">📋 Lista de deudas</div>
-      <div id="deudasLista" style="max-height:50vh;overflow-y:auto;"></div>
-    </div>
-    <div id="deudasPanelHistorial" style="display:none;">
-      <div style="font-size:12px;font-weight:800;color:#555;margin-bottom:6px;">📜 Historial de cobros</div>
-      <div id="historialCobrosLista" style="max-height:50vh;overflow-y:auto;"></div>
-    </div>
+    <div style="font-size:12px;font-weight:800;color:#555;margin-bottom:6px;">ðŸ“‹ Lista de deudas</div>
+    <div id="deudasLista" style="max-height:50vh;overflow-y:auto;"></div>
     <div class="modal-btns"><button class="btn-cancel" onclick="cerrarModal('modalDeudas')">Cerrar</button></div>
   </div>
 </div>
 
-<!-- ═══ MODAL CLIENTES ═══ -->
+<!-- â•â•â• MODAL CLIENTES â•â•â• -->
 <div class="modal-back" id="modalClientes">
   <div class="modal">
-    <div class="modal-header"><h3>👤 Historial por cliente</h3><button class="modal-close" onclick="cerrarModal('modalClientes')">✕</button></div>
+    <div class="modal-header"><h3>ðŸ‘¤ Historial por cliente</h3><button class="modal-close" onclick="cerrarModal('modalClientes')">âœ•</button></div>
     <div id="clientesLista" style="max-height:60vh;overflow-y:auto;"></div>
     <div class="modal-btns"><button class="btn-cancel" onclick="cerrarModal('modalClientes')">Cerrar</button></div>
   </div>
 </div>
 
-<!-- ═══ MODAL CIERRE DE DÍA ═══ -->
+<!-- â•â•â• MODAL CIERRE DE DÃA â•â•â• -->
 
-<!-- ═══ MODAL CALCULADORA DE PRECIOS ═══ -->
+<!-- â•â•â• MODAL CALCULADORA DE PRECIOS â•â•â• -->
 
-<!-- ═══ MODAL REPORTES ═══ -->
+<!-- â•â•â• MODAL REPORTES â•â•â• -->
 <div class="modal-back" id="modalReportes">
   <div class="modal">
-    <div class="modal-header"><h3>📊 Reportes</h3><button class="modal-close" onclick="cerrarModal('modalReportes')">✕</button></div>
+    <div class="modal-header"><h3>ðŸ“Š Reportes</h3><button class="modal-close" onclick="cerrarModal('modalReportes')">âœ•</button></div>
     <div style="display:flex;gap:4px;margin-bottom:10px;">
-      <button onclick="reportesTab('resumen')" id="rTabResumen" style="flex:1;padding:8px;border:2px solid #2563eb;background:#eff6ff;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;">📈 Resumen</button>
-      <button onclick="reportesTab('proyeccion')" id="rTabProyec" style="flex:1;padding:8px;border:2px solid #e5e7eb;background:#fff;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;">💰 Proyección</button>
-      <button onclick="reportesTab('graficas')" id="rTabGrafic" style="flex:1;padding:8px;border:2px solid #e5e7eb;background:#fff;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;">📊 Gráficas</button>
+      <button onclick="reportesTab('resumen')" id="rTabResumen" style="flex:1;padding:8px;border:2px solid #2563eb;background:#eff6ff;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;">ðŸ“ˆ Resumen</button>
+      <button onclick="reportesTab('proyeccion')" id="rTabProyec" style="flex:1;padding:8px;border:2px solid #e5e7eb;background:#fff;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;">ðŸ’° ProyecciÃ³n</button>
+      <button onclick="reportesTab('graficas')" id="rTabGrafic" style="flex:1;padding:8px;border:2px solid #e5e7eb;background:#fff;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;">ðŸ“Š GrÃ¡ficas</button>
     </div>
     <div id="repoPanelResumen">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;">
-        <span style="font-size:12px;font-weight:700;color:#475569;">📅 Ver día:</span>
-        <input type="date" id="repoFechaFiltro" style="flex:1;border:1px solid #d1d5db;border-radius:6px;padding:4px 8px;font-size:12px;" onchange="llenarResumen()">
-        <button onclick="repoLimpiarFecha()" style="padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:11px;cursor:pointer;background:#fff;">Hoy</button>
-      </div>
-      <div class="paso-titulo" id="repoResumenTitulo">Ganancias</div>
+      <div class="paso-titulo">Ganancias</div>
       <div class="stat3">
-        <div class="s"><div class="v" id="rsHoy"></div><div class="l" id="lblRsHoy">Hoy</div></div>
-        <div class="s"><div class="v" id="rsSemana"></div><div class="l" id="lblRsSemana">Semana</div></div>
-        <div class="s"><div class="v" id="rsMes"></div><div class="l" id="lblRsMes">Mes</div></div>
+        <div class="s"><div class="v" id="rsHoy"></div><div class="l">Hoy</div></div>
+        <div class="s"><div class="v" id="rsSemana"></div><div class="l">Semana</div></div>
+        <div class="s"><div class="v" id="rsMes"></div><div class="l">Mes</div></div>
       </div>
       <div style="height:10px"></div>
       <div class="paso-titulo">Actividad</div>
       <div class="stat3">
         <div class="s"><div class="v" id="rsBandejas"></div><div class="l">Bandejas vend.</div></div>
         <div class="s"><div class="v" id="rsCajas"></div><div class="l">Cajas vend.</div></div>
-        <div class="s"><div class="v" id="rsVentas"></div><div class="l">N° ventas</div></div>
+        <div class="s"><div class="v" id="rsVentas"></div><div class="l">NÂ° ventas</div></div>
       </div>
       <div style="height:10px"></div>
       <div class="stat3">
@@ -560,11 +567,11 @@ if ('serviceWorker' in navigator) {
   </div>
 </div>
 
-<!-- ═══ MODAL CALCULADORAS ═══ -->
+<!-- â•â•â• MODAL CALCULADORAS â•â•â• -->
 <div class="modal-back" id="modalCalculadoras">
   <div class="modal">
-    <div class="modal-header"><h3>🧮 Calculadora de precios</h3><button class="modal-close" onclick="cerrarModal('modalCalculadoras')">✕</button></div>
-    <p style="font-size:12px;color:#777;margin-bottom:10px;">Calcula el precio de venta ideal según tu costo y margen deseado.</p>
+    <div class="modal-header"><h3>ðŸ§® Calculadora de precios</h3><button class="modal-close" onclick="cerrarModal('modalCalculadoras')">âœ•</button></div>
+    <p style="font-size:12px;color:#777;margin-bottom:10px;">Calcula el precio de venta ideal segÃºn tu costo y margen deseado.</p>
     <div class="paso-titulo">Costo por caja ($)</div>
     <input type="number" class="field" id="calcCostoCaja" placeholder="Ej: 29950" oninput="calcularPrecioIdeal()">
     <div class="paso-titulo">Margen deseado (%)</div>
@@ -576,45 +583,45 @@ if ('serviceWorker' in navigator) {
   </div>
 </div>
 
-<!-- ═══ MODAL MI DINERO ═══ -->
+<!-- â•â•â• MODAL MI DINERO â•â•â• -->
 <div class="modal-back" id="modalMiDinero">
   <div class="modal">
-    <div class="modal-header"><h3>💵 Mi dinero de hoy</h3><button class="modal-close" onclick="cerrarModal('modalMiDinero')">✕</button></div>
-    <div class="paso-titulo">1 · Calcular vuelto</div>
-    <p style="font-size:12px;color:#777;margin-bottom:8px;">El cliente te paga con un billete y tú le das vuelto.</p>
+    <div class="modal-header"><h3>ðŸ’µ Mi dinero de hoy</h3><button class="modal-close" onclick="cerrarModal('modalMiDinero')">âœ•</button></div>
+    <div class="paso-titulo">1 Â· Calcular vuelto</div>
+    <p style="font-size:12px;color:#777;margin-bottom:8px;">El cliente te paga con un billete y tÃº le das vuelto.</p>
     <div style="display:flex;gap:8px;">
-      <div style="flex:1;"><label class="campo">Cuánto es la venta</label><input type="number" class="field" id="cambioVenta" placeholder="Ej: 6000"></div>
-      <div style="flex:1;"><label class="campo">Con cuánto pagó</label><input type="number" class="field" id="cambioPago" placeholder="Ej: 10000"></div>
+      <div style="flex:1;"><label class="campo">CuÃ¡nto es la venta</label><input type="number" class="field" id="cambioVenta" placeholder="Ej: 6000"></div>
+      <div style="flex:1;"><label class="campo">Con cuÃ¡nto pagÃ³</label><input type="number" class="field" id="cambioPago" placeholder="Ej: 10000"></div>
     </div>
     <div id="vueltoResult"></div>
-    <div class="paso-titulo">2 · Resumen del día</div>
+    <div class="paso-titulo">2 Â· Resumen del dÃ­a</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
       <div style="min-width:0;background:#ecfdf5;border:2.5px solid #10b981;border-radius:14px;padding:12px 6px;text-align:center;">
-        <div style="font-size:12px;color:#047857;font-weight:800;">💵 EFECTIVO EN TU MANO</div>
+        <div style="font-size:12px;color:#047857;font-weight:800;">ðŸ’µ EFECTIVO EN TU MANO</div>
         <div style="font-size:30px;font-weight:900;color:#059669;overflow-wrap:anywhere;" id="cajaSaldoGrande">$0</div>
       </div>
       <div style="min-width:0;background:#eff6ff;border:2.5px solid #3b82f6;border-radius:14px;padding:12px 6px;text-align:center;">
-        <div style="font-size:12px;color:#1d4ed8;font-weight:800;">🏦 TRANSFERENCIAS</div>
+        <div style="font-size:12px;color:#1d4ed8;font-weight:800;">ðŸ¦ TRANSFERENCIAS</div>
         <div style="font-size:30px;font-weight:900;color:#2563eb;overflow-wrap:anywhere;" id="cajaTransf2">$0</div>
       </div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;">
-      <div class="caja-mini"><div class="v" id="cajaEntra2">$0</div><div class="l">💵 Efectivo hoy</div></div>
-      <div class="caja-mini"><div class="v" id="cajaTransfer2">$0</div><div class="l">🏦 Transfer. hoy</div></div>
-      <div class="caja-mini"><div class="v" id="cajaSale2">$0</div><div class="l">💸 Gastos hoy</div></div>
-      <div class="caja-mini"><div class="v" id="cajaCompra2">$0</div><div class="l">🛒 Compras hoy</div></div>
+      <div class="caja-mini"><div class="v" id="cajaEntra2">$0</div><div class="l">ðŸ’µ Efectivo hoy</div></div>
+      <div class="caja-mini"><div class="v" id="cajaTransfer2">$0</div><div class="l">ðŸ¦ Transfer. hoy</div></div>
+      <div class="caja-mini"><div class="v" id="cajaSale2">$0</div><div class="l">ðŸ’¸ Gastos hoy</div></div>
+      <div class="caja-mini"><div class="v" id="cajaCompra2">$0</div><div class="l">ðŸ›’ Compras hoy</div></div>
     </div>
-    <div class="gan-line" style="margin-top:10px;"><span class="k">Total del día</span><span class="v" id="cajaNeto2">$0</span></div>
+    <div class="gan-line" style="margin-top:10px;"><span class="k">Total del dÃ­a</span><span class="v" id="cajaNeto2">$0</span></div>
     <div class="modal-btns"><button class="btn-cancel" onclick="cerrarModal('modalMiDinero')">Cerrar</button></div>
   </div>
 </div>
 
 <div class="modal-back" id="modalCierre">
   <div class="modal">
-    <div class="modal-header"><h3>🌙 Cierre de hoy</h3><button class="modal-close" onclick="cerrarModal('modalCierre')">✕</button></div>
+    <div class="modal-header"><h3>id="tituloModalCierre" ðŸŒ™ Cierre de hoy</h3><button class="modal-close" onclick="cerrarModal('modalCierre')">âœ•</button></div>
     <div style="display:flex;gap:4px;margin-bottom:10px;">
-      <button onclick="cierreTab('resumen')" id="cTabResumen" style="flex:1;padding:8px;border:2px solid #2563eb;background:#eff6ff;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;">📊 Resumen</button>
-      <button onclick="cierreTab('cuadratura')" id="cTabCuad" style="flex:1;padding:8px;border:2px solid #e5e7eb;background:#fff;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;">🧮 Cuadratura</button>
+      <button onclick="cierreTab('resumen')" id="cTabResumen" style="flex:1;padding:8px;border:2px solid #2563eb;background:#eff6ff;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;">ðŸ“Š Resumen</button>
+      <button onclick="cierreTab('cuadratura')" id="cTabCuad" style="flex:1;padding:8px;border:2px solid #e5e7eb;background:#fff;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;">ðŸ§® Cuadratura</button>
     </div>
     <div id="cierrePanelResumen"><div id="cierreContenido"></div></div>
     <div id="cierrePanelCuad" style="display:none;">
@@ -629,14 +636,14 @@ if ('serviceWorker' in navigator) {
         <div style="flex:1;"><label class="campo">Efectivo esperado ($)</label><input type="number" class="field" id="cuadEsperado" placeholder="" onchange="actualizarCuadratura()"></div>
       </div>
       <div id="cuadDiferencia" style="margin-top:8px;padding:10px;border-radius:10px;text-align:center;font-weight:800;font-size:14px;"></div>
-      <button onclick="guardarCuadratura()" style="width:100%;padding:10px;border:none;border-radius:10px;background:#16a34a;color:#fff;font-weight:700;cursor:pointer;font-size:13px;margin-top:8px;">💾 Guardar cuadratura</button>
+      <button onclick="guardarCuadratura()" style="width:100%;padding:10px;border:none;border-radius:10px;background:#16a34a;color:#fff;font-weight:700;cursor:pointer;font-size:13px;margin-top:8px;">ðŸ’¾ Guardar cuadratura</button>
       <div style="margin-top:14px;padding-top:14px;border-top:2px dashed #ddd;">
-        <label style="font-size:13px;font-weight:700;display:block;margin-bottom:4px;">💵 Cuánto efectivo tienes contado</label>
+        <label style="font-size:13px;font-weight:700;display:block;margin-bottom:4px;">ðŸ’µ CuÃ¡nto efectivo tienes contado</label>
         <input id="cierreContado" type="number" inputmode="numeric" placeholder="Ej: 150000" style="width:100%;padding:10px;border:2px solid #e5e7eb;border-radius:8px;font-size:15px;font-weight:700;box-sizing:border-box;">
       </div>
       <div id="cierreDiferencia" style="margin-top:10px;"></div>
-      <button onclick="cerrarDia()" style="width:100%;padding:12px;border:none;border-radius:10px;background:#dc2626;color:#fff;font-weight:700;cursor:pointer;font-size:14px;margin-top:10px;">🔒 Cerrar día</button>
-      <button onclick="exportarPDF()" style="width:100%;padding:10px;border:none;border-radius:10px;background:#2563eb;color:#fff;font-weight:700;cursor:pointer;font-size:13px;margin-top:6px;">📄 Imprimir / PDF del cierre</button>
+      <button onclick="cerrarDia()" style="width:100%;padding:12px;border:none;border-radius:10px;background:#dc2626;color:#fff;font-weight:700;cursor:pointer;font-size:14px;margin-top:10px;">ðŸ”’ Cerrar dÃ­a</button>
+      <button onclick="exportarPDF()" style="width:100%;padding:10px;border:none;border-radius:10px;background:#2563eb;color:#fff;font-weight:700;cursor:pointer;font-size:13px;margin-top:6px;">ðŸ“„ Imprimir / PDF del cierre</button>
     </div>
     <div class="modal-btns"><button class="btn-cancel" onclick="cerrarModal('modalCierre')">Cerrar</button></div>
   </div>
@@ -644,34 +651,34 @@ if ('serviceWorker' in navigator) {
 
 <div class="modal-back" id="modalApertura">
   <div class="modal">
-    <div class="modal-header"><h3>☀️ Apertura de día</h3><button class="modal-close" onclick="cerrarModal('modalApertura')">✕</button></div>
-    <div style="font-size:13px;color:#6b7280;margin-bottom:10px;">¿Con cuánto efectivo inicias el día? (lo que traes del día anterior)</div>
+    <div class="modal-header"><h3>â˜€ï¸ Apertura de dÃ­a</h3><button class="modal-close" onclick="cerrarModal('modalApertura')">âœ•</button></div>
+    <div style="font-size:13px;color:#6b7280;margin-bottom:10px;">Â¿Con cuÃ¡nto efectivo inicias el dÃ­a? (lo que traes del dÃ­a anterior)</div>
     <div id="aperturaInfo" style="background:#f0f9ff;border-radius:10px;padding:10px;font-size:13px;margin-bottom:10px;"></div>
     <input id="aperturaEfectivo" type="number" inputmode="numeric" placeholder="Ej: 150000" style="width:100%;padding:10px;border:2px solid #e5e7eb;border-radius:8px;font-size:15px;font-weight:700;box-sizing:border-box;">
-    <button onclick="abrirDia()" style="width:100%;padding:12px;border:none;border-radius:10px;background:#16a34a;color:#fff;font-weight:700;cursor:pointer;font-size:14px;margin-top:10px;">☀️ Abrir día</button>
+    <button onclick="abrirDia()" style="width:100%;padding:12px;border:none;border-radius:10px;background:#16a34a;color:#fff;font-weight:700;cursor:pointer;font-size:14px;margin-top:10px;">â˜€ï¸ Abrir dÃ­a</button>
     <div class="modal-btns"><button class="btn-cancel" onclick="cerrarModal('modalApertura')">Cerrar</button></div>
   </div>
 </div>
 
-<!-- ═══ MODAL AJUSTAR STOCK ═══ -->
+<!-- â•â•â• MODAL AJUSTAR STOCK â•â•â• -->
 <div class="modal-back" id="modalAjustar">
   <div class="modal">
-    <div class="modal-header"><h3>🔧 Ajustar stock</h3><button class="modal-close" onclick="cerrarModal('modalAjustar')">✕</button></div>
-    <p style="font-size:11px;color:#999;margin-bottom:10px;">El stock se modifica por compras y ventas. Solo podés poner un número exacto.</p>
-    <div class="gan-line"><span class="k">🥚 Primera</span><span class="v" id="ajPrim">3 cajas</span></div>
-    <div class="gan-line"><span class="k">🥚 Segunda</span><span class="v" id="ajSeg">2 cajas</span></div>
-    <div class="paso-titulo">Poner un número exacto</div>
+    <div class="modal-header"><h3>ðŸ”§ Ajustar stock</h3><button class="modal-close" onclick="cerrarModal('modalAjustar')">âœ•</button></div>
+    <p style="font-size:11px;color:#999;margin-bottom:10px;">El stock se modifica por compras y ventas. Solo podÃ©s poner un nÃºmero exacto.</p>
+    <div class="gan-line"><span class="k">ðŸ¥š Primera</span><span class="v" id="ajPrim">3 cajas</span></div>
+    <div class="gan-line"><span class="k">ðŸ¥š Segunda</span><span class="v" id="ajSeg">2 cajas</span></div>
+    <div class="paso-titulo">Poner un nÃºmero exacto</div>
     <div style="display:flex;gap:8px;">
-      <div style="flex:1;"><label class="campo">🥚 Primera (cajas)</label><input type="number" class="field" id="ajPrimInput" min="0" inputmode="numeric"></div>
-      <div style="flex:1;"><label class="campo">🥚 Segunda (cajas)</label><input type="number" class="field" id="ajSegInput" min="0" inputmode="numeric"></div>
+      <div style="flex:1;"><label class="campo">ðŸ¥š Primera (cajas)</label><input type="number" class="field" id="ajPrimInput" min="0" inputmode="numeric"></div>
+      <div style="flex:1;"><label class="campo">ðŸ¥š Segunda (cajas)</label><input type="number" class="field" id="ajSegInput" min="0" inputmode="numeric"></div>
     </div>
     <div id="ajTerceraWrap" style="display:none;margin-top:8px;">
       <div style="display:flex;gap:8px;align-items:center;">
-        <div style="flex:1;"><label class="campo">🥚 Tercera (bandejas)</label><input type="number" class="field" id="ajTerceraInput" min="0" inputmode="numeric"></div>
-        <button class="btn-cancel" style="padding:10px 14px;border:none;border-radius:10px;color:#fff;font-weight:800;cursor:pointer;font-size:12px;" onclick="toggleTercera()">⏻ Desactivar</button>
+        <div style="flex:1;"><label class="campo">ðŸ¥š Tercera (bandejas)</label><input type="number" class="field" id="ajTerceraInput" min="0" inputmode="numeric"></div>
+        <button class="btn-cancel" style="padding:10px 14px;border:none;border-radius:10px;color:#fff;font-weight:800;cursor:pointer;font-size:12px;" onclick="toggleTercera()">â» Desactivar</button>
       </div>
     </div>
-    <div style="margin-top:8px;"><button class="btn-ok" style="width:100%;padding:12px;border:none;border-radius:10px;color:#fff;font-weight:800;cursor:pointer;" onclick="ajustarStockExacto()">✓ Guardar stock exacto</button></div>
+    <div style="margin-top:8px;"><button class="btn-ok" style="width:100%;padding:12px;border:none;border-radius:10px;color:#fff;font-weight:800;cursor:pointer;" onclick="ajustarStockExacto()">âœ“ Guardar stock exacto</button></div>
     <label class="campo" style="margin-top:8px;">Umbral alerta de stock bajo (bandejas)</label>
     <input type="number" class="field" id="umbralStock" value="2">
     <div class="modal-btns">
@@ -681,46 +688,46 @@ if ('serviceWorker' in navigator) {
   </div>
 </div>
 
-<!-- ═══ MODAL HISTORIAL ═══ -->
+<!-- â•â•â• MODAL HISTORIAL â•â•â• -->
 <div class="modal-back" id="modalHistorial">
   <div class="modal">
-    <div class="modal-header"><h3>📋 Historial</h3><button class="modal-close" onclick="cerrarModal('modalHistorial')">✕</button></div>
+    <div class="modal-header"><h3>ðŸ“‹ Historial</h3><button class="modal-close" onclick="cerrarModal('modalHistorial')">âœ•</button></div>
     <div style="display:flex;gap:4px;margin-bottom:10px;">
-      <button onclick="historialTab('log')" id="hTabLog" style="flex:1;padding:8px;border:2px solid #2563eb;background:#eff6ff;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;">📋 Cambios</button>
-      <button onclick="historialTab('versiones')" id="hTabVersiones" style="flex:1;padding:8px;border:2px solid #e5e7eb;background:#fff;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;">↩️ Versiones</button>
+      <button onclick="historialTab('log')" id="hTabLog" style="flex:1;padding:8px;border:2px solid #2563eb;background:#eff6ff;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;">ðŸ“‹ Cambios</button>
+      <button onclick="historialTab('versiones')" id="hTabVersiones" style="flex:1;padding:8px;border:2px solid #e5e7eb;background:#fff;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;">â†©ï¸ Versiones</button>
     </div>
     <div id="historialPanelLog">
-      <p style="font-size:11px;color:#999;margin-bottom:10px;">Cada eliminación o edición queda registrada. No se puede borrar.</p>
+      <p style="font-size:11px;color:#999;margin-bottom:10px;">Cada eliminaciÃ³n o ediciÃ³n queda registrada. No se puede borrar.</p>
       <div id="logContenido" style="max-height:55vh;overflow-y:auto;"></div>
     </div>
     <div id="historialPanelVersiones" style="display:none;">
-      <p style="font-size:11px;color:#999;margin-bottom:10px;">Cada "Guardar ahora" crea una versión. Puedes restaurar las últimas 10.</p>
+      <p style="font-size:11px;color:#999;margin-bottom:10px;">Cada "Guardar ahora" crea una versiÃ³n. Puedes restaurar las Ãºltimas 10.</p>
       <div id="versionesLista" style="max-height:55vh;overflow-y:auto;"></div>
     </div>
     <div class="modal-btns"><button class="btn-cancel" onclick="cerrarModal('modalHistorial')">Cerrar</button></div>
   </div>
 </div>
 
-<!-- ═══ MODAL RESET ═══ -->
+<!-- â•â•â• MODAL RESET â•â•â• -->
 <div class="modal-back" id="modalReset">
   <div class="modal">
-    <div class="modal-header"><h3>🗑️ Reiniciar todo</h3><button class="modal-close" onclick="cerrarModal('modalReset')">✕</button></div>
-    <div style="background:#fff2cc;color:#ef6c00;border-left:4px solid #ef6c00;padding:10px;border-radius:6px;font-size:13px;font-weight:700;">⚠️ Se borrará TODO: ventas, compras, gastos, merma, deudas, logs, cuadratura, precios de terceras y versiones. Stock vuelve a 0.</div>
+    <div class="modal-header"><h3>ðŸ—‘ï¸ Reiniciar todo</h3><button class="modal-close" onclick="cerrarModal('modalReset')">âœ•</button></div>
+    <div style="background:#fff2cc;color:#ef6c00;border-left:4px solid #ef6c00;padding:10px;border-radius:6px;font-size:13px;font-weight:700;">âš ï¸ Se borrarÃ¡ TODO: ventas, compras, gastos, merma, deudas, logs, cuadratura, precios de terceras y versiones. Stock vuelve a 0.</div>
     <div style="margin-top:12px;">
       <label class="campo">Escribe 1234 para confirmar</label>
       <input type="password" id="resetClave" class="field" inputmode="numeric" placeholder="Clave" maxlength="4" style="text-align:center;font-size:18px;font-weight:700;letter-spacing:8px;">
     </div>
     <div class="modal-btns">
       <button class="btn-cancel" onclick="cerrarModal('modalReset')">Cancelar</button>
-      <button class="btn-ok" id="btnResetConfirmar" style="background:#dc2626 !important;opacity:0.5;" onclick="reiniciarTodo()" disabled>Sí, reiniciar</button>
+      <button class="btn-ok" id="btnResetConfirmar" style="background:#dc2626 !important;opacity:0.5;" onclick="reiniciarTodo()" disabled>SÃ­, reiniciar</button>
     </div>
   </div>
 </div>
 
-<!-- ═══ MODAL EDITAR VENTA ═══ -->
+<!-- â•â•â• MODAL EDITAR VENTA â•â•â• -->
 <div class="modal-back" id="editarVentaModal">
   <div class="modal">
-    <div class="modal-header"><h3>✏️ Editar venta</h3><button class="modal-close" onclick="cerrarModal('editarVentaModal')">✕</button></div>
+    <div class="modal-header"><h3>âœï¸ Editar venta</h3><button class="modal-close" onclick="cerrarModal('editarVentaModal')">âœ•</button></div>
     <div class="gan-line"><span class="k">Producto</span><span class="v" id="editProdLbl"></span></div>
     <div class="gan-line"><span class="k">Cantidad</span><span class="v" id="editCantLbl"></span></div>
     <div class="paso-titulo">Nuevo precio ($)</div>
@@ -728,9 +735,9 @@ if ('serviceWorker' in navigator) {
     <div id="editInfo"></div>
     <div class="paso-titulo">Forma de pago</div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
-      <div class="pago-op" id="editPagoEfectivo" onclick="elegirEditPago('efectivo')">💵 Efectivo</div>
-      <div class="pago-op" id="editPagoTransferencia" onclick="elegirEditPago('transferencia')">🏦 Transfer.</div>
-      <div class="pago-op" id="editPagoDeuda" onclick="elegirEditPago('deuda')">📒 Deuda</div>
+      <div class="pago-op" id="editPagoEfectivo" onclick="elegirEditPago('efectivo')">ðŸ’µ Efectivo</div>
+      <div class="pago-op" id="editPagoTransferencia" onclick="elegirEditPago('transferencia')">ðŸ¦ Transfer.</div>
+      <div class="pago-op" id="editPagoDeuda" onclick="elegirEditPago('deuda')">ðŸ“’ Deuda</div>
     </div>
     <div id="editClienteWrap" style="display:none;margin-top:10px;">
       <label class="campo">Nombre del cliente</label>
@@ -738,51 +745,51 @@ if ('serviceWorker' in navigator) {
     </div>
     <div class="modal-btns">
       <button class="btn-cancel" onclick="cerrarModal('editarVentaModal')">Cancelar</button>
-      <button class="btn-ok" onclick="guardarEdicionVenta()">✓ Guardar cambio</button>
+      <button class="btn-ok" onclick="guardarEdicionVenta()">âœ“ Guardar cambio</button>
     </div>
   </div>
 </div>
 
-<!-- ═══ MODAL CONFIRMAR ═══ -->
+<!-- â•â•â• MODAL CONFIRMAR â•â•â• -->
 <div class="modal-back" id="confirmModal">
   <div class="modal">
-    <div class="modal-header"><h3 id="confirmTitulo">Confirmar</h3><button class="modal-close" onclick="cerrarModal('confirmModal')">✕</button></div>
+    <div class="modal-header"><h3 id="confirmTitulo">Confirmar</h3><button class="modal-close" onclick="cerrarModal('confirmModal')">âœ•</button></div>
     <div id="confirmMsj" style="font-size:15px;color:#374151;padding:4px 0 8px;"></div>
     <div class="modal-btns">
       <button class="btn-cancel" onclick="cerrarModal('confirmModal')">Cancelar</button>
-      <button class="btn-ok" id="confirmOkBtn" onclick="ejecutarConfirmar()">Sí</button>
+      <button class="btn-ok" id="confirmOkBtn" onclick="ejecutarConfirmar()">SÃ­</button>
     </div>
   </div>
 </div>
 
-<!-- ═══ MODAL PAGAR DEUDA ═══ -->
+<!-- â•â•â• MODAL PAGAR DEUDA â•â•â• -->
 <div class="modal-back" id="pagoDeudaModal">
   <div class="modal">
-    <div class="modal-header"><h3>💵 Cobrar deuda</h3><button class="modal-close" onclick="cerrarModal('pagoDeudaModal')">✕</button></div>
+    <div class="modal-header"><h3>ðŸ’µ Cobrar deuda</h3><button class="modal-close" onclick="cerrarModal('pagoDeudaModal')">âœ•</button></div>
     <div class="gan-line"><span class="k">Cliente</span><span class="v" id="pagoDeudaNombre"></span></div>
     <div class="gan-line"><span class="k">Debe</span><span class="v" id="pagoDeudaMonto"></span></div>
-    <div class="paso-titulo">¿Cuánto paga?</div>
+    <div class="paso-titulo">Â¿CuÃ¡nto paga?</div>
     <input type="number" class="field" id="pagoDeudaInput" min="0" style="font-size:20px;font-weight:800;">
     <div class="modal-btns">
       <button class="btn-cancel" onclick="cerrarModal('pagoDeudaModal')">Cancelar</button>
-      <button class="btn-ok" onclick="confirmarPagoDeuda()">✓ Registrar pago</button>
+      <button class="btn-ok" onclick="confirmarPagoDeuda()">âœ“ Registrar pago</button>
     </div>
   </div>
 </div>
 
-<!-- ═══ MODAL DATOS ═══ -->
+<!-- â•â•â• MODAL DATOS â•â•â• -->
 <div class="modal-back" id="modalDatos">
   <div class="modal">
-    <div class="modal-header"><h3>💾 Datos</h3><button class="modal-close" onclick="cerrarModal('modalDatos')">✕</button></div>
+    <div class="modal-header"><h3>ðŸ’¾ Datos</h3><button class="modal-close" onclick="cerrarModal('modalDatos')">âœ•</button></div>
     <div style="display:flex;gap:4px;margin-bottom:10px;">
-      <button onclick="datosTab('respaldar')" id="dTabRespaldar" style="flex:1;padding:8px;border:2px solid #2563eb;background:#eff6ff;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;">📤 Respaldar</button>
-      <button onclick="datosTab('sync')" id="dTabSync" style="flex:1;padding:8px;border:2px solid #e5e7eb;background:#fff;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;">☁️ Sincronizar</button>
+      <button onclick="datosTab('respaldar')" id="dTabRespaldar" style="flex:1;padding:8px;border:2px solid #2563eb;background:#eff6ff;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;">ðŸ“¤ Respaldar</button>
+      <button onclick="datosTab('sync')" id="dTabSync" style="flex:1;padding:8px;border:2px solid #e5e7eb;background:#fff;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;">â˜ï¸ Sincronizar</button>
     </div>
     <div id="datosPanelRespaldar">
-      <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:10px 12px;font-size:12px;color:#1e40af;margin-bottom:12px;">Último respaldo: <b id="ultimoRespaldoLbl">nunca</b></div>
-      <button class="btn-ok" style="width:100%;padding:14px;border:none;border-radius:12px;color:#fff;font-weight:800;font-size:15px;cursor:pointer;" onclick="exportarDatos()">📤 Exportar datos</button>
+      <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:10px 12px;font-size:12px;color:#1e40af;margin-bottom:12px;">Ãšltimo respaldo: <b id="ultimoRespaldoLbl">nunca</b></div>
+      <button class="btn-ok" style="width:100%;padding:14px;border:none;border-radius:12px;color:#fff;font-weight:800;font-size:15px;cursor:pointer;" onclick="exportarDatos()">ðŸ“¤ Exportar datos</button>
       <div style="height:10px"></div>
-      <button class="btn-ok" style="width:100%;padding:14px;border:none;border-radius:12px;background:#f97316;color:#fff;font-weight:800;font-size:15px;cursor:pointer;" onclick="document.getElementById('fileImport').click()">📥 Importar datos</button>
+      <button class="btn-ok" style="width:100%;padding:14px;border:none;border-radius:12px;background:#f97316;color:#fff;font-weight:800;font-size:15px;cursor:pointer;" onclick="document.getElementById('fileImport').click()">ðŸ“¥ Importar datos</button>
       <input type="file" id="fileImport" accept=".json" style="display:none;" onchange="importarDatos(event)">
     </div>
     <div id="datosPanelSync" style="display:none;">
@@ -790,9 +797,9 @@ if ('serviceWorker' in navigator) {
       <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:10px 12px;font-size:12px;color:#1e40af;margin-bottom:12px;" id="syncEstadoMsg">
         <b>Estado:</b> <span id="syncEstado">No conectado</span>
       </div>
-      <label class="campo">Configuración Firebase (pegar bloque {...})</label>
+      <label class="campo">ConfiguraciÃ³n Firebase (pegar bloque {...})</label>
       <textarea id="syncConfig" rows="5" class="field" style="font-family:monospace;font-size:11px;" placeholder='{ "apiKey": "...", ... }'></textarea>
-      <button class="btn-ok" style="width:100%;padding:10px;border:none;border-radius:10px;margin-top:8px;" onclick="guardarSyncConfig()">✓ Guardar y conectar</button>
+      <button class="btn-ok" style="width:100%;padding:10px;border:none;border-radius:10px;margin-top:8px;" onclick="guardarSyncConfig()">âœ“ Guardar y conectar</button>
       <button class="btn-cancel" style="width:100%;margin-top:6px;" onclick="desconectarSync()">Desconectar</button>
     </div>
     <div class="modal-btns"><button class="btn-cancel" onclick="cerrarModal('modalDatos')">Cerrar</button></div>
@@ -805,7 +812,7 @@ if ('serviceWorker' in navigator) {
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <script>
-// ── CONFIG ──
+// â”€â”€ CONFIG â”€â”€
 const DATOS = { costoPrimera:29950, costoSegunda:25990, trx:6, huevosTrx:30, btxPrim:18, btxSeg:12 };
 const COSTO_BTX = { Primera: DATOS.costoPrimera/DATOS.trx, Segunda: DATOS.costoSegunda/DATOS.trx };
 const COSTO_BTX_TERCEIRA = 4000;
@@ -819,6 +826,7 @@ let estado = {
   precios: { Primera: Math.round(COSTO_BTX.Primera*(1+18/100)), Segunda: Math.round(COSTO_BTX.Segunda*(1+18/100)) },
   feriaPrecio: 6000,
   margen: 18,
+  tema: 'naranja',
   umbral: 2,
   ventas: [],
   compras: [],
@@ -836,23 +844,31 @@ let estado = {
   versiones: [],
   clientesPrecios: {},
   cuadratura: {},
+  darkMode: false,
   stockParcial: {},
-  lastModified: Date.now(),
-  historialCobros: []
+  lastModified: Date.now()
+};
+
+const TEMAS = {
+  naranja:  { h1:'#f59e0b', h2:'#f97316', v1:'#16a34a', v2:'#15803d', a1:'#f97316', a2:'#c2410c', t1:'#2F5496', bg:'#f0f2f5', lbl:'ðŸŸ  Naranja' },
+  verde:    { h1:'#16a34a', h2:'#15803d', v1:'#059669', v2:'#047857', a1:'#059669', a2:'#047857', t1:'#065f46', bg:'#ecfdf5', lbl:'ðŸŸ¢ Verde' },
+  azul:     { h1:'#2563eb', h2:'#1d4ed8', v1:'#0ea5e9', v2:'#0284c7', a1:'#2563eb', a2:'#1d4ed8', t1:'#1e40af', bg:'#eff6ff', lbl:'ðŸ”µ Azul' },
+  morado:   { h1:'#7c3aed', h2:'#6d28d9', v1:'#8b5cf6', v2:'#7c3aed', a1:'#7c3aed', a2:'#6d28d9', t1:'#5b21b6', bg:'#f5f3ff', lbl:'ðŸŸ£ Morado' },
+  rojo:     { h1:'#dc2626', h2:'#b91c1c', v1:'#f97316', v2:'#ea580c', a1:'#dc2626', a2:'#b91c1c', t1:'#991b1b', bg:'#fef2f2', lbl:'ðŸ”´ Rojo' }
 };
 
 let venta = { producto:'Primera', tipo:'bandeja', cant:1, pago:'efectivo', sesion:[] };
-let feria = { producto:'Primera', cant:1, sesion:[], pago:'efectivo' };
+let feria = { producto:'Primera', cant:1, sesion:[] };
 const merma = { prod:'Primera', cant:1 };
 
-// ── ALMACENAMIENTO ROBUSTO (3 copias: localStorage, IndexedDB, sessionStorage) ──
+// â”€â”€ ALMACENAMIENTO ROBUSTO (3 copias: localStorage, IndexedDB, sessionStorage) â”€â”€
 function aplicarDefaults(d){
   if(d.stock.Primera===undefined||d.stock.Primera>100) d.stock={...STOCK_INI};
   if(d.feriaPrecio===undefined) d.feriaPrecio=6000;
   if(d.margen===undefined) d.margen=18;
+  if(d.tema===undefined) d.tema='naranja';
   if(d.umbral===undefined) d.umbral=2;
   if(!d.deudas) d.deudas=[];
-  if(!d.historialCobros) d.historialCobros=[];
   if(!d.ventas) d.ventas=[];
   if(d.arqueoInicial===undefined) d.arqueoInicial=0;
   if(d.arqueoFecha===undefined) d.arqueoFecha='';
@@ -873,7 +889,7 @@ function guardar(){
   try{ sessionStorage.setItem('misHuevos', json); }catch(e){}
   try{ idbPut('estado', json); }catch(e){}
   if(!lok && !document.getElementById('alertaGuardado').innerHTML){
-    document.getElementById('alertaGuardado').innerHTML = '<div class="alert-banner">⚠️ Tu navegador no está guardando los datos. Ábrelo en Chrome o añádelo a la pantalla de inicio, o usa Respaldar → Exportar.</div>';
+    document.getElementById('alertaGuardado').innerHTML = '<div class="alert-banner">âš ï¸ Tu navegador no estÃ¡ guardando los datos. Ãbrelo en Chrome o aÃ±Ã¡delo a la pantalla de inicio, o usa Respaldar â†’ Exportar.</div>';
   }
   if(fbRef) syncFirebase();
 }
@@ -925,7 +941,7 @@ function idbGet(key){
   });
 }
 
-// ── SINCRO FIREBASE ──
+// â”€â”€ SINCRO FIREBASE â”€â”€
 let fb = null, fbRef = null, syncOcupado = false, fbConectado = false, reiniciando = false, ultimaSyncLocal = 0;
 function getFbConfig(){
   try{ const s = localStorage.getItem('misHuevosFirebase'); if(!s) return null; const c = JSON.parse(s); if(c && c.databaseURL && c.apiKey) return c; return null; }catch(e){ return null; }
@@ -936,14 +952,14 @@ function guardarSyncConfig(){
   try{
     const m = texto.match(/\{[\s\S]*\}/);
     cfg = JSON.parse(m ? m[0] : texto);
-  }catch(e){ toast('❌ El texto no es un JSON válido'); return; }
-  if(!cfg || !cfg.apiKey){ toast('❌ Falta apiKey. Copia el bloque completo'); return; }
+  }catch(e){ toast('âŒ El texto no es un JSON vÃ¡lido'); return; }
+  if(!cfg || !cfg.apiKey){ toast('âŒ Falta apiKey. Copia el bloque completo'); return; }
   if(!cfg.databaseURL && cfg.projectId){ cfg.databaseURL = 'https://'+cfg.projectId+'-default-rtdb.firebaseio.com'; }
-  if(!cfg.databaseURL){ toast('❌ Falta databaseURL y projectId'); return; }
+  if(!cfg.databaseURL){ toast('âŒ Falta databaseURL y projectId'); return; }
   localStorage.setItem('misHuevosFirebase', JSON.stringify(cfg));
   if(fb){ desconectarSync(); }
   conectarFirebase(cfg);
-  toast('☁️ Guardando conexión...');
+  toast('â˜ï¸ Guardando conexiÃ³n...');
   setTimeout(()=>cerrarModal('modalDatos'), 400);
 }
 function desconectarSync(){
@@ -958,11 +974,11 @@ function syncFirebase(){
   if(!fbRef || syncOcupado || reiniciando) return;
   syncOcupado = true;
   ultimaSyncLocal = Date.now();
-  fbRef.set(JSON.parse(JSON.stringify(estado))).catch(()=>{}).finally(()=>{ setTimeout(()=>{ syncOcupado = false; }, 3000); });
+  fbRef.set(JSON.parse(JSON.stringify(estado))).catch(()=>{}).finally(()=>{ syncOcupado = false; });
 }
 function conectarFirebase(cfg){
   try{
-    if(!window.firebase || !firebase.database){ toast('❌ Sin internet para cargar Firebase'); return; }
+    if(!window.firebase || !firebase.database){ toast('âŒ Sin internet para cargar Firebase'); return; }
     fb = firebase.initializeApp(cfg, 'app'+Date.now());
     fbRef = firebase.database(fb).ref('huevos/estado');
     fbRef.once('value', snap=>{
@@ -973,7 +989,7 @@ function conectarFirebase(cfg){
         if(fbTime > localTime){
           estado = Object.assign(estado, d);
           guardar();
-          actualizarTodo();
+          aplicarTema(estado.tema); actualizarTodo();
         } else {
           fbRef.set(JSON.parse(JSON.stringify(estado)));
         }
@@ -984,31 +1000,31 @@ function conectarFirebase(cfg){
     fbRef.on('value', snap=>{
       const d = snap.val();
       if(d && !syncOcupado && !reiniciando){
-        if(Date.now() - ultimaSyncLocal < 5000) return;
+        if(Date.now() - ultimaSyncLocal < 2000) return;
         const fbTime = d.lastModified || 0;
         const localTime = estado.lastModified || 0;
         if(fbTime > localTime){
           estado = JSON.parse(JSON.stringify(d));
-          actualizarTodo();
+          aplicarTema(estado.tema); actualizarTodo();
         }
       }
     });
     firebase.database(fb).ref('.info/connected').on('value', s=>{ fbConectado = !!s.val(); actualizarSyncUI(); });
     fbConectado = true; actualizarSyncUI();
-  }catch(e){ fb = null; fbRef = null; toast('❌ Error al conectar'); }
+  }catch(e){ fb = null; fbRef = null; toast('âŒ Error al conectar'); }
 }
 function llenarModalDatos(){
   const el = document.getElementById('ultimoRespaldoLbl');
   el.textContent = estado.ultimoRespaldo ? new Date(estado.ultimoRespaldo).toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit',year:'2-digit'}) : 'nunca';
 }
 function tapSyncDot(){
-  if(fbRef && fbConectado){ toast('Ya estás sincronizado'); return; }
+  if(fbRef && fbConectado){ toast('Ya estÃ¡s sincronizado'); return; }
   const cfg = {"apiKey":"AIzaSyDGkne1l3xny7lCC4PvdWhmQEfS3yAE5No","authDomain":"xmishuevosx.firebaseapp.com","projectId":"xmishuevosx","storageBucket":"xmishuevosx.firebasestorage.app","messagingSenderId":"959739221540","appId":"1:959739221540:web:794b2a25429a57fcfbeab1"};
   cfg.databaseURL = 'https://xmishuevosx-default-rtdb.firebaseio.com';
   localStorage.setItem('misHuevosFirebase', JSON.stringify(cfg));
   if(fb){ desconectarSync(); }
   conectarFirebase(cfg);
-  toast('☁️ Conectando...');
+  toast('â˜ï¸ Conectando...');
 }
 function actualizarSyncUI(){
   const el = document.getElementById('syncEstado');
@@ -1017,10 +1033,10 @@ function actualizarSyncUI(){
     if(el) el.textContent = 'No conectado';
     if(dot){ dot.style.background='#6b7280'; dot.textContent='OFF'; dot.title='Sin sincronizar'; }
   } else if(fbConectado){
-    if(el) el.textContent = '✅ En línea';
-    if(dot){ dot.style.background='#22c55e'; dot.textContent='ON'; dot.title='Sincronizando — online'; }
+    if(el) el.textContent = 'âœ… En lÃ­nea';
+    if(dot){ dot.style.background='#22c55e'; dot.textContent='ON'; dot.title='Sincronizando â€” online'; }
   } else {
-    if(el) el.textContent = '⏳ Conectando...';
+    if(el) el.textContent = 'â³ Conectando...';
     if(dot){ dot.style.background='#eab308'; dot.textContent='...'; dot.title='Conectando...'; }
   }
 }
@@ -1032,7 +1048,7 @@ function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg
 function hoy(){ return new Date().toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit'}); }
 function fDate(d){ return new Date(d).toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit',year:'2-digit'}); }
 
-// ── MODALES + botón atrás ──
+// â”€â”€ MODALES + botÃ³n atrÃ¡s â”€â”€
 function abrirModal(id){
   document.getElementById(id).classList.add('show');
   try{ history.pushState({modal:id}, ''); }catch(e){}
@@ -1125,7 +1141,7 @@ function llenarProyeccion(){
     });
     return lotes;
   }
-  // Totales históricos (todo lo que se ha comprado y vendido)
+  // Totales histÃ³ricos (todo lo que se ha comprado y vendido)
   const totalCompras = estado.compras.reduce((a,c)=>a+c.total,0);
   const totalVentas = estado.ventas.reduce((a,v)=>a+v.precio,0);
   const totalGanancia = estado.ventas.reduce((a,v)=>a+v.gan,0);
@@ -1134,15 +1150,15 @@ function llenarProyeccion(){
   html += '<div class="s"><div class="v" style="color:#16a34a;">'+fmt(totalVentas)+'</div><div class="l">Total vendido</div></div>';
   html += '<div class="s"><div class="v" style="color:'+(totalGanancia>=0?'#16a34a':'#dc2626')+';">'+fmt(totalGanancia)+'</div><div class="l">Ganancia real</div></div></div>';
   html += '<div style="height:12px"></div>';
-  html += '<div class="paso-titulo">📦 Stock actual (si vendes todo)</div>';
+  html += '<div class="paso-titulo">ðŸ“¦ Stock actual (si vendes todo)</div>';
   html += '<div style="background:#f8f9fb;border-radius:10px;padding:10px;font-size:13px;">';
-  if(stockP>0) html += '<div style="display:flex;justify-content:space-between;padding:4px 0;"><span>🥚 Primera</span><span><b>'+stockP+'</b> × '+fmt(precioP)+' = <b style="color:#16a34a;">'+fmt(ventaP)+'</b></span></div>';
-  if(stockS>0) html += '<div style="display:flex;justify-content:space-between;padding:4px 0;"><span>🥚 Segunda</span><span><b>'+stockS+'</b> × '+fmt(precioS)+' = <b style="color:#16a34a;">'+fmt(ventaS)+'</b></span></div>';
-  if(estado.tercera.activada && stockT>0) html += '<div style="display:flex;justify-content:space-between;padding:4px 0;"><span>🥚 Tercera</span><span><b>'+stockT+'</b> × '+fmt(precioT)+' = <b style="color:#16a34a;">'+fmt(ventaT)+'</b></span></div>';
+  if(stockP>0) html += '<div style="display:flex;justify-content:space-between;padding:4px 0;"><span>ðŸ¥š Primera</span><span><b>'+stockP+'</b> Ã— '+fmt(precioP)+' = <b style="color:#16a34a;">'+fmt(ventaP)+'</b></span></div>';
+  if(stockS>0) html += '<div style="display:flex;justify-content:space-between;padding:4px 0;"><span>ðŸ¥š Segunda</span><span><b>'+stockS+'</b> Ã— '+fmt(precioS)+' = <b style="color:#16a34a;">'+fmt(ventaS)+'</b></span></div>';
+  if(estado.tercera.activada && stockT>0) html += '<div style="display:flex;justify-content:space-between;padding:4px 0;"><span>ðŸ¥š Tercera</span><span><b>'+stockT+'</b> Ã— '+fmt(precioT)+' = <b style="color:#16a34a;">'+fmt(ventaT)+'</b></span></div>';
   html += '<div style="border-top:2px solid #e5e7eb;margin-top:6px;padding-top:6px;display:flex;justify-content:space-between;font-weight:700;"><span>Total:</span><span style="color:#16a34a;">'+fmt(ventaTotal)+'</span></div>';
   html += '</div>';
   html += '<div style="height:12px"></div>';
-  html += '<div class="paso-titulo">¿Cuándo recupero la inversión?</div>';
+  html += '<div class="paso-titulo">Â¿CuÃ¡ndo recupero la inversiÃ³n?</div>';
   if(puntosQuiebre.length===0){
     html += '<div class="alert-banner">No hay ganancia positiva para calcular punto de quiebre.</div>';
   } else {
@@ -1150,35 +1166,35 @@ function llenarProyeccion(){
     puntosQuiebre.forEach(p=>{
       const color = p.btx >= p.total ? '#dc2626' : '#f97316';
       const texto = p.btx >= p.total ? 'No alcanza con '+p.total+' bandejas' : 'Vender <b style="color:'+color+';">'+p.btx+' de '+p.total+'</b> bandejas';
-      html += '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed #eee;"><span><b>🥚 '+p.prod+'</b></span><span>'+texto+'</span></div>';
+      html += '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed #eee;"><span><b>ðŸ¥š '+p.prod+'</b></span><span>'+texto+'</span></div>';
     });
     html += '</div>';
   }
   html += '<div style="height:12px"></div>';
   html += '<div class="paso-titulo">Ganancia por bandeja</div>';
   html += '<div style="background:#f0fdf4;border-radius:10px;padding:10px;font-size:13px;">';
-  if(stockP>0) html += '<div style="display:flex;justify-content:space-between;padding:4px 0;"><span>🥚 Primera</span><span><b style="color:#16a34a;">+'+fmt(gananciaP)+'</b> por bandeja</span></div>';
-  if(stockS>0) html += '<div style="display:flex;justify-content:space-between;padding:4px 0;"><span>🥚 Segunda</span><span><b style="color:#16a34a;">+'+fmt(gananciaS)+'</b> por bandeja</span></div>';
-  if(estado.tercera.activada && stockT>0) html += '<div style="display:flex;justify-content:space-between;padding:4px 0;"><span>🥚 Tercera</span><span><b style="color:#16a34a;">+'+fmt(gananciaT)+'</b> por bandeja</span></div>';
+  if(stockP>0) html += '<div style="display:flex;justify-content:space-between;padding:4px 0;"><span>ðŸ¥š Primera</span><span><b style="color:#16a34a;">+'+fmt(gananciaP)+'</b> por bandeja</span></div>';
+  if(stockS>0) html += '<div style="display:flex;justify-content:space-between;padding:4px 0;"><span>ðŸ¥š Segunda</span><span><b style="color:#16a34a;">+'+fmt(gananciaS)+'</b> por bandeja</span></div>';
+  if(estado.tercera.activada && stockT>0) html += '<div style="display:flex;justify-content:space-between;padding:4px 0;"><span>ðŸ¥š Tercera</span><span><b style="color:#16a34a;">+'+fmt(gananciaT)+'</b> por bandeja</span></div>';
   html += '</div>';
   // FIFO: Desglose por compra
   const lotesP = lotesFIFO('Primera');
   const lotesS = lotesFIFO('Segunda');
   if(lotesP.length>0 || lotesS.length>0){
     html += '<div style="height:12px"></div>';
-    html += '<div class="paso-titulo">📦 Desglose por compra (FIFO)</div>';
+    html += '<div class="paso-titulo">ðŸ“¦ Desglose por compra (FIFO)</div>';
     const mostrarLotes = (prod, lotes, color)=>{
       if(lotes.length===0) return '';
       let h = '';
       lotes.forEach((l,i)=>{
         const fecha = new Date(l.fecha).toLocaleDateString('es-CL',{day:'2-digit',month:'short'});
         const pct = l.total>0 ? Math.round(l.vendidas/l.total*100) : 0;
-        const estadoLote = l.quedan===0 ? '✅ Recuperado' : (l.vendidas>0 ? '🔄 En proceso' : '🆕 Sin vender');
+        const estadoLote = l.quedan===0 ? 'âœ… Recuperado' : (l.vendidas>0 ? 'ðŸ”„ En proceso' : 'ðŸ†• Sin vender');
         h += '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:10px;margin-bottom:8px;">';
         h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">';
         h += '<b style="color:'+color+';">'+prod+' #'+(i+1)+'</b>';
         h += '<span style="font-size:11px;background:'+(l.quedan===0?'#dcfce7':'#fef3c7')+';padding:2px 8px;border-radius:10px;">'+estadoLote+'</span></div>';
-        h += '<div style="font-size:12px;color:#6b7280;margin-bottom:4px;">📅 '+fecha+' · '+l.cajas+' cajas'+(l.bandejasExtra>0?' + '+l.bandejasExtra+' btx':'')+'</div>';
+        h += '<div style="font-size:12px;color:#6b7280;margin-bottom:4px;">ðŸ“… '+fecha+' Â· '+l.cajas+' cajas'+(l.bandejasExtra>0?' + '+l.bandejasExtra+' btx':'')+'</div>';
         h += '<div style="display:flex;justify-content:space-between;font-size:12px;padding:2px 0;"><span>Costo compra:</span><b>'+fmt(l.total>0?l.vendidas*l.costoU+l.quedan*l.costoU:0)+'</b></div>';
         h += '<div style="display:flex;justify-content:space-between;font-size:12px;padding:2px 0;"><span>Vendidas:</span><b>'+l.vendidas+'/'+l.total+'</b> ('+pct+'%)</div>';
         h += '<div style="background:#e5e7eb;border-radius:5px;height:6px;margin:6px 0;"><div style="background:'+color+';height:100%;border-radius:5px;width:'+pct+'%;"></div></div>';
@@ -1212,7 +1228,7 @@ function cerrarTodosModales(){ document.querySelectorAll('.modal-back.show').for
 window.addEventListener('popstate', ()=>{ cerrarTodosModales(); });
 document.addEventListener('keydown', e=>{ if(e.key==='Escape') cerrarTodosModales(); });
 
-// ── STOCK ──
+// â”€â”€ STOCK â”€â”€
 function actualizarStockUI(){
   const prod = 'Primera';
   const stock = estado.stock[prod]||0;
@@ -1252,16 +1268,16 @@ function actualizarStockUI(){
   document.getElementById('ajSeg').textContent = Math.floor(stock2/6)+' cajas';
   document.getElementById('umbralStock').value = estado.umbral;
   let msj='';
-  if(stock>0 && stock<=3) msj+='🚨 <b>¡URGENTE!</b> Solo quedan <b>'+stock+'</b> bandejas de Primera. ¡Reponer ya! ';
-  else if(stock>0 && stock<=estado.umbral) msj+='⚠️ Stock bajo de Primera ('+stock+' bandejas). ';
-  if(stock2>0 && stock2<=3) msj+='🚨 <b>¡URGENTE!</b> Solo quedan <b>'+stock2+'</b> bandejas de Segunda. ¡Reponer ya! ';
-  else if(stock2>0 && stock2<=estado.umbral) msj+='⚠️ Stock bajo de Segunda ('+stock2+' bandejas). ';
-  if(estado.tercera.activada && tStock>0 && tStock<=3) msj+='🚨 <b>¡URGENTE!</b> Solo quedan <b>'+tStock+'</b> bandejas de Tercera. ¡Reponer ya! ';
-  else if(estado.tercera.activada && tStock>0 && tStock<=estado.umbral) msj+='⚠️ Stock bajo de Tercera ('+tStock+' bandejas). ';
+  if(stock>0 && stock<=3) msj+='ðŸš¨ <b>Â¡URGENTE!</b> Solo quedan <b>'+stock+'</b> bandejas de Primera. Â¡Reponer ya! ';
+  else if(stock>0 && stock<=estado.umbral) msj+='âš ï¸ Stock bajo de Primera ('+stock+' bandejas). ';
+  if(stock2>0 && stock2<=3) msj+='ðŸš¨ <b>Â¡URGENTE!</b> Solo quedan <b>'+stock2+'</b> bandejas de Segunda. Â¡Reponer ya! ';
+  else if(stock2>0 && stock2<=estado.umbral) msj+='âš ï¸ Stock bajo de Segunda ('+stock2+' bandejas). ';
+  if(estado.tercera.activada && tStock>0 && tStock<=3) msj+='ðŸš¨ <b>Â¡URGENTE!</b> Solo quedan <b>'+tStock+'</b> bandejas de Tercera. Â¡Reponer ya! ';
+  else if(estado.tercera.activada && tStock>0 && tStock<=estado.umbral) msj+='âš ï¸ Stock bajo de Tercera ('+tStock+' bandejas). ';
   const totalVentasHoy = estado.ventas.filter(v=>new Date(v.f).toDateString()===new Date().toDateString()).length;
-  if(totalVentasHoy>=10 && totalVentasHoy%10===0 && !estado._alertaVenta10) { estado._alertaVenta10=true; msj+='🎉 ¡Llevas '+totalVentasHoy+' ventas hoy! '; }
+  if(totalVentasHoy>=10 && totalVentasHoy%10===0 && !estado._alertaVenta10) { estado._alertaVenta10=true; msj+='ðŸŽ‰ Â¡Llevas '+totalVentasHoy+' ventas hoy! '; }
   if(msj) document.getElementById('stockAlerta').innerHTML = '<div class="alert-banner">'+msj+'</div>';
-  else if(respaldoPendiente()) document.getElementById('stockAlerta').innerHTML = '<div class="alert-banner" style="background:#fefce8;border-color:#fde68a;color:#a16207;">💾 Llevas '+respaldoPendiente()+' días sin respaldar. Haz tu <b style="cursor:pointer;text-decoration:underline;" onclick="abrirModal(\'modalDatos\')">respaldo</b> (💾 Respaldar → 📤 Exportar datos o 📊 Excel).</div>';
+  else if(respaldoPendiente()) document.getElementById('stockAlerta').innerHTML = '<div class="alert-banner" style="background:#fefce8;border-color:#fde68a;color:#a16207;">ðŸ’¾ Llevas '+respaldoPendiente()+' dÃ­as sin respaldar. Haz tu <b style="cursor:pointer;text-decoration:underline;" onclick="abrirModal(\'modalDatos\')">respaldo</b> (ðŸ’¾ Respaldar â†’ ðŸ“¤ Exportar datos o ðŸ“Š Excel).</div>';
   else document.getElementById('stockAlerta').innerHTML='';
   // Tercera UI
   const tAct = estado.tercera.activada;
@@ -1287,7 +1303,7 @@ function respaldoPendiente(){
 }
 function ajustarStock(prod, delta){
   const nuevo = estado.stock[prod] + delta;
-  if(nuevo < 0){ toast('⚠️ No puede ser negativo'); return; }
+  if(nuevo < 0){ toast('âš ï¸ No puede ser negativo'); return; }
   estado.stock[prod] = nuevo;
   guardar(); actualizarStockUI(); toast('Stock '+prod.toLowerCase()+': '+nuevo+' bandejas');
 }
@@ -1297,7 +1313,7 @@ function ajustarStockExacto(){
   if(p1>=0) estado.stock.Primera = p1 * 6;
   if(p2>=0) estado.stock.Segunda = p2 * 6;
   guardar(); actualizarStockUI();
-  toast('✅ Stock actualizado');
+  toast('âœ… Stock actualizado');
 }
 function guardarUmbral(){
   const u = parseInt(document.getElementById('umbralStock').value)||2;
@@ -1310,9 +1326,9 @@ function costoBtx(prod){
   return COSTO_BTX[prod]||0;
 }
 
-// ── PRECIOS (escribes el precio, la app te dice cuánto ganas) ──
+// â”€â”€ PRECIOS (escribes el precio, la app te dice cuÃ¡nto ganas) â”€â”€
 function gananciaInfo(precio, prod){
-  if(!precio || precio<=0) return '—';
+  if(!precio || precio<=0) return 'â€”';
   const costo = costoBtx(prod);
   const gan = precio - costo;
   const pct = Math.round(gan/costo*100);
@@ -1322,7 +1338,7 @@ function actualizarPreciosUI(){
   document.getElementById('precioPrimBtx').value = estado.precios.Primera;
   document.getElementById('precioSegBtx').value = estado.precios.Segunda;
   document.getElementById('feriaPrecioPrincipal').value = estado.feriaPrecio;
-  document.getElementById('feriaSub').textContent = 'rápido a '+fmt(estado.feriaPrecio)+' la bandeja';
+  document.getElementById('feriaSub').textContent = 'rÃ¡pido a '+fmt(estado.feriaPrecio)+' la bandeja';
   document.getElementById('infoGanPrim').textContent = gananciaInfo(estado.precios.Primera,'Primera');
   document.getElementById('infoGanSeg').textContent = gananciaInfo(estado.precios.Segunda,'Segunda');
   document.getElementById('infoGanFeria').textContent = 'ganas '+gananciaInfo(estado.feriaPrecio,'Primera');
@@ -1356,27 +1372,36 @@ document.getElementById('feriaPrecioPrincipal').addEventListener('change', e=>{
 });
 function feriaSugerirPrincipal(){
   estado.feriaPrecio = Math.round(COSTO_BTX.Primera*(1+estado.margen/100));
-  guardar(); actualizarPreciosUI(); toast('✨ FERIA a '+fmt(estado.feriaPrecio)+' ('+estado.margen+'%)');
+  guardar(); actualizarPreciosUI(); toast('âœ¨ FERIA a '+fmt(estado.feriaPrecio)+' ('+estado.margen+'%)');
 }
 
-// ── TEMA ──
-// ── HISTORIAL VENTAS ──
+// â”€â”€ TEMA â”€â”€
+function aplicarTema(t){
+  const th = TEMAS[t] || TEMAS.naranja;
+  const r = document.documentElement.style;
+  r.setProperty('--h1',th.h1); r.setProperty('--h2',th.h2);
+  r.setProperty('--v1',th.v1); r.setProperty('--v2',th.v2);
+  r.setProperty('--a1',th.a1); r.setProperty('--a2',th.a2);
+  r.setProperty('--t1',th.t1); r.setProperty('--bg',th.bg);
+}
+
+// â”€â”€ HISTORIAL VENTAS â”€â”€
 function llenarHistorialVentas(){
   const v = estado.ventas;
   document.getElementById('histTotal').textContent = fmt(v.reduce((a,x)=>a+x.precio,0));
   document.getElementById('histGanancia').textContent = fmt(v.reduce((a,x)=>a+x.gan,0));
   document.getElementById('histBandejas').textContent = v.reduce((a,x)=>a+x.bandejas,0);
   const c = document.getElementById('histLista');
-  if(v.length===0){ c.innerHTML='<div class="empty">Sin ventas aún</div>'; return; }
+  if(v.length===0){ c.innerHTML='<div class="empty">Sin ventas aÃºn</div>'; return; }
   c.innerHTML = '<table class="tab"><tr><th>Fecha</th><th>Producto</th><th>Cant</th><th>Precio</th><th>Pago</th></tr>' +
     v.slice().reverse().map(x=>{
       const f = new Date(x.f).toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit'});
-      const pg = x.pago==='transferencia'?'🏦':x.pago==='deuda'?'📒':'💵';
+      const pg = x.pago==='transferencia'?'ðŸ¦':x.pago==='deuda'?'ðŸ“’':'ðŸ’µ';
       return '<tr><td>'+f+'</td><td>'+(x.nombre||x.prod)+'</td><td>'+x.cant+' '+x.tipo+'</td><td>'+fmt(x.precio)+'</td><td>'+pg+'</td></tr>';
     }).join('') + '</table>';
 }
 
-// ── VIBRACIÓN Y SONIDO ──
+// â”€â”€ VIBRACIÃ“N Y SONIDO â”€â”€
 function feedbackVenta(){
   if(navigator.vibrate){ navigator.vibrate(80); }
   try{
@@ -1393,7 +1418,7 @@ function feedbackError(){
   if(navigator.vibrate){ navigator.vibrate([50,50,50]); }
 }
 
-// ── RECORDATORIO DE PAGOS ──
+// â”€â”€ RECORDATORIO DE PAGOS â”€â”€
 function deudasVencidas(){
   const hace7 = Date.now() - 7*24*60*60*1000;
   return estado.deudas.filter(d=>{
@@ -1402,7 +1427,7 @@ function deudasVencidas(){
   });
 }
 
-// ── VENTA ──
+// â”€â”€ VENTA â”€â”€
 function abrirVenta(){
   venta = { producto:'Primera', tipo:'bandeja', cant:1, pago:'efectivo', sesion:[] };
   document.getElementById('ventaQuien').value='';
@@ -1415,7 +1440,7 @@ function toggleTercera(){
   estado.tercera.activada = !estado.tercera.activada;
   if(estado.tercera.activada && !estado.stock.Tercera) estado.stock.Tercera = 0;
   guardar(); actualizarTodo();
-  toast(estado.tercera.activada ? '🥚 Tercera activada' : '🥚 Tercera desactivada');
+  toast(estado.tercera.activada ? 'ðŸ¥š Tercera activada' : 'ðŸ¥š Tercera desactivada');
 }
 function selProducto(p){
   venta.producto = p;
@@ -1457,7 +1482,7 @@ function confirmarVenta(){
   const huevosParciales = estado.stockParcial && estado.stockParcial[prod]||0;
   if(huevosParciales >= 6) bandejasDisponibles += Math.floor(huevosParciales/6);
   
-  if(btx > bandejasDisponibles){ toast('⚠️ Solo quedan '+bandejasDisponibles+' bandejas'); return; }
+  if(btx > bandejasDisponibles){ toast('âš ï¸ Solo quedan '+bandejasDisponibles+' bandejas'); return; }
   
   const precio = venta.tipo==='bandeja' ? (prod==='Tercera'?estado.tercera.precio:estado.precios[prod])*venta.cant : (prod==='Tercera'?estado.tercera.precio:estado.precios[prod])*6*venta.cant;
   const cliente = document.getElementById('ventaQuien').value.trim();
@@ -1491,10 +1516,10 @@ function confirmarVenta(){
   estado.ventas.push(vReg);
   venta.sesion.push(vReg);
   guardar(); actualizarTodo(); actualizarSesionVenta();
-  if(estado.ventas.length % 10 === 0){ autoBackup(); toast('💾 Respaldo automático hecho'); }
+  if(estado.ventas.length % 10 === 0){ autoBackup(); toast('ðŸ’¾ Respaldo automÃ¡tico hecho'); }
   document.getElementById('ventaQuien').value='';
   feedbackVenta();
-  toast(venta.pago==='transferencia' ? '🏦 Registrado: '+fmt(precio) : venta.pago==='deuda' ? '📒 Deuda anotada: '+fmt(precio) : '✅ Registrado: '+fmt(precio));
+  toast(venta.pago==='transferencia' ? 'ðŸ¦ Registrado: '+fmt(precio) : venta.pago==='deuda' ? 'ðŸ“’ Deuda anotada: '+fmt(precio) : 'âœ… Registrado: '+fmt(precio));
 }
 function actualizarSesionVenta(){
   const s = venta.sesion;
@@ -1502,28 +1527,21 @@ function actualizarSesionVenta(){
   document.getElementById('sesionTotal').textContent = fmt(s.reduce((a,v)=>a+v.precio,0));
   document.getElementById('sesionBandejas').textContent = s.reduce((a,v)=>a+v.bandejas,0);
   const c = document.getElementById('ventaList');
-  if(s.length===0){ c.innerHTML='<div class="empty">Aquí verás lo que vas registrando</div>'; }
+  if(s.length===0){ c.innerHTML='<div class="empty">AquÃ­ verÃ¡s lo que vas registrando</div>'; }
   else {
     c.innerHTML = s.slice().reverse().map(v=>{
-      const pg = v.pago==='transferencia' ? '🏦' : v.pago==='deuda' ? '📒' : '💵';
-      return '<div class="venta-list-item"><span><b>'+((v.nombre||v.prod)+'').slice(0,12)+'</b> '+v.cant+' '+v.tipo+' · '+v.quien+' '+pg+'</span><span class="v-t">'+fmt(v.precio)+'</span></div>';
+      const pg = v.pago==='transferencia' ? 'ðŸ¦' : v.pago==='deuda' ? 'ðŸ“’' : 'ðŸ’µ';
+      return '<div class="venta-list-item"><span><b>'+((v.nombre||v.prod)+'').slice(0,12)+'</b> '+v.cant+' '+v.tipo+' Â· '+v.quien+' '+pg+'</span><span class="v-t">'+fmt(v.precio)+'</span></div>';
     }).join('');
   }
 }
 
-// ── FERIA ──
-function feriaPago(p){
-  feria.pago = p;
-  document.getElementById('feriaPagoEfectivo').classList.toggle('act', p==='efectivo');
-  document.getElementById('feriaPagoTransferencia').classList.toggle('act', p==='transferencia');
-}
+// â”€â”€ FERIA â”€â”€
 function abrirFeria(){
-  feria = { producto:'Primera', cant:1, tipo:'bandeja', sesion:[], pago:'efectivo' };
+  feria = { producto:'Primera', cant:1, tipo:'bandeja', sesion:[] };
   document.getElementById('feriaPrecioModal').value = estado.precios.Primera;
   document.getElementById('feriaTipoBandeja').classList.add('act');
   document.getElementById('feriaTipoCaja').classList.remove('act');
-  document.getElementById('feriaPagoEfectivo').classList.add('act');
-  document.getElementById('feriaPagoTransferencia').classList.remove('act');
   document.getElementById('feriaCantUnid').textContent = 'bandeja(s)';
   document.getElementById('feriaPrecioPorLbl').textContent = 'por bandeja';
   document.getElementById('feriaPrecioLbl2').textContent = 'bandeja';
@@ -1581,7 +1599,7 @@ document.getElementById('feriaPrecioModal').addEventListener('input', ()=>{
 function confirmarFeria(){
   if(!verificarBloqueo()) return;
   const precioUnit = parseInt(document.getElementById('feriaPrecioModal').value)||0;
-  if(precioUnit<=0){ toast('Ingresa un precio válido'); return; }
+  if(precioUnit<=0){ toast('Ingresa un precio vÃ¡lido'); return; }
   const prod = feria.producto;
   const bandejas = feria.tipo==='caja' ? feria.cant * 6 : feria.cant;
   
@@ -1590,7 +1608,7 @@ function confirmarFeria(){
   const huevosParciales = estado.stockParcial && estado.stockParcial[prod]||0;
   if(huevosParciales >= 6) bandejasDisponibles += Math.floor(huevosParciales/6);
   
-  if(bandejas > bandejasDisponibles){ toast('⚠️ Solo quedan '+bandejasDisponibles+' bandejas'); return; }
+  if(bandejas > bandejasDisponibles){ toast('âš ï¸ Solo quedan '+bandejasDisponibles+' bandejas'); return; }
   
   const precio = feria.cant * precioUnit;
   
@@ -1614,13 +1632,13 @@ function confirmarFeria(){
   }
   
   const costoTotal = bandejas * costoBtx(prod);
-  const vReg = { id:Date.now()+'-'+Math.random().toString(36).slice(2,7), f:Date.now(), prod:prod, tipo:feria.tipo, cant:feria.cant, bandejas:bandejas, precio:precio, gan:precio - costoTotal, pago:feria.pago, quien:'Feria' };
+  const vReg = { id:Date.now()+'-'+Math.random().toString(36).slice(2,7), f:Date.now(), prod:prod, tipo:feria.tipo, cant:feria.cant, bandejas:bandejas, precio:precio, gan:precio - costoTotal, pago:'efectivo', quien:'Feria' };
   estado.ventas.push(vReg);
   feria.sesion.push(vReg);
   guardar(); actualizarTodo(); actualizarSesionFeria();
-  if(estado.ventas.length % 10 === 0){ autoBackup(); toast('💾 Respaldo automático hecho'); }
+  if(estado.ventas.length % 10 === 0){ autoBackup(); toast('ðŸ’¾ Respaldo automÃ¡tico hecho'); }
   feedbackVenta();
-  toast('🎪 Vendido '+feria.cant+' '+feria.tipo+(feria.cant>1?'s':'')+' · '+fmt(precio));
+  toast('ðŸŽª Vendido '+feria.cant+' '+feria.tipo+(feria.cant>1?'s':'')+' Â· '+fmt(precio));
 }
 function actualizarSesionFeria(){
   const s = feria.sesion;
@@ -1628,7 +1646,7 @@ function actualizarSesionFeria(){
   document.getElementById('feriaTotal2').textContent = fmt(s.reduce((a,v)=>a+v.precio,0));
   document.getElementById('feriaBandejas').textContent = s.reduce((a,v)=>a+v.bandejas,0);
   const c = document.getElementById('feriaList');
-  if(s.length===0){ c.innerHTML='<div class="empty">Aquí verás lo que vas vendiendo</div>'; }
+  if(s.length===0){ c.innerHTML='<div class="empty">AquÃ­ verÃ¡s lo que vas vendiendo</div>'; }
   else {
     c.innerHTML = s.slice().reverse().map(v=>'<div class="venta-list-item"><span><b>'+((v.nombre||v.prod)+'').slice(0,12)+'</b> '+v.cant+' bandeja(s)</span><span class="v-t">'+fmt(v.precio)+'</span></div>').join('');
   }
@@ -1637,10 +1655,10 @@ function agregarOtro(dest){
   const esFeria = dest==='feria';
   const nombre = document.getElementById(esFeria?'feriaOtroNombre':'otroNombre').value.trim();
   const precio = parseInt(document.getElementById(esFeria?'feriaOtroPrecio':'otroPrecio').value)||0;
-  if(!nombre){ toast('Escribe qué vendiste'); return; }
+  if(!nombre){ toast('Escribe quÃ© vendiste'); return; }
   if(precio<=0){ toast('Ingresa el precio'); return; }
   const quien = esFeria ? 'Feria' : (document.getElementById('ventaQuien').value.trim() || 'Venta suelta');
-  const pago = esFeria ? feria.pago : venta.pago;
+  const pago = esFeria ? 'efectivo' : venta.pago;
   const vReg = { id:Date.now()+'-'+Math.random().toString(36).slice(2,7), f:Date.now(), prod:'Otro', nombre:nombre, tipo:'otro', cant:1, bandejas:0, precio:precio, gan:precio, pago:pago, quien:quien };
   estado.ventas.push(vReg);
   (esFeria?feria.sesion:venta.sesion).push(vReg);
@@ -1649,7 +1667,7 @@ function agregarOtro(dest){
   document.getElementById(esFeria?'feriaOtroNombre':'otroNombre').value='';
   document.getElementById(esFeria?'feriaOtroPrecio':'otroPrecio').value='';
   feedbackVenta();
-  toast('➕ '+nombre+': '+fmt(precio));
+  toast('âž• '+nombre+': '+fmt(precio));
   if(!estado.productosExtra) estado.productosExtra={};
   estado.productosExtra[nombre.toLowerCase()] = precio;
 }
@@ -1659,7 +1677,7 @@ function onOtroNombreInput(dest){
   if(precio) document.getElementById(dest==='feria'?'feriaOtroPrecio':'otroPrecio').value = precio;
 }
 
-// ── NUEVA COMPRA ──
+// â”€â”€ NUEVA COMPRA â”€â”€
 function actualizarTotalCompra(){
   const cat = document.getElementById('compraCategoria').value;
   const cajas = parseInt(document.getElementById('compraCajas').value)||0;
@@ -1672,7 +1690,7 @@ function actualizarTotalCompra(){
   const stockActual = estado.stock[cat]||0;
   const stockDespues = stockActual + totalBandejas;
   if(totalBandejas > 0){
-    document.getElementById('compraStockPreview').innerHTML = '<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:10px;margin-top:8px;font-size:13px;text-align:center;"><span style="color:#6b7280;">Stock '+cat+':</span> <b>'+stockActual+'</b> → <b style="color:#16a34a;font-size:16px;">'+stockDespues+'</b> <span style="color:#16a34a;font-weight:800;">(+'+totalBandejas+')</span></div>';
+    document.getElementById('compraStockPreview').innerHTML = '<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:10px;margin-top:8px;font-size:13px;text-align:center;"><span style="color:#6b7280;">Stock '+cat+':</span> <b>'+stockActual+'</b> â†’ <b style="color:#16a34a;font-size:16px;">'+stockDespues+'</b> <span style="color:#16a34a;font-weight:800;">(+'+totalBandejas+')</span></div>';
   } else {
     document.getElementById('compraStockPreview').innerHTML = '';
   }
@@ -1696,13 +1714,13 @@ function confirmarCompra(){
   if(categoria==='Tercera' && !estado.tercera.activada){
     estado.tercera.activada = true;
     if(!estado.tercera.precio || estado.tercera.precio<=0) estado.tercera.precio = Math.round(COSTO_BTX[categoria] * (1+estado.tercera.margen/100));
-    toast('🥚 Tercera activada automáticamente');
+    toast('ðŸ¥š Tercera activada automÃ¡ticamente');
   }
   estado.stock[categoria] += totalBandejas;
   estado.compras.push({ f:fecha?new Date(fecha).getTime():Date.now(), proveedor, prod:categoria, cajas:cajas, bandejas:bandejas, precio:precioCaja, total:total });
-  logAccion('COMPRA', categoria+' · '+cajas+' cajas + '+bandejas+' bandejas · '+fmt(total)+' · '+proveedor);
+  logAccion('COMPRA', categoria+' Â· '+cajas+' cajas + '+bandejas+' bandejas Â· '+fmt(total)+' Â· '+proveedor);
   guardar(); actualizarTodo();
-  toast('🛒 '+categoria+' · '+cajas+' cajas + '+bandejas+' btx · '+fmt(total));
+  toast('ðŸ›’ '+categoria+' Â· '+cajas+' cajas + '+bandejas+' btx Â· '+fmt(total));
   document.getElementById('compraCajas').value='';
   document.getElementById('compraBandejas').value='';
   document.getElementById('compraPrecioCaja').value='';
@@ -1716,8 +1734,8 @@ function toggleHistorialCompras(){
 }
 function llenarHistCompras(){
   const c = document.getElementById('histComprasContenedor');
-  if(estado.compras.length===0){ c.innerHTML='<div class="empty">Aún no hay compras registradas</div>'; return; }
-  let html = '<table class="tab"><tr><th>Fecha</th><th>Proveedor</th><th>Categoría</th><th>Cajas</th><th>Btx</th><th>Total</th></tr>';
+  if(estado.compras.length===0){ c.innerHTML='<div class="empty">AÃºn no hay compras registradas</div>'; return; }
+  let html = '<table class="tab"><tr><th>Fecha</th><th>Proveedor</th><th>CategorÃ­a</th><th>Cajas</th><th>Btx</th><th>Total</th></tr>';
   estado.compras.slice().reverse().forEach(cp=>{
     html += '<tr><td>'+fDate(cp.f)+'</td><td>'+cp.proveedor+'</td><td><b>'+cp.prod+'</b></td><td>'+cp.cajas+'</td><td>'+(cp.bandejas||0)+'</td><td style="font-weight:800;">'+fmt(cp.total||cp.cajas*cp.precio)+'</td></tr>';
   });
@@ -1725,7 +1743,7 @@ function llenarHistCompras(){
   c.innerHTML = html;
 }
 
-// ── MERMA ──
+// â”€â”€ MERMA â”€â”€
 function mermaProducto(p){
   merma.prod = p;
   document.getElementById('mermaPrim').classList.toggle('act', p==='Primera');
@@ -1741,7 +1759,7 @@ function mermaCant(d){
 function actualizarMermaInfo(){
   const costoHuevo = costoBtx(merma.prod)/DATOS.huevosTrx;
   const perdida = merma.cant * costoHuevo;
-  document.getElementById('mermaInfo').innerHTML = '<div class="gan-line"><span class="k">Pérdida estimada</span><span class="v" style="color:#dc2626;">'+fmt(perdida)+'</span></div><div style="font-size:11px;color:#888;margin-top:4px;">🥚 '+merma.cant+' huevo(s) quebrado(s) · La bandeja incompleta queda como repuesto.</div>';
+  document.getElementById('mermaInfo').innerHTML = '<div class="gan-line"><span class="k">PÃ©rdida estimada</span><span class="v" style="color:#dc2626;">'+fmt(perdida)+'</span></div><div style="font-size:11px;color:#888;margin-top:4px;">ðŸ¥š '+merma.cant+' huevo(s) quebrado(s) Â· La bandeja incompleta queda como repuesto.</div>';
 }
 function confirmarMerma(){
   if(!verificarBloqueo()) return;
@@ -1750,13 +1768,13 @@ function confirmarMerma(){
   const costoHuevo = costoBtx(prod)/DATOS.huevosTrx;
   const perdida = huevosRotos*costoHuevo;
   estado.mermas.push({ f:Date.now(), prod, huevos:huevosRotos, perdida });
-  logAccion('MERMA', huevosRotos+' huevo(s) rotos de '+prod+' · Pérdida: '+fmt(perdida));
+  logAccion('MERMA', huevosRotos+' huevo(s) rotos de '+prod+' Â· PÃ©rdida: '+fmt(perdida));
   guardar(); actualizarTodo();
-  toast('🥚 '+huevosRotos+' huevo(s) rotos · Pérdida: '+fmt(perdida));
+  toast('ðŸ¥š '+huevosRotos+' huevo(s) rotos Â· PÃ©rdida: '+fmt(perdida));
   cerrarModal('modalMerma');
 }
 
-// ── GASTOS ──
+// â”€â”€ GASTOS â”€â”€
 function confirmarGasto(){
   if(!verificarBloqueo()) return;
   const concepto = document.getElementById('gastoConcepto').value.trim();
@@ -1767,11 +1785,11 @@ function confirmarGasto(){
   document.getElementById('gastoConcepto').value='';
   document.getElementById('gastoMonto').value='';
   guardar(); actualizarTodo();
-  toast('💸 Gasto registrado: '+fmt(monto));
+  toast('ðŸ’¸ Gasto registrado: '+fmt(monto));
   cerrarModal('modalGasto');
 }
 
-// ── CAJA ──
+// â”€â”€ CAJA â”€â”€
 function llenarCaja(){
   const hoy0 = new Date(); hoy0.setHours(0,0,0,0);
   const ts = hoy0.getTime();
@@ -1798,12 +1816,12 @@ function llenarCaja(){
   document.getElementById('cajaHistorial').innerHTML = movs.length ? html : '<div class="empty">Sin movimientos hoy</div>';
 }
 
-// ── DEUDAS ──
+// â”€â”€ DEUDAS â”€â”€
 function llenarDeudas(){
   const c = document.getElementById('deudasLista');
-  if(estado.deudas.length===0){ c.innerHTML='<div class="empty">No hay deudas. Las ventas "a deuda" se anotan aquí.</div>'; return; }
+  if(estado.deudas.length===0){ c.innerHTML='<div class="empty">No hay deudas. Las ventas "a deuda" se anotan aquÃ­.</div>'; return; }
   c.innerHTML = estado.deudas.map(d=>{
-    return '<div class="gan-line"><span class="k" style="font-weight:800;">'+d.nombre+'</span><span style="display:flex;gap:6px;align-items:center;"><span style="color:#dc2626;font-weight:800;">'+fmt(d.monto)+'</span> <button class="btn-ok" style="padding:6px 10px;border:none;border-radius:8px;color:#fff;font-weight:800;font-size:11px;cursor:pointer;background:#16a34a;" onclick="pagarDeuda(\''+d.nombre+'\')">Pagó</button> <button style="padding:6px 10px;border:none;border-radius:8px;color:#fff;font-weight:800;font-size:11px;cursor:pointer;background:#dc2626;" onclick="borrarDeuda(\''+d.nombre+'\')">✕</button></span></div>';
+    return '<div class="gan-line"><span class="k" style="font-weight:800;">'+d.nombre+'</span><span style="display:flex;gap:6px;align-items:center;"><span style="color:#dc2626;font-weight:800;">'+fmt(d.monto)+'</span> <button class="btn-ok" style="padding:6px 10px;border:none;border-radius:8px;color:#fff;font-weight:800;font-size:11px;cursor:pointer;background:#16a34a;" onclick="pagarDeuda(\''+d.nombre+'\')">PagÃ³</button> <button style="padding:6px 10px;border:none;border-radius:8px;color:#fff;font-weight:800;font-size:11px;cursor:pointer;background:#dc2626;" onclick="borrarDeuda(\''+d.nombre+'\')">âœ•</button></span></div>';
   }).join('');
   const total = estado.deudas.reduce((a,d)=>a+d.monto,0);
   c.innerHTML += '<div class="gan-line"><span class="k">Total por cobrar</span><span class="v" style="color:#dc2626;">'+fmt(total)+'</span></div>';
@@ -1821,58 +1839,31 @@ function confirmarPagoDeuda(){
   const d = estado.deudas.find(x=>x.nombre===nombre);
   if(!d) return;
   const pago = parseInt(document.getElementById('pagoDeudaInput').value)||0;
-  if(pago<=0){ toast('Ingresa un monto válido'); return; }
-  if(!estado.historialCobros) estado.historialCobros = [];
-  estado.historialCobros.push({ nombre, monto: pago, fecha: Date.now(), restante: Math.max(0, d.monto - pago) });
+  if(pago<=0){ toast('Ingresa un monto vÃ¡lido'); return; }
   d.monto = Math.max(0, d.monto - pago);
   if(d.monto===0) estado.deudas = estado.deudas.filter(x=>x.nombre!==nombre);
   guardar(); llenarDeudas(); actualizarTodo(); cerrarModal('pagoDeudaModal');
-  toast('💵 Pago registrado: '+fmt(pago));
+  toast('ðŸ’µ Pago registrado: '+fmt(pago));
 }
 function borrarDeuda(nombre){
-  miConfirmar('¿Quitar la deuda de '+nombre+'?', ()=>{ estado.deudas = estado.deudas.filter(x=>x.nombre!==nombre); guardar(); llenarDeudas(); actualizarTodo(); toast('Deuda eliminada'); });
-}
-function deudasTab(tab){
-  const panels = {activas:'deudasPanelActivas', historial:'deudasPanelHistorial'};
-  const ids = {activas:'dTabActivas', historial:'dTabHistorial'};
-  Object.values(panels).forEach(p=>document.getElementById(p).style.display='none');
-  Object.entries(ids).forEach(([k,id])=>{
-    const btn = document.getElementById(id);
-    if(k===tab){ btn.style.borderColor='#2563eb'; btn.style.background='#eff6ff'; }
-    else { btn.style.borderColor='#e5e7eb'; btn.style.background='#fff'; }
-  });
-  document.getElementById(panels[tab]).style.display='block';
-  if(tab==='activas') llenarDeudas();
-  if(tab==='historial') llenarHistorialCobros();
-}
-function llenarHistorialCobros(){
-  const c = document.getElementById('historialCobrosLista');
-  const hist = (estado.historialCobros||[]).slice().reverse();
-  if(hist.length===0){ c.innerHTML='<div class="empty">Aún no hay cobros registrados</div>'; return; }
-  c.innerHTML = hist.map(h=>{
-    const fecha = new Date(h.fecha);
-    const fechaStr = fecha.toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit',year:'2-digit'})+' '+fecha.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
-    return '<div class="gan-line"><span class="k"><b>'+h.nombre+'</b><br><span style="font-size:10px;color:#999;">'+fechaStr+'</span></span><span style="text-align:right;"><span style="color:#16a34a;font-weight:800;">+'+fmt(h.monto)+'</span>'+(h.restante!==undefined?'<br><span style="font-size:10px;color:#999;">Debe: '+fmt(h.restante)+'</span>':'')+'</span></div>';
-  }).join('');
-  const totalMes = hist.filter(h=>{ const f=new Date(h.fecha); const m=new Date(); return f.getMonth()===m.getMonth() && f.getFullYear()===m.getFullYear(); }).reduce((a,h)=>a+h.monto,0);
-  c.innerHTML += '<div class="gan-line"><span class="k">Cobrado este mes</span><span class="v" style="color:#16a34a;">'+fmt(totalMes)+'</span></div>';
+  miConfirmar('Â¿Quitar la deuda de '+nombre+'?', ()=>{ estado.deudas = estado.deudas.filter(x=>x.nombre!==nombre); guardar(); llenarDeudas(); actualizarTodo(); toast('Deuda eliminada'); });
 }
 function registrarDarEfectivo(){
   if(!verificarBloqueo()) return;
   const nombre = document.getElementById('darEfectivoNombre').value.trim();
   const monto = parseInt(document.getElementById('darEfectivoMonto').value)||0;
   if(!nombre){ toast('Escribe el nombre'); return; }
-  if(monto<=0){ toast('Ingresa un monto válido'); return; }
+  if(monto<=0){ toast('Ingresa un monto vÃ¡lido'); return; }
   const exist = estado.deudas.find(d=>d.nombre===nombre);
   if(exist) exist.monto += monto; else estado.deudas.push({nombre:nombre, monto:monto, tipo:'prestamo'});
-  logAccion('PRÉSTAMO', nombre+' · '+fmt(monto));
+  logAccion('PRÃ‰STAMO', nombre+' Â· '+fmt(monto));
   guardar(); llenarDeudas(); actualizarTodo();
   document.getElementById('darEfectivoNombre').value='';
   document.getElementById('darEfectivoMonto').value='';
-  toast('💰 Efectivo dado a '+nombre+': '+fmt(monto));
+  toast('ðŸ’° Efectivo dado a '+nombre+': '+fmt(monto));
 }
 
-// ── HISTORIAL POR CLIENTE ──
+// â”€â”€ HISTORIAL POR CLIENTE â”€â”€
 function llenarClientes(){
   const c = document.getElementById('clientesLista');
   const clientes = {};
@@ -1887,14 +1878,14 @@ function llenarClientes(){
   const deudaMap = {};
   estado.deudas.forEach(d=>{ deudaMap[d.nombre] = d.monto; });
   const lista = Object.values(clientes).sort((a,b)=>b.total-a.total);
-  if(lista.length===0){ c.innerHTML='<div class="empty">Aún no hay clientes registrados</div>'; return; }
+  if(lista.length===0){ c.innerHTML='<div class="empty">AÃºn no hay clientes registrados</div>'; return; }
   let html = '<div style="margin-bottom:8px;font-size:12px;color:#666;">'+lista.length+' cliente(s) registrado(s)</div>';
   lista.forEach(cl=>{
     const deuda = deudaMap[cl.nombre] || 0;
     const fecha = fDate(cl.ultimaFecha);
     html += '<div style="padding:10px 0;border-bottom:1px dashed #eee;">';
     html += '<div style="display:flex;justify-content:space-between;align-items:center;">';
-    html += '<div><b style="font-size:14px;">'+cl.nombre+'</b><div style="font-size:11px;color:#888;">'+cl.ventas+' compra(s) · última: '+fecha+'</div></div>';
+    html += '<div><b style="font-size:14px;">'+cl.nombre+'</b><div style="font-size:11px;color:#888;">'+cl.ventas+' compra(s) Â· Ãºltima: '+fecha+'</div></div>';
     html += '<div style="text-align:right;"><div style="font-weight:800;color:#15803d;">'+fmt(cl.total)+'</div>';
     if(deuda>0) html += '<div style="font-size:11px;color:#dc2626;">Debe: '+fmt(deuda)+'</div>';
     html += '<div style="font-size:11px;color:#6b7280;">Ganancia: '+fmt(cl.ganancia)+'</div>';
@@ -1903,7 +1894,7 @@ function llenarClientes(){
   c.innerHTML = html;
 }
 
-// ── CIERRE DE DÍA ──
+// â”€â”€ CIERRE DE DÃA â”€â”€
 function cierreTab(tab){
   const tabs = {resumen:'cierrePanelResumen', cuadratura:'cierrePanelCuad'};
   const ids = {resumen:'cTabResumen', cuadratura:'cTabCuad'};
@@ -1969,11 +1960,11 @@ function historialTab(tab){
   if(tab==='versiones') abrirVersiones();
 }
 function llenarCierre(){
-  const hoy0 = new Date(); hoy0.setHours(0,0,0,0);
-  const vHoy = estado.ventas.filter(v=>v.f>=hoy0.getTime());
-  const gHoy = estado.gastos.filter(g=>g.f>=hoy0.getTime());
-  const mHoy = estado.mermas.filter(m=>m.f>=hoy0.getTime());
-  const cHoy = estado.compras.filter(c=>c.f>=hoy0.getTime());
+  const rg = rangoCorte(); const hoy0 = rg.desde; const HASTA = rg.hasta;
+  const vHoy = estado.ventas.filter(v=>v.f>=hoy0&&v.f<HASTA);
+  const gHoy = estado.gastos.filter(g=>g.f>=hoy0&&g.f<HASTA);
+  const mHoy = estado.mermas.filter(m=>m.f>=hoy0&&m.f<HASTA);
+  const cHoy = estado.compras.filter(c=>c.f>=hoy0&&c.f<HASTA);
   const ventas = vHoy.reduce((a,v)=>a+v.precio,0);
   const ganancia = vHoy.reduce((a,v)=>a+v.gan,0);
   const efectivo = vHoy.filter(v=>v.pago==='efectivo').reduce((a,v)=>a+v.precio,0);
@@ -1988,20 +1979,20 @@ function llenarCierre(){
     '<div class="stat3"><div class="s"><div class="v">'+fmt(ventas)+'</div><div class="l">Ventas hoy</div></div>'+
     '<div class="s"><div class="v" style="color:#16a34a;">'+fmt(ganancia)+'</div><div class="l">Ganancia</div></div>'+
     '<div class="s"><div class="v">'+btx+'</div><div class="l">Bandejas</div></div></div>'+
-    '<div class="gan-line" style="margin-top:6px;"><span class="k">📦 Cajas vendidas</span><span class="v">'+(cajas%1?cajas.toFixed(1):cajas)+' cajas ('+btx+' bandejas)</span></div>'+
+    '<div class="gan-line" style="margin-top:6px;"><span class="k">ðŸ“¦ Cajas vendidas</span><span class="v">'+(cajas%1?cajas.toFixed(1):cajas)+' cajas ('+btx+' bandejas)</span></div>'+
     '<div style="height:10px"></div>'+
-    '<div class="gan-line"><span class="k">💵 Efectivo cobrado</span><span class="v">'+fmt(efectivo)+'</span></div>'+
-    '<div class="gan-line"><span class="k">🏦 Transferencias</span><span class="v">'+fmt(transf)+'</span></div>'+
-    '<div class="gan-line"><span class="k">💸 Gastos del día</span><span class="v" style="color:#dc2626;">-'+fmt(gastos)+'</span></div>'+
-    '<div class="gan-line"><span class="k">🛒 Compras del día</span><span class="v" style="color:#dc2626;">-'+fmt(compras)+'</span></div>'+
-    '<div class="gan-line"><span class="k">🥚 Merma del día</span><span class="v" style="color:#dc2626;">-'+fmt(merma)+'</span></div>'+
-    '<div class="gan-line"><span class="k">📒 Por cobrar (deudas)</span><span class="v">'+fmt(estado.deudas.reduce((a,d)=>a+d.monto,0))+'</span></div>'+
-    '<div style="margin-top:10px;padding:12px;background:#f0fdf4;border-radius:10px;text-align:center;"><div style="font-size:11px;color:#6b7280;">NETO DEL DÍA<br><small>ventas − gastos − merma</small></div><div style="font-size:24px;font-weight:900;color:#15803d;">'+fmt(neto)+'</div></div>';
+    '<div class="gan-line"><span class="k">ðŸ’µ Efectivo cobrado</span><span class="v">'+fmt(efectivo)+'</span></div>'+
+    '<div class="gan-line"><span class="k">ðŸ¦ Transferencias</span><span class="v">'+fmt(transf)+'</span></div>'+
+    '<div class="gan-line"><span class="k">ðŸ’¸ Gastos del dÃ­a</span><span class="v" style="color:#dc2626;">-'+fmt(gastos)+'</span></div>'+
+    '<div class="gan-line"><span class="k">ðŸ›’ Compras del dÃ­a</span><span class="v" style="color:#dc2626;">-'+fmt(compras)+'</span></div>'+
+    '<div class="gan-line"><span class="k">ðŸ¥š Merma del dÃ­a</span><span class="v" style="color:#dc2626;">-'+fmt(merma)+'</span></div>'+
+    '<div class="gan-line"><span class="k">ðŸ“’ Por cobrar (deudas)</span><span class="v">'+fmt(estado.deudas.reduce((a,d)=>a+d.monto,0))+'</span></div>'+
+    '<div style="margin-top:10px;padding:12px;background:#f0fdf4;border-radius:10px;text-align:center;"><div style="font-size:11px;color:#6b7280;">NETO DEL DÃA<br><small>ventas âˆ’ gastos âˆ’ merma</small></div><div style="font-size:24px;font-weight:900;color:#15803d;">'+fmt(neto)+'</div></div>';
 }
 function llenarApertura(){
   const info = document.getElementById('aperturaInfo');
   if(estado.arqueoInicialManana>0){
-    info.innerHTML = '<div style="display:flex;justify-content:space-between;"><span>💵 Cierre anterior:</span><b>'+fmt(estado.arqueoInicialManana)+'</b></div><div style="font-size:11px;color:#6b7280;margin-top:4px;">Puedes usar este valor o ingresar uno nuevo</div>';
+    info.innerHTML = '<div style="display:flex;justify-content:space-between;"><span>ðŸ’µ Cierre anterior:</span><b>'+fmt(estado.arqueoInicialManana)+'</b></div><div style="font-size:11px;color:#6b7280;margin-top:4px;">Puedes usar este valor o ingresar uno nuevo</div>';
   } else {
     info.innerHTML = '<div style="color:#6b7280;">No hay cierre anterior registrado</div>';
   }
@@ -2009,97 +2000,69 @@ function llenarApertura(){
 }
 function abrirDia(){
   const efectivo = parseInt(document.getElementById('aperturaEfectivo').value)||0;
-  if(efectivo<=0){ toast('Ingresa cuánto efectivo tienes para iniciar'); return; }
+  if(efectivo<=0){ toast('Ingresa cuÃ¡nto efectivo tienes para iniciar'); return; }
   estado.arqueoInicial = efectivo;
   estado.arqueoFecha = '';
-  estado.diaAbierto = true;
-  logAccion('APERTURA', 'Día abierto con '+fmt(efectivo)+' en efectivo');
+  estado.diaAbierto = true; estado.diaAbiertoFecha = new Date().toDateString();
+  logAccion('APERTURA', 'DÃ­a abierto con '+fmt(efectivo)+' en efectivo');
   guardar(); cerrarModal('modalApertura');
   actualizarBtnApertura();
-  toast('☀️ Día abierto. Empiezas con '+fmt(efectivo));
+  toast('â˜€ï¸ DÃ­a abierto. Empiezas con '+fmt(efectivo));
 }
 function cerrarDia(){
   const contado = parseInt(document.getElementById('cierreContado').value)||0;
-  if(contado<=0){ toast('Ingresa cuánto tienes contado'); return; }
-  const hoy0 = new Date(); hoy0.setHours(0,0,0,0);
-  const vHoy = estado.ventas.filter(v=>v.f>=hoy0.getTime());
-  const gHoy = estado.gastos.filter(g=>g.f>=hoy0.getTime());
-  const mHoy = estado.mermas.filter(m=>m.f>=hoy0.getTime());
+  if(contado<=0){ toast('Ingresa cuÃ¡nto tienes contado'); return; }
+  const rg = rangoCorte(); const hoy0 = rg.desde; const HASTA = rg.hasta;
+  const vHoy = estado.ventas.filter(v=>v.f>=hoy0&&v.f<HASTA);
+  const gHoy = estado.gastos.filter(g=>g.f>=hoy0&&g.f<HASTA);
+  const mHoy = estado.mermas.filter(m=>m.f>=hoy0&&m.f<HASTA);
   const efectivoVentas = vHoy.filter(v=>v.pago==='efectivo').reduce((a,v)=>a+v.precio,0);
   const gastosEfectivo = gHoy.reduce((a,g)=>a+g.monto,0);
   const mermasEfectivo = mHoy.reduce((a,m)=>a+m.perdida,0);
   const esperado = estado.arqueoInicial + efectivoVentas - gastosEfectivo - mermasEfectivo;
   const diferencia = contado - esperado;
   const difHtml = '<div style="padding:12px;border-radius:10px;background:'+(diferencia===0?'#f0fdf4':'#fef2f2')+';text-align:center;">'+
-    '<div style="font-size:11px;color:#6b7280;">ESPERADO: '+fmt(esperado)+' · CONTADO: '+fmt(contado)+'</div>'+
+    '<div style="font-size:11px;color:#6b7280;">ESPERADO: '+fmt(esperado)+' Â· CONTADO: '+fmt(contado)+'</div>'+
     '<div style="font-size:20px;font-weight:900;color:'+(diferencia===0?'#16a34a':'#dc2626')+';">'+
-    (diferencia===0?'✅ Cuadrado':(diferencia>0?'🟢 Sobrante: +':'🔴 Faltante: ')+fmt(Math.abs(diferencia)))+'</div></div>';
+    (diferencia===0?'âœ… Cuadrado':(diferencia>0?'ðŸŸ¢ Sobrante: +':'ðŸ”´ Faltante: ')+fmt(Math.abs(diferencia)))+'</div></div>';
   document.getElementById('cierreDiferencia').innerHTML = difHtml;
   if(diferencia!==0){
-    toast((diferencia>0?'🟢 Sobrante: +':'🔴 Faltante: ')+fmt(Math.abs(diferencia)));
+    toast((diferencia>0?'ðŸŸ¢ Sobrante: +':'ðŸ”´ Faltante: ')+fmt(Math.abs(diferencia)));
   }
-  logAccion('CIERRE', 'Día cerrado con '+fmt(contado)+' (esperado '+fmt(esperado)+', diff '+(diferencia>=0?'+':'')+diferencia+') · '+new Date().toLocaleString('es-CL'));
+  logAccion('CIERRE', 'DÃ­a cerrado con '+fmt(contado)+' (esperado '+fmt(esperado)+', diff '+(diferencia>=0?'+':'')+diferencia+') Â· '+new Date().toLocaleString('es-CL'));
   estado.arqueoInicial = contado;
-  estado.arqueoFecha = new Date().toDateString();
+  if(modoCierreForzado){
+    estado.arqueoFecha = modoCierreForzado.toDateString();
+    modoCierreForzado = null;
+    setTimeout(()=>toast('âœ… DÃ­a pendiente cerrado. Ahora abre el dÃ­a de hoy'),700);
+  } else {
+    estado.arqueoFecha = new Date().toDateString();
+  }
+  estado.diaAbiertoFecha = '';
   estado.arqueoInicialManana = contado;
   estado.diaAbierto = false;
   guardar(); cerrarModal('modalCierre');
   actualizarBtnApertura();
-  toast('🔒 Día cerrado. Mañana empiezas con '+fmt(contado));
+  toast('ðŸ”’ DÃ­a cerrado. MaÃ±ana empiezas con '+fmt(contado));
 }
 
-// ── RESUMEN ──
-function repoLimpiarFecha(){
-  document.getElementById('repoFechaFiltro').value='';
-  llenarResumen();
-}
+// â”€â”€ RESUMEN â”€â”€
 function llenarResumen(){
-  const fechaInput = document.getElementById('repoFechaFiltro').value;
   const hoy0 = new Date(); hoy0.setHours(0,0,0,0);
   const semana0 = new Date(hoy0); semana0.setDate(hoy0.getDate()-hoy0.getDay());
   const mes0 = new Date(hoy0.getFullYear(), hoy0.getMonth(), 1);
   const sum = arr => arr.reduce((a,v)=>a+v.gan,0);
-
-  if(fechaInput){
-    const dia0 = new Date(fechaInput+'T00:00:00');
-    const diaFin = new Date(dia0); diaFin.setDate(diaFin.getDate()+1);
-    const vDia = estado.ventas.filter(v=>v.f>=dia0.getTime() && v.f<diaFin.getTime());
-    const gDia = vDia.reduce((a,v)=>a+v.precio,0);
-    const ganDia = sum(vDia);
-    const gastosDia = estado.gastos.filter(g=>g.f>=dia0.getTime() && g.f<diaFin.getTime()).reduce((a,g)=>a+g.monto,0);
-    const mermasDia = estado.mermas.filter(m=>m.f>=dia0.getTime() && m.f<diaFin.getTime());
-    let btx=0, cajas=0;
-    vDia.forEach(v=>{ if(v.tipo==='caja') cajas+=v.cant; else btx+=v.cant; });
-    document.getElementById('repoResumenTitulo').innerHTML = '📅 '+dia0.toLocaleDateString('es-CL',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
-    document.getElementById('lblRsHoy').textContent = 'Ganancia';
-    document.getElementById('lblRsSemana').textContent = 'Gastos';
-    document.getElementById('lblRsMes').textContent = 'Ventas';
-    document.getElementById('rsHoy').textContent = fmt(ganDia);
-    document.getElementById('rsSemana').textContent = fmt(gastosDia);
-    document.getElementById('rsMes').textContent = fmt(gDia);
-    document.getElementById('rsBandejas').textContent = btx;
-    document.getElementById('rsCajas').textContent = cajas;
-    document.getElementById('rsVentas').textContent = vDia.length;
-    document.getElementById('rsMerma').textContent = mermasDia.reduce((a,m)=>a+m.huevos,0);
-    document.getElementById('rsGastos').textContent = fmt(gastosDia);
-    document.getElementById('rsInversion').textContent = fmt(estado.compras.filter(c=>c.f>=dia0.getTime() && c.f<diaFin.getTime()).reduce((a,c)=>a+c.total,0));
-  } else {
-    document.getElementById('repoResumenTitulo').innerHTML = 'Ganancias';
-    document.getElementById('lblRsHoy').textContent = 'Hoy';
-    document.getElementById('lblRsSemana').textContent = 'Semana';
-    document.getElementById('lblRsMes').textContent = 'Mes';
-    document.getElementById('rsHoy').textContent = fmt(sum(estado.ventas.filter(v=>v.f>=hoy0.getTime())));
-    document.getElementById('rsSemana').textContent = fmt(sum(estado.ventas.filter(v=>v.f>=semana0.getTime())));
-    document.getElementById('rsMes').textContent = fmt(sum(estado.ventas.filter(v=>v.f>=mes0.getTime())));
-    let btx=0, cajas=0;
-    estado.ventas.forEach(v=>{ if(v.tipo==='caja') cajas+=v.cant; else btx+=v.cant; });
-    document.getElementById('rsBandejas').textContent = btx;
-    document.getElementById('rsCajas').textContent = cajas;
-    document.getElementById('rsVentas').textContent = estado.ventas.length;
-    document.getElementById('rsMerma').textContent = estado.mermas.reduce((a,m)=>a+m.huevos,0);
-    document.getElementById('rsGastos').textContent = fmt(estado.gastos.filter(g=>g.f>=mes0.getTime()).reduce((a,g)=>a+g.monto,0));
-    document.getElementById('rsInversion').textContent = fmt(estado.compras.reduce((a,c)=>a+c.total,0));
-  }
+  document.getElementById('rsHoy').textContent = fmt(sum(estado.ventas.filter(v=>v.f>=hoy0.getTime())));
+  document.getElementById('rsSemana').textContent = fmt(sum(estado.ventas.filter(v=>v.f>=semana0.getTime())));
+  document.getElementById('rsMes').textContent = fmt(sum(estado.ventas.filter(v=>v.f>=mes0.getTime())));
+  let btx=0, cajas=0;
+  estado.ventas.forEach(v=>{ if(v.tipo==='caja') cajas+=v.cant; else btx+=v.cant; });
+  document.getElementById('rsBandejas').textContent = btx;
+  document.getElementById('rsCajas').textContent = cajas;
+  document.getElementById('rsVentas').textContent = estado.ventas.length;
+  document.getElementById('rsMerma').textContent = estado.mermas.reduce((a,m)=>a+m.huevos,0);
+  document.getElementById('rsGastos').textContent = fmt(estado.gastos.filter(g=>g.f>=mes0.getTime()).reduce((a,g)=>a+g.monto,0));
+  document.getElementById('rsInversion').textContent = fmt(estado.compras.reduce((a,c)=>a+c.total,0));
   const partes = [];
   if(estado.stock.Primera > 0) partes.push(estado.stock.Primera + ' btx Primera');
   if(estado.stock.Segunda > 0) partes.push(estado.stock.Segunda + ' btx Segunda');
@@ -2107,7 +2070,7 @@ function llenarResumen(){
   document.getElementById('rsInvertido').innerHTML = partes.length > 0 ? partes.join('<br>') : '<span style="color:#999;">Sin stock</span>';
 }
 
-// ── CAMBIO ──
+// â”€â”€ CAMBIO â”€â”€
 document.getElementById('cambioVenta').addEventListener('input', calcularVuelto);
 document.getElementById('cambioPago').addEventListener('input', calcularVuelto);
 function calcularVuelto(){
@@ -2117,7 +2080,7 @@ function calcularVuelto(){
   if(venta<=0 || pago<=0){ c.innerHTML=''; return; }
   const vuelto = pago - venta;
   if(vuelto < 0){
-    c.innerHTML = '<div style="margin-top:8px;background:#fef2f2;color:#dc2626;border-radius:8px;padding:10px;font-size:13px;font-weight:700;">⚠️ El pago no alcanza. Faltan '+fmt(-vuelto)+'.</div>';
+    c.innerHTML = '<div style="margin-top:8px;background:#fef2f2;color:#dc2626;border-radius:8px;padding:10px;font-size:13px;font-weight:700;">âš ï¸ El pago no alcanza. Faltan '+fmt(-vuelto)+'.</div>';
     return;
   }
   const den=[20000,10000,5000,2000,1000,500,100,50,10];
@@ -2146,19 +2109,19 @@ function llenarCajaResumen(){
   document.getElementById('cajaNeto2').textContent = fmt(entra + transf - saleG - saleC);
 }
 
-// ── ARQUEO DE CAJA ──
+// â”€â”€ ARQUEO DE CAJA â”€â”€
 
-// ── HISTORIAL ──
+// â”€â”€ HISTORIAL â”€â”€
 function actualizarHistorial(){
   const c = document.getElementById('historialLista');
-  if(estado.ventas.length===0){ c.innerHTML='<div class="empty">Aún no hay ventas</div>'; }
+  if(estado.ventas.length===0){ c.innerHTML='<div class="empty">AÃºn no hay ventas</div>'; }
   else {
     c.innerHTML = estado.ventas.slice(-12).reverse().map(v=>{
       const f = fDate(v.f);
       const h = new Date(v.f).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
-      const quien = v.quien ? ' → '+v.quien : '';
-      const pg = v.pago==='transferencia' ? '🏦' : v.pago==='deuda' ? '📒' : '💵';
-      return '<div class="h-item"><span><b>'+((v.nombre||v.prod)+'').slice(0,12)+'</b> '+v.tipo+' · <span class="d">'+f+' '+h+quien+' '+pg+'</span></span><span class="t">'+fmt(v.precio)+' <button style="background:none;border:none;font-size:13px;cursor:pointer;" onclick="editarVenta(\''+v.id+'\')">✏️</button> <button style="background:none;border:none;font-size:13px;cursor:pointer;" onclick="eliminarVenta(\''+v.id+'\')">🗑️</button></span></div>';
+      const quien = v.quien ? ' â†’ '+v.quien : '';
+      const pg = v.pago==='transferencia' ? 'ðŸ¦' : v.pago==='deuda' ? 'ðŸ“’' : 'ðŸ’µ';
+      return '<div class="h-item"><span><b>'+((v.nombre||v.prod)+'').slice(0,12)+'</b> '+v.tipo+' Â· <span class="d">'+f+' '+h+quien+' '+pg+'</span></span><span class="t">'+fmt(v.precio)+' <button style="background:none;border:none;font-size:13px;cursor:pointer;" onclick="editarVenta(\''+v.id+'\')">âœï¸</button> <button style="background:none;border:none;font-size:13px;cursor:pointer;" onclick="eliminarVenta(\''+v.id+'\')">ðŸ—‘ï¸</button></span></div>';
     }).join('');
   }
   const hoyVentas = estado.ventas.filter(v=>new Date(v.f).toDateString()===new Date().toDateString());
@@ -2183,15 +2146,15 @@ function logAccion(tipo, detalle){
 }
 function llenarLogModal(){
   const c = document.getElementById('logContenido');
-  if(!estado.logs || estado.logs.length===0){ c.innerHTML='<div class="empty">Sin cambios registrados aún</div>'; return; }
+  if(!estado.logs || estado.logs.length===0){ c.innerHTML='<div class="empty">Sin cambios registrados aÃºn</div>'; return; }
   let html = '';
   estado.logs.forEach(l=>{
     const d = new Date(l.t);
     const fecha = d.toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit',year:'2-digit'})+' '+d.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
     const color = l.tipo==='ELIMINAR' ? '#dc2626' : l.tipo==='EDITAR' ? '#f59e0b' : '#16a34a';
-    const icon = l.tipo==='ELIMINAR' ? '🗑️' : l.tipo==='EDITAR' ? '✏️' : '➕';
+    const icon = l.tipo==='ELIMINAR' ? 'ðŸ—‘ï¸' : l.tipo==='EDITAR' ? 'âœï¸' : 'âž•';
     html += '<div style="padding:8px 0;border-bottom:1px dashed #eee;font-size:12px;">';
-    html += '<div style="font-weight:800;color:'+color+';">'+icon+' '+l.tipo+' · <span style="font-weight:400;color:#888;font-size:11px;">'+fecha+'</span></div>';
+    html += '<div style="font-weight:800;color:'+color+';">'+icon+' '+l.tipo+' Â· <span style="font-weight:400;color:#888;font-size:11px;">'+fecha+'</span></div>';
     html += '<div style="color:#374151;margin-top:2px;">'+l.detalle+'</div>';
     html += '</div>';
   });
@@ -2201,8 +2164,8 @@ function eliminarVenta(id){
   const idx = estado.ventas.findIndex(v=>v.id===id);
   if(idx<0) return;
   const v = estado.ventas[idx];
-  logAccion('ELIMINAR', 'Venta eliminada: '+fmt(v.precio)+' · '+v.prod+' '+v.tipo+' '+v.cant+' · '+v.quien+' · '+new Date(v.f).toLocaleString('es-CL'));
-  miConfirmar('¿Eliminar esta venta de '+fmt(v.precio)+'? Se devuelve el stock.', ()=>{
+  logAccion('ELIMINAR', 'Venta eliminada: '+fmt(v.precio)+' Â· '+v.prod+' '+v.tipo+' '+v.cant+' Â· '+v.quien+' Â· '+new Date(v.f).toLocaleString('es-CL'));
+  miConfirmar('Â¿Eliminar esta venta de '+fmt(v.precio)+'? Se devuelve el stock.', ()=>{
     estado.ventas.splice(idx,1);
     estado.stock[v.prod] += v.bandejas;
     if(v.pago==='deuda' && v.quien){
@@ -2210,7 +2173,7 @@ function eliminarVenta(id){
       if(d){ d.monto = Math.max(0, d.monto - v.precio); if(d.monto===0) estado.deudas = estado.deudas.filter(x=>x.nombre!==v.quien); }
     }
     llenarLogModal();
-    guardar(); actualizarTodo(); toast('🗑️ Venta eliminada');
+    guardar(); actualizarTodo(); toast('ðŸ—‘ï¸ Venta eliminada');
   });
 }
 let ventaEditando = null;
@@ -2218,7 +2181,7 @@ function editarVenta(id){
   const v = estado.ventas.find(x=>x.id===id);
   if(!v) return;
   ventaEditando = id;
-  document.getElementById('editProdLbl').textContent = v.prod+' · '+v.tipo;
+  document.getElementById('editProdLbl').textContent = v.prod+' Â· '+v.tipo;
   document.getElementById('editCantLbl').textContent = v.cant+' ('+v.bandejas+' bandejas)';
   document.getElementById('editPrecioInput').value = v.precio;
   document.getElementById('editClienteInput').value = v.quien||'';
@@ -2244,7 +2207,7 @@ function guardarEdicionVenta(){
   const v = estado.ventas.find(x=>x.id===ventaEditando);
   if(!v) return;
   const np = parseInt(document.getElementById('editPrecioInput').value)||0;
-  if(np<=0){ toast('Precio inválido'); return; }
+  if(np<=0){ toast('Precio invÃ¡lido'); return; }
   const viejoPrecio = v.precio;
   const viejoPago = v.pago;
   let nuevoPago='efectivo', nuevoQuien='';
@@ -2253,8 +2216,8 @@ function guardarEdicionVenta(){
   else nuevoPago='deuda';
   if(nuevoPago==='deuda'){ nuevoQuien = (document.getElementById('editClienteInput').value||'').trim(); if(!nuevoQuien){ toast('Escribe el nombre del cliente'); return; } }
   let logDetalle = 'Venta editada: '+v.prod+' '+v.tipo+' '+v.cant;
-  if(viejoPrecio!==np) logDetalle += ' · precio: '+fmt(viejoPrecio)+' → '+fmt(np);
-  if(viejoPago!==nuevoPago) logDetalle += ' · pago: '+viejoPago+' → '+nuevoPago;
+  if(viejoPrecio!==np) logDetalle += ' Â· precio: '+fmt(viejoPrecio)+' â†’ '+fmt(np);
+  if(viejoPago!==nuevoPago) logDetalle += ' Â· pago: '+viejoPago+' â†’ '+nuevoPago;
   logAccion('EDITAR', logDetalle);
   if(v.pago==='deuda' && v.quien){
     const d = estado.deudas.find(x=>x.nombre===v.quien);
@@ -2271,24 +2234,24 @@ function guardarEdicionVenta(){
     d.monto += np;
   }
   guardar(); actualizarTodo(); cerrarModal('editarVentaModal');
-  toast('✏️ Venta actualizada: '+fmt(v.precio));
+  toast('âœï¸ Venta actualizada: '+fmt(v.precio));
 }
 
 const R = n => Math.round(n);
 
-// ── CUADRATURA DE DINERO ──
+// â”€â”€ CUADRATURA DE DINERO â”€â”€
 const BILLETES = [20000,10000,5000,2000,1000];
 const MONEDAS = [500,100,50,10];
 function renderCuadratura(){
   if(!estado.cuadratura) estado.cuadratura = {};
   let html = '';
   BILLETES.forEach(b=>{
-    html += '<div class="gan-line"><span class="k" style="font-weight:900;">$'+b.toLocaleString('es-CL')+'</span><span style="display:flex;align-items:center;gap:6px;"><input type="number" min="0" value="'+(estado.cuadratura[b]||0)+'" class="field" style="width:70px;text-align:center;font-weight:800;font-size:16px;" onchange="actualizarCuadratura()" data-cuad="'+b+'"><span style="font-size:11px;color:#888;">× $'+b.toLocaleString('es-CL')+' = <b>$'+R(b*(estado.cuadratura[b]||0)).toLocaleString('es-CL')+'</b></span></span></div>';
+    html += '<div class="gan-line"><span class="k" style="font-weight:900;">$'+b.toLocaleString('es-CL')+'</span><span style="display:flex;align-items:center;gap:6px;"><input type="number" min="0" value="'+(estado.cuadratura[b]||0)+'" class="field" style="width:70px;text-align:center;font-weight:800;font-size:16px;" onchange="actualizarCuadratura()" data-cuad="'+b+'"><span style="font-size:11px;color:#888;">Ã— $'+b.toLocaleString('es-CL')+' = <b>$'+R(b*(estado.cuadratura[b]||0)).toLocaleString('es-CL')+'</b></span></span></div>';
   });
   document.getElementById('cuadBilletes').innerHTML = html;
-  let mh = '<p style="font-size:12px;font-weight:800;color:#555;margin-bottom:8px;">🪙 Monedas</p>';
+  let mh = '<p style="font-size:12px;font-weight:800;color:#555;margin-bottom:8px;">ðŸª™ Monedas</p>';
   MONEDAS.forEach(m=>{
-    mh += '<div class="gan-line"><span class="k">$'+m.toLocaleString('es-CL')+'</span><span style="display:flex;align-items:center;gap:6px;"><input type="number" min="0" value="'+(estado.cuadratura['moneda'+m]||0)+'" class="field" style="width:70px;text-align:center;font-weight:800;font-size:16px;" onchange="actualizarCuadratura()" data-cuad="moneda'+m+'"><span style="font-size:11px;color:#888;">× $'+m+' = <b>$'+R(m*(estado.cuadratura['moneda'+m]||0)).toLocaleString('es-CL')+'</b></span></span></div>';
+    mh += '<div class="gan-line"><span class="k">$'+m.toLocaleString('es-CL')+'</span><span style="display:flex;align-items:center;gap:6px;"><input type="number" min="0" value="'+(estado.cuadratura['moneda'+m]||0)+'" class="field" style="width:70px;text-align:center;font-weight:800;font-size:16px;" onchange="actualizarCuadratura()" data-cuad="moneda'+m+'"><span style="font-size:11px;color:#888;">Ã— $'+m+' = <b>$'+R(m*(estado.cuadratura['moneda'+m]||0)).toLocaleString('es-CL')+'</b></span></span></div>';
   });
   document.getElementById('cuadMonedas').innerHTML = mh;
   document.getElementById('cuadEsperado').value = estado.cuadratura.efectivoReal || '';
@@ -2308,17 +2271,17 @@ function actualizarCuadratura(){
   const dif = total - esperado;
   const difEl = document.getElementById('cuadDiferencia');
   if(esperado > 0){
-    if(dif === 0){ difEl.style.background='#dcfce7'; difEl.style.color='#15803d'; difEl.textContent='✅ Cuadra perfecto'; }
-    else if(dif > 0){ difEl.style.background='#fff7ed'; difEl.style.color='#c2410c'; difEl.textContent='💰 Sobran $'+R(dif).toLocaleString('es-CL'); }
-    else { difEl.style.background='#fef2f2'; difEl.style.color='#dc2626'; difEl.textContent='⚠️ Faltan $'+R(Math.abs(dif)).toLocaleString('es-CL'); }
+    if(dif === 0){ difEl.style.background='#dcfce7'; difEl.style.color='#15803d'; difEl.textContent='âœ… Cuadra perfecto'; }
+    else if(dif > 0){ difEl.style.background='#fff7ed'; difEl.style.color='#c2410c'; difEl.textContent='ðŸ’° Sobran $'+R(dif).toLocaleString('es-CL'); }
+    else { difEl.style.background='#fef2f2'; difEl.style.color='#dc2626'; difEl.textContent='âš ï¸ Faltan $'+R(Math.abs(dif)).toLocaleString('es-CL'); }
   } else { difEl.style.background='#f3f4f6'; difEl.style.color='#6b7280'; difEl.textContent='Escribe el efectivo esperado'; }
 }
 function guardarCuadratura(){
   estado.cuadratura.efectivoReal = parseInt(document.getElementById('cuadEsperado').value)||0;
-  guardar(); cerrarModal('modalCuadratura'); toast('🧮 Cuadratura guardada');
+  guardar(); cerrarModal('modalCuadratura'); toast('ðŸ§® Cuadratura guardada');
 }
 
-// ── EXPORTAR EXCEL (.xlsx real multi-hoja con SheetJS) ──
+// â”€â”€ EXPORTAR EXCEL (.xlsx real multi-hoja con SheetJS) â”€â”€
 function exportarExcel(){
   try {
     const hoyStr = hoy().replace('/','-');
@@ -2334,14 +2297,14 @@ function exportarExcel(){
     // Hoja 1: Resumen
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
       ['RESUMEN MIS HUEVOS'],
-      ['Fecha exportación', new Date().toLocaleDateString('es-CL')],
+      ['Fecha exportaciÃ³n', new Date().toLocaleDateString('es-CL')],
       [],
       ['CONCEPTO', 'MONTO'],
       ['Venta Total', totalVentas],
       ['Ganancia Total', totalGanancia],
       ['Gastos Totales', totalGastos],
       ['Compras Totales', totalCompras],
-      ['Pérdida por Merma', totalMerma],
+      ['PÃ©rdida por Merma', totalMerma],
       ['Deudas por Cobrar', totalDeudas],
       [],
       ['STOCK ACTUAL'],
@@ -2351,7 +2314,7 @@ function exportarExcel(){
       ['Tercera', estado.stock.Tercera||0, R((estado.stock.Tercera||0)/6)],
     ]), 'Resumen');
 
-    // Hoja 2: Resumen por día
+    // Hoja 2: Resumen por dÃ­a
     const todasFechas = new Set();
     estado.ventas.forEach(v=>todasFechas.add(new Date(v.f).toDateString()));
     estado.gastos.forEach(g=>todasFechas.add(new Date(g.f).toDateString()));
@@ -2373,10 +2336,10 @@ function exportarExcel(){
       const mer = R(mDia.reduce((a,m)=>a+m.perdida,0));
       dayRows.push([label,ven,gan,gas,com,mer,ven-gas-mer]);
     });
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(dayRows), 'Por Día');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(dayRows), 'Por DÃ­a');
 
     // Hoja 3: Todas las ventas
-    const venRows = [['FECHA','HORA','PRODUCTO','TIPO','CANT','BANDEJAS','PRECIO','GANANCIA','PAGO','QUIÉN']];
+    const venRows = [['FECHA','HORA','PRODUCTO','TIPO','CANT','BANDEJAS','PRECIO','GANANCIA','PAGO','QUIÃ‰N']];
     estado.ventas.forEach(v=>{
       const d = new Date(v.f);
       venRows.push([d.toLocaleDateString('es-CL'), d.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'}), v.nombre||v.prod, v.tipo, v.cant, v.bandejas, R(v.precio), R(v.gan), v.pago, v.quien||'']);
@@ -2394,7 +2357,7 @@ function exportarExcel(){
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(comRows), 'Compras');
 
     // Hoja 6: Merma
-    const merRows = [['FECHA','PRODUCTO','HUEVOS','PÉRDIDA']];
+    const merRows = [['FECHA','PRODUCTO','HUEVOS','PÃ‰RDIDA']];
     estado.mermas.forEach(m=>merRows.push([fDate(m.f), m.prod, m.huevos, R(m.perdida)]));
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(merRows), 'Merma');
 
@@ -2409,7 +2372,7 @@ function exportarExcel(){
     // Hoja 8: Cuadratura
     const cuad = estado.cuadratura || {};
     const billetes = [50000,20000,10000,5000,2000,1000,500,100,50,10];
-    const cuadRows = [['DENOMINACIÓN','CANTIDAD','SUBTOTAL']];
+    const cuadRows = [['DENOMINACIÃ“N','CANTIDAD','SUBTOTAL']];
     let totalCuad = 0;
     billetes.forEach(b=>{
       const cant = cuad[b]||0;
@@ -2437,7 +2400,7 @@ function exportarExcel(){
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(cuadRows), 'Cuadratura');
 
     // Hoja 9: Historial de versiones
-    const verRows = [['VERSIÓN','FECHA','VENTAS','STOCK P','STOCK S']];
+    const verRows = [['VERSIÃ“N','FECHA','VENTAS','STOCK P','STOCK S']];
     (estado.versiones||[]).forEach(v=>{
       verRows.push([v.label, new Date(v.fecha).toLocaleString('es-CL'), v.ventasCount, v.stockPrim, v.stockSeg]);
     });
@@ -2445,11 +2408,11 @@ function exportarExcel(){
 
     XLSX.writeFile(wb, 'MisHuevos_'+hoyStr+'.xlsx');
     estado.ultimoRespaldo = Date.now(); guardar();
-    toast('📊 Excel exportado: 9 hojas');
+    toast('ðŸ“Š Excel exportado: 9 hojas');
   } catch(e){ toast('Error al exportar: '+e.message); }
 }
 
-// ── RESPALDAR ──
+// â”€â”€ RESPALDAR â”€â”€
 function exportarDatos(){
   const blob = new Blob([JSON.stringify(estado,null,2)], {type:'application/json'});
   const a = document.createElement('a');
@@ -2458,7 +2421,7 @@ function exportarDatos(){
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
   estado.ultimoRespaldo = Date.now(); guardar();
-  toast('💾 Datos exportados');
+  toast('ðŸ’¾ Datos exportados');
 }
 function importarDatos(e){
   const file=e.target.files[0]; if(!file) return;
@@ -2466,18 +2429,18 @@ function importarDatos(e){
   reader.onload=ev=>{
     try{
       const d=JSON.parse(ev.target.result);
-      logAccion('IMPORTAR', 'Datos importados desde archivo JSON · '+new Date().toLocaleString('es-CL'));
+      logAccion('IMPORTAR', 'Datos importados desde archivo JSON Â· '+new Date().toLocaleString('es-CL'));
       estado=Object.assign(estado,d);
       guardar(); actualizarTodo();
-      toast('✅ Datos importados');
+      toast('âœ… Datos importados');
       cerrarModal('modalDatos');
-    }catch(err){ toast('❌ Archivo inválido'); }
+    }catch(err){ toast('âŒ Archivo invÃ¡lido'); }
   };
   reader.readAsText(file);
   e.target.value='';
 }
 
-// ── RESET ──
+// â”€â”€ RESET â”€â”€
 document.getElementById('resetClave').addEventListener('input', function(){
   const btn = document.getElementById('btnResetConfirmar');
   if(this.value === '1234'){
@@ -2490,9 +2453,9 @@ document.getElementById('resetClave').addEventListener('input', function(){
 });
 function reiniciarTodo(){
   const clave = document.getElementById('resetClave').value;
-  if(clave !== '1234'){ toast('❌ Clave incorrecta'); return; }
+  if(clave !== '1234'){ toast('âŒ Clave incorrecta'); return; }
   reiniciando = true;
-  logAccion('REINICIAR', 'App reiniciada completamente · '+new Date().toLocaleString('es-CL'));
+  logAccion('REINICIAR', 'App reiniciada completamente Â· '+new Date().toLocaleString('es-CL'));
   estado.stock = { Primera: 0, Segunda: 0 };
   estado.ventas = [];
   estado.compras = [];
@@ -2519,11 +2482,11 @@ function reiniciarTodo(){
   } else {
     reiniciando = false;
   }
-  actualizarTodo(); cerrarModal('modalReset'); toast('🔥 Todo reiniciado desde cero');
+  actualizarTodo(); cerrarModal('modalReset'); toast('ðŸ”¥ Todo reiniciado desde cero');
 }
 
 function guardarManual(){
-  // Guardar versión antes de sobreescribir
+  // Guardar versiÃ³n antes de sobreescribir
   const snapshot = {
     fecha: Date.now(),
     label: 'Ver '+ (estado.versiones.length+1),
@@ -2536,7 +2499,7 @@ function guardarManual(){
   estado.versiones.unshift(snapshot);
   if(estado.versiones.length > 10) estado.versiones = estado.versiones.slice(0, 10);
   guardar();
-  toast('💾 Guardado · versión '+snapshot.label);
+  toast('ðŸ’¾ Guardado Â· versiÃ³n '+snapshot.label);
 }
 function abrirVersiones(){
   const c = document.getElementById('versionesLista');
@@ -2550,9 +2513,9 @@ function abrirVersiones(){
     const fecha = d.toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit'})+' '+d.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
     html += '<div style="padding:10px 0;border-bottom:1px dashed #eee;display:flex;justify-content:space-between;align-items:center;">';
     html += '<div><div style="font-weight:800;font-size:13px;">'+v.label+'</div>';
-    html += '<div style="font-size:11px;color:#888;">'+fecha+' · '+v.ventasCount+' ventas · Est: '+v.stockPrim+'+'+v.stockSeg+' btx</div>';
+    html += '<div style="font-size:11px;color:#888;">'+fecha+' Â· '+v.ventasCount+' ventas Â· Est: '+v.stockPrim+'+'+v.stockSeg+' btx</div>';
     html += '</div>';
-    html += '<button style="padding:8px 14px;border:none;border-radius:8px;background:#16a34a;color:#fff;font-weight:800;cursor:pointer;font-size:12px;" onclick="restaurarVersion('+i+')">↩ Restaurar</button>';
+    html += '<button style="padding:8px 14px;border:none;border-radius:8px;background:#16a34a;color:#fff;font-weight:800;cursor:pointer;font-size:12px;" onclick="restaurarVersion('+i+')">â†© Restaurar</button>';
     html += '</div>';
   });
   c.innerHTML = html;
@@ -2560,7 +2523,7 @@ function abrirVersiones(){
 function restaurarVersion(idx){
   const v = estado.versiones[idx];
   if(!v || !v.snapshot) return;
-  miConfirmar('¿Restaurar '+v.label+'? Se perderán los cambios desde entonces.', ()=>{
+  miConfirmar('Â¿Restaurar '+v.label+'? Se perderÃ¡n los cambios desde entonces.', ()=>{
     estado.stock = v.snapshot.stock || { Primera: 0, Segunda: 0 };
     estado.ventas = v.snapshot.ventas || [];
     estado.compras = v.snapshot.compras || [];
@@ -2568,38 +2531,106 @@ function restaurarVersion(idx){
     estado.gastos = v.snapshot.gastos || [];
     estado.deudas = v.snapshot.deudas || [];
     estado.precios = v.snapshot.precios || estado.precios;
-    logAccion('RESTAURAR', 'Restaurado desde '+v.label+' · '+new Date(v.fecha).toLocaleString('es-CL'));
+    logAccion('RESTAURAR', 'Restaurado desde '+v.label+' Â· '+new Date(v.fecha).toLocaleString('es-CL'));
     guardar(); actualizarTodo();
-    toast('↩ Restaurado: '+v.label);
+    toast('â†© Restaurado: '+v.label);
     cerrarModal('modalHistorial');
   });
 }
 
-// ── MODO OSCURO ──
-// ── DÍA CERRADO (ya no bloquea, solo recuerda) ──
+// â”€â”€ MODO OSCURO â”€â”€
+function toggleTema(){
+  estado.darkMode = !estado.darkMode;
+  document.body.classList.toggle('dark', estado.darkMode);
+  document.getElementById('btnTema').textContent = estado.darkMode ? 'â˜€ï¸' : 'ðŸŒ™';
+  guardar();
+}
+
+// â”€â”€ DÃA CERRADO (ya no bloquea, solo recuerda) â”€â”€
+let modoCierreForzado = null;
+
+function fechaVencida(){
+  if(!estado.diaAbierto || !estado.diaAbiertoFecha) return null;
+  return estado.diaAbiertoFecha === new Date().toDateString() ? null : estado.diaAbiertoFecha;
+}
+function rangoCorte(){
+  if(modoCierreForzado){
+    const d = new Date(modoCierreForzado); d.setHours(0,0,0,0);
+    return { desde: d.getTime(), hasta: d.getTime()+86400000 };
+  }
+  const h = new Date(); h.setHours(0,0,0,0);
+  return { desde: h.getTime(), hasta: Infinity };
+}
+function fmtDiaVenc(dStr){
+  try { return new Date(dStr).toLocaleDateString('es-CL',{weekday:'long',day:'2-digit',month:'2-digit'}); }
+  catch(e){ return dStr; }
+}
+function forzarCierreModal(){
+  const fv = fechaVencida();
+  if(!fv) return;
+  if(!document.getElementById('modalForzar')){
+    document.body.insertAdjacentHTML('beforeend',
+      '<div class="modal-back" id="modalForzar"><div class="modal">'+
+      '<div class="modal-header"><h3>âš ï¸ DÃ­a sin cerrar</h3></div>'+
+      '<p style="font-size:14px;line-height:1.5;">El dÃ­a <b id="fzFecha"></b> no fue cerrado.<br>'+
+      'No puedes registrar <b>nada</b> (ventas, gastos, compras, merma) hasta que lo cierres y cuadres la caja.</p>'+
+      '<div class="modal-btns">'+
+      '<button class="btn-cancel" onclick="cerrarModal(\'modalForzar\')">DespuÃ©s</button>'+
+      '<button class="btn-ok" style="color:#fff;font-weight:700;border:none;border-radius:10px;padding:12px 18px;cursor:pointer;" onclick="irCerrarPendiente()">ðŸ”’ Cerrar ese dÃ­a ahora</button>'+
+      '</div></div></div>');
+  }
+  document.getElementById('fzFecha').textContent = fmtDiaVenc(fv);
+  abrirModal('modalForzar');
+}
+function irCerrarPendiente(){
+  const fv = fechaVencida();
+  if(!fv) return;
+  modoCierreForzado = new Date(fv);
+  cerrarModal('modalForzar');
+  const t = document.getElementById('tituloModalCierre');
+  if(t) t.textContent = 'â³ Cierre del dÃ­a pendiente ('+fmtDiaVenc(fv)+')';
+  abrirModal('modalCierre');
+}
+function actualizarAvisoDia(){
+  let b = document.getElementById('avisoDiaVencido');
+  const fv = fechaVencida();
+  if(fv && !b){
+    b = document.createElement('div');
+    b.id = 'avisoDiaVencido';
+    b.style.cssText = 'position:sticky;top:0;z-index:999;background:#dc2626;color:#fff;padding:8px 14px;font-size:12px;font-weight:800;text-align:center;cursor:pointer;';
+    b.onclick = forzarCierreModal;
+    b.textContent = 'âš ï¸ Hay un dÃ­a sin cerrar â€” toca aquÃ­ para cuadrar';
+    const app = document.querySelector('.app') || document.body;
+    app.insertBefore(b, app.firstChild);
+  } else if(fv && b){
+    b.style.display = 'block';
+  } else if(!fv && b){
+    b.style.display = 'none';
+  }
+}
 function diaBloqueado(){
   if(!estado.arqueoFecha) return false;
   return estado.arqueoFecha !== new Date().toDateString();
 }
 function verificarBloqueo(){
+  const fv = fechaVencida();
+  if(fv){ forzarCierreModal(); return false; }
   if(estado.diaAbierto) return true;
-  toast('☀️ Abre el día primero desde ☀️ Abrir día');
+  toast('â° Abre el dÃ­a primero desde â˜€ï¸ Abrir dÃ­a');
   return false;
 }
-
-// ── EXPORTAR PDF DEL CIERRE ──
 function exportarPDF(){
-  const hoy0 = new Date(); hoy0.setHours(0,0,0,0);
-  const vHoy = estado.ventas.filter(v=>v.f>=hoy0.getTime());
-  const gHoy = estado.gastos.filter(g=>g.f>=hoy0.getTime());
-  const mHoy = estado.mermas.filter(m=>m.f>=hoy0.getTime());
+  const rg = rangoCorte(); const hoy0 = rg.desde; const HASTA = rg.hasta;
+  const vHoy = estado.ventas.filter(v=>v.f>=hoy0&&v.f<HASTA);
+  const gHoy = estado.gastos.filter(g=>g.f>=hoy0&&g.f<HASTA);
+  const mHoy = estado.mermas.filter(m=>m.f>=hoy0&&m.f<HASTA);
   const venHoy = vHoy.reduce((a,v)=>a+v.precio,0);
   const ganHoy = vHoy.reduce((a,v)=>a+v.gan,0);
   const gasHoy = gHoy.reduce((a,g)=>a+g.monto,0);
   const merHoy = mHoy.reduce((a,m)=>a+m.perdida,0);
   const neto = venHoy - gasHoy - merHoy;
   let html = '<html><head><style>body{font-family:Arial,sans-serif;padding:20px;color:#333;}h1{color:#f97316;border-bottom:2px solid #f97316;padding-bottom:8px;}table{width:100%;border-collapse:collapse;margin:10px 0;}th{background:#f97316;color:#fff;padding:8px;text-align:left;}td{padding:6px 8px;border-bottom:1px solid #eee;}.total{font-size:18px;font-weight:bold;color:#15803d;background:#f0fdf4;padding:12px;border-radius:8px;margin-top:12px;}</style></head><body>';
-  html += '<h1>🥚 Mis Huevos - Cierre del Día</h1>';
+  html += '<h1>ðŸ¥š Mis Huevos - Cierre del DÃ­a</h1>';
   html += '<p><b>Fecha:</b> '+new Date().toLocaleDateString('es-CL')+' '+new Date().toLocaleTimeString('es-CL')+'</p>';
   html += '<table><tr><th>Concepto</th><th>Monto</th></tr>';
   html += '<tr><td>Ventas</td><td>'+fmt(venHoy)+'</td></tr>';
@@ -2609,14 +2640,14 @@ function exportarPDF(){
   html += '<tr><td><b>Neto</b></td><td><b>'+fmt(neto)+'</b></td></tr>';
   html += '</table>';
   html += '<p><b>Ventas realizadas:</b> '+vHoy.length+'</p>';
-  html += '<div class="total">Neto del día: '+fmt(neto)+'</div>';
+  html += '<div class="total">Neto del dÃ­a: '+fmt(neto)+'</div>';
   html += '</body></html>';
   const win = window.open('','_blank');
   win.document.write(html); win.document.close(); win.print();
-  toast('📄 PDF del cierre listo');
+  toast('ðŸ“„ PDF del cierre listo');
 }
 
-// ── HISTORIAL CON FILTROS ──
+// â”€â”€ HISTORIAL CON FILTROS â”€â”€
 let historialFiltro = 'ventas';
 let filtroDesde = null;
 let filtroHasta = null;
@@ -2669,7 +2700,7 @@ function renderHistorialFiltrado(){
   } else if(historialFiltro==='merma'){
     const items = [...estado.mermas].reverse();
     if(!items.length){ c.innerHTML='<div class="empty">No hay merma</div>'; return; }
-    html = '<table class="tab"><tr><th>Fecha</th><th>Prod</th><th>Huevos</th><th>Pérdida</th></tr>';
+    html = '<table class="tab"><tr><th>Fecha</th><th>Prod</th><th>Huevos</th><th>PÃ©rdida</th></tr>';
     items.forEach(m=>html+='<tr><td>'+fDate(m.f)+'</td><td>'+m.prod+'</td><td>'+m.huevos+'</td><td>'+fmt(m.perdida)+'</td></tr>');
     html += '</table>';
   } else if(historialFiltro==='deudas'){
@@ -2678,14 +2709,14 @@ function renderHistorialFiltrado(){
     html = '<table class="tab"><tr><th>Cliente</th><th>Monto</th><th>Estado</th></tr>';
     items.forEach(d=>{
       const dias = Math.floor((Date.now()-new Date(d.f||Date.now()))/(1000*60*60*24));
-      html+='<tr><td>'+d.nombre+'</td><td>'+fmt(d.monto)+'</td><td>'+(dias>=7?'🔴 VENCIDA':'🟡 PENDIENTE')+'</td></tr>';
+      html+='<tr><td>'+d.nombre+'</td><td>'+fmt(d.monto)+'</td><td>'+(dias>=7?'ðŸ”´ VENCIDA':'ðŸŸ¡ PENDIENTE')+'</td></tr>';
     });
     html += '</table>';
   }
   c.innerHTML = html;
 }
 
-// ── PRECIOS POR CLIENTE FRECUENTE ──
+// â”€â”€ PRECIOS POR CLIENTE FRECUENTE â”€â”€
 function getClientePrecio(nombre){
   if(!estado.clientesPrecios) return null;
   return estado.clientesPrecios[nombre] || null;
@@ -2696,7 +2727,7 @@ function setClientePrecio(nombre, precio){
   guardar();
 }
 
-// ── GRÁFICAS ──
+// â”€â”€ GRÃFICAS â”€â”€
 function renderGraficas(){
   const c = document.getElementById('graficaContainer');
   const hoy = new Date();
@@ -2711,7 +2742,7 @@ function renderGraficas(){
     dias.push({fecha:d, label:d.toLocaleDateString('es-CL',{weekday:'short',day:'numeric'}), total, ganancia, count:ventas.length});
   }
   const maxTotal = Math.max(...dias.map(d=>d.total), 1);
-  let html = '<div style="font-size:12px;font-weight:800;color:#555;margin-bottom:8px;">💰 Ventas últimos 7 días</div>';
+  let html = '<div style="font-size:12px;font-weight:800;color:#555;margin-bottom:8px;">ðŸ’° Ventas Ãºltimos 7 dÃ­as</div>';
   html += '<div style="display:flex;align-items:flex-end;gap:6px;height:140px;padding:8px 0;">';
   dias.forEach(d=>{
     const h = Math.max((d.total/maxTotal)*100, 4);
@@ -2729,7 +2760,7 @@ function renderGraficas(){
   html += '<div style="background:#f8f9fb;border-radius:10px;padding:10px;margin-top:10px;">';
   html += '<div class="gan-line"><span class="k">Total semana</span><span class="v">'+fmt(totalSem)+'</span></div>';
   html += '<div class="gan-line"><span class="k">Ganancia semana</span><span class="v" style="color:#16a34a;">'+fmt(ganSem)+'</span></div>';
-  html += '<div class="gan-line" style="border-bottom:none;"><span class="k">N° ventas</span><span class="v">'+ventasSem+'</span></div>';
+  html += '<div class="gan-line" style="border-bottom:none;"><span class="k">NÂ° ventas</span><span class="v">'+ventasSem+'</span></div>';
   html += '</div>';
   const prods = {};
   estado.ventas.filter(v=>{const d=new Date(v.f); return (hoy-d)/(1000*60*60*24)<=7;}).forEach(v=>{
@@ -2738,7 +2769,7 @@ function renderGraficas(){
     prods[v.prod].total+=v.precio;
   });
   if(Object.keys(prods).length>0){
-    html += '<div style="font-size:12px;font-weight:800;color:#555;margin-top:12px;margin-bottom:6px;">🥚 Por categoría (7 días)</div>';
+    html += '<div style="font-size:12px;font-weight:800;color:#555;margin-top:12px;margin-bottom:6px;">ðŸ¥š Por categorÃ­a (7 dÃ­as)</div>';
     Object.entries(prods).sort((a,b)=>b[1].total-a[1].total).forEach(([prod,data])=>{
       const pct = Math.round((data.total/totalSem)*100);
       html += '<div style="margin-bottom:6px;"><div style="display:flex;justify-content:space-between;font-size:12px;"><span><b>'+prod+'</b> ('+data.cant+' ventas)</span><span style="font-weight:800;">'+fmt(data.total)+' ('+pct+'%)</span></div>';
@@ -2748,7 +2779,7 @@ function renderGraficas(){
   c.innerHTML = html;
 }
 
-// ── CALCULADORA DE PRECIOS ──
+// â”€â”€ CALCULADORA DE PRECIOS â”€â”€
 function calcularPrecioIdeal(){
   const costoCaja = parseInt(document.getElementById('calcCostoCaja').value)||0;
   const margen = parseFloat(document.getElementById('calcMargen').value)||18;
@@ -2766,11 +2797,11 @@ function calcularPrecioIdeal(){
     +'<div class="gan-line"><span class="k">Costo por huevo</span><span class="v">'+fmt(costoHuevo)+'</span></div>'
     +'<div class="gan-line" style="border-bottom:none;"><span class="k"><b>Precio venta /bandeja</b></span><span class="v" style="color:#16a34a;font-size:18px;">'+fmt(precioBtx)+'</span></div>'
     +'<div class="gan-line" style="border-bottom:none;"><span class="k"><b>Precio venta /caja</b></span><span class="v" style="color:#16a34a;font-size:18px;">'+fmt(precioCaja)+'</span></div>'
-    +'<div style="text-align:center;margin-top:8px;padding:8px;background:#dcfce7;border-radius:8px;"><span style="font-size:12px;color:#16a34a;font-weight:800;">Ganancia: '+fmt(gananciaBtx)+'/bandeja · '+fmt(gananciaCaja)+'/caja ('+margen+'%)</span></div>'
+    +'<div style="text-align:center;margin-top:8px;padding:8px;background:#dcfce7;border-radius:8px;"><span style="font-size:12px;color:#16a34a;font-weight:800;">Ganancia: '+fmt(gananciaBtx)+'/bandeja Â· '+fmt(gananciaCaja)+'/caja ('+margen+'%)</span></div>'
     +'</div>';
 }
 
-// ── BACKUP AUTOMÁTICO ──
+// â”€â”€ BACKUP AUTOMÃTICO â”€â”€
 function autoBackup(){
   try{
     const key = 'misHuevos_backup_auto';
@@ -2779,14 +2810,14 @@ function autoBackup(){
   }catch(e){}
 }
 
-// ── INIT ──
-function actualizarTodo(){ actualizarStockUI(); actualizarPreciosUI(); actualizarHistorial(); actualizarBtnApertura(); }
+// â”€â”€ INIT â”€â”€
+function actualizarTodo(){ actualizarAvisoDia(); actualizarStockUI(); actualizarPreciosUI(); actualizarHistorial(); actualizarBtnApertura(); }
 async function initApp(){
   const s = cargar();
   document.getElementById('fechaHoy').textContent = 'Hoy: '+hoy();
   if(!s){
     const recuperado = await recuperarIndexedDB();
-    if(recuperado) toast('↩️ Se recuperaron tus datos guardados');
+    if(recuperado) toast('â†©ï¸ Se recuperaron tus datos guardados');
   }
   // Recordatorio si hay cierre pendiente
   if(estado.arqueoFecha && estado.arqueoFecha !== new Date().toDateString()){
@@ -2794,7 +2825,7 @@ async function initApp(){
     const ventasDesde = estado.ventas.filter(v=>v.f>fechaCierre);
     if(ventasDesde.length>0){
       setTimeout(()=>{
-        toast('⚠️ Tienes '+ventasDesde.length+' venta(s) sin cerrar desde '+estado.arqueoFecha+'. Cierra el día desde 🔒 Cierre.');
+        toast('âš ï¸ Tienes '+ventasDesde.length+' venta(s) sin cerrar desde '+estado.arqueoFecha+'. Cierra el dÃ­a desde ðŸ”’ Cierre.');
       },2500);
     }
     estado.arqueoFecha = '';
@@ -2802,11 +2833,13 @@ async function initApp(){
     guardar();
   }
   if(!localStorage.getItem('misHuevos')){ guardar(); }
+  aplicarTema(estado.tema);
+  if(estado.darkMode) document.body.classList.add('dark');
   actualizarTodo();
   actualizarBtnApertura();
-  // Backup automático: avisa si 7+ días
+  // Backup automÃ¡tico: avisa si 7+ dÃ­as
   if(respaldoPendiente()){
-    setTimeout(()=>toast('💾 Llevas '+respaldoPendiente()+' días sin respaldar. Hazlo desde 💾 Respaldar → 📤 Exportar.'),2000);
+    setTimeout(()=>toast('ðŸ’¾ Llevas '+respaldoPendiente()+' dÃ­as sin respaldar. Hazlo desde ðŸ’¾ Respaldar â†’ ðŸ“¤ Exportar.'),2000);
   }
   // Auto-backup a IndexedDB cada vez que se guarda
   autoBackup();
@@ -2814,7 +2847,7 @@ async function initApp(){
   if(venc.length>0){
     setTimeout(()=>{
       const msj = venc.map(d=>d.nombre+' ($'+d.monto.toLocaleString('es-CL')+')').join(', ');
-      toast('⚠️ Deudas de 7+ días: '+msj+'. Cobrar desde 📒 Deudas.');
+      toast('âš ï¸ Deudas de 7+ dÃ­as: '+msj+'. Cobrar desde ðŸ“’ Deudas.');
     },3500);
   }
 }
