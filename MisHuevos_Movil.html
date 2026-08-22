@@ -2722,18 +2722,8 @@ function instalarExtras(){
     btns.parentNode.insertBefore(wrap, btns);
     modal.dataset.fotoOk = '1';
   });
-    // boton simulador bajo los precios de la pantalla principal
-  const pPrim = document.getElementById('precioPrimBtx');
-  if(pPrim && !document.getElementById('btnSimuladorHome')){
-    const cont = pPrim.closest('.precios') || pPrim.parentNode;
-    const b = document.createElement('button');
-    b.id = 'btnSimuladorHome';
-    b.textContent = '🔮 Simulador de precios';
-    b.style.cssText = 'width:100%;margin-top:8px;background:#7c3aed;color:#fff;border:none;border-radius:10px;padding:11px;font-weight:800;cursor:pointer;font-size:13px;';
-    b.onclick = function(){ abrirModal('modalCalculadoras'); };
-    (cont.parentNode || cont).insertBefore(b, cont.nextSibling);
-  }
-}
+    }
+
 function contarBoletas(){
   let n = 0;
   estado.compras.forEach(function(c){ if(c.foto) n++; });
@@ -2823,33 +2813,38 @@ function simularPrecio(){
 }
 
 
-// ================= A CUANTO VENDO (nueva calculadora unica) =================
+// ================= A CUANTO VENDO (calculadora clara por pasos) =================
 function instalarExtras2(){
   const modal = document.getElementById('modalCalculadoras');
   if(!modal || modal.dataset.nuevaOk) { return; }
-  const form = modal.querySelector('form');
-  if(form){ form.style.display='none'; }
   const host = modal.querySelector('.modal');
+  const form = modal.querySelector('form');
+  if(form){ form.style.display = 'none'; }
   if(host){
+    const viejoP = host.querySelector('p');
+    if(viejoP){ viejoP.style.display = 'none'; }
     const controles = document.createElement('div');
     controles.innerHTML =
-      '<label style="font-size:12px;font-weight:700;">Producto</label>'+
+      '<p style="font-size:13px;color:#555;margin-bottom:10px;">Te digo a cuánto vender según lo que te costó la bandeja y cuánto quieres ganar.</p>'+
+      '<div style="font-size:13px;font-weight:800;margin-bottom:4px;">1️⃣ Elige el producto</div>'+
       '<select id="calcProdSel" onchange="cambioProdCalc()" style="width:100%;padding:10px;border:2px solid #e5e7eb;border-radius:8px;font-size:14px;box-sizing:border-box;">'+
       '<option value="Primera">Primera</option><option value="Segunda">Segunda</option><option value="Tercera">Tercera</option></select>'+
-      '<div style="height:8px"></div>'+
-      '<label style="font-size:12px;font-weight:700;">Costo por bandeja (de tus compras)</label>'+
+      '<div style="height:10px"></div>'+
+      '<div style="font-size:13px;font-weight:800;margin-bottom:4px;">2️⃣ Lo que te costó cada bandeja</div>'+
+      '<div style="font-size:11px;color:#888;margin-bottom:4px;">Se llena solo con tus compras registradas. Puedes cambiarlo si quieres.</div>'+
       '<input id="calcCostoReal" type="number" inputmode="numeric" oninput="calcVender()" style="width:100%;padding:10px;border:2px solid #e5e7eb;border-radius:8px;font-size:15px;font-weight:700;box-sizing:border-box;">'+
-      '<div style="height:8px"></div>'+
-      '<label style="font-size:12px;font-weight:700;">Quiero ganar por bandeja</label>'+
+      '<div style="height:10px"></div>'+
+      '<div style="font-size:13px;font-weight:800;margin-bottom:4px;color:#16a34a;">3️⃣ Cuánto quieres GANAR por cada bandeja</div>'+
+      '<div style="font-size:11px;color:#888;margin-bottom:4px;">Ejemplo: si escribes 800 y la bandeja te costó 6.000, te sugerirá venderla a $6.800.</div>'+
       '<input id="calcObjetivo" type="number" inputmode="numeric" oninput="calcVender()" placeholder="Ej: 800" style="width:100%;padding:10px;border:2px solid #16a34a;border-radius:8px;font-size:15px;font-weight:800;color:#16a34a;box-sizing:border-box;">'+
       '<div id="calcNuevoRes" style="margin-top:12px;"></div>'+
-      '<button id="btnAplicarPrecio" onclick="aplicarPrecioCalc()" style="width:100%;margin-top:6px;background:#16a34a;color:#fff;border:none;border-radius:10px;padding:12px;font-weight:800;cursor:pointer;font-size:14px;">✅ Aplicar este precio</button>';
+      '<button id="btnAplicarPrecio" onclick="aplicarPrecioCalc()" style="width:100%;margin-top:6px;background:#16a34a;color:#fff;border:none;border-radius:10px;padding:12px;font-weight:800;cursor:pointer;font-size:14px;display:none;">✅ Usar este precio en la app</button>';
     host.insertBefore(controles, host.querySelector('.modal-btns'));
   }
   modal.dataset.nuevaOk = '1';
   if(document.querySelectorAll){
     document.querySelectorAll("button[onclick*='modalCalculadoras']").forEach(function(btn){
-      btn.innerHTML = btn.innerHTML.replace('Calculadoras', '¿A cuánto vendo?');
+      btn.innerHTML = btn.innerHTML.replace('¿A cuánto vendo?', '🔮 ¿A cuánto vendo?').replace('Calculadoras', '🔮 ¿A cuánto vendo?');
     });
   }
 }
@@ -2883,7 +2878,12 @@ function calcVender(){
   _ultimoPrecioCalc = 0;
   const ba = document.getElementById('btnAplicarPrecio');
   if(costo <= 0){
-    if(c) c.innerHTML = '<div class="empty">Registra una compra o escribe el costo</div>';
+    if(c) c.innerHTML = '<div class="empty">Paso 2: escribe cuánto te costó la bandeja (o registra una compra primero).</div>';
+    if(ba) ba.style.display = 'none';
+    return;
+  }
+  if(obj <= 0){
+    if(c) c.innerHTML = '<div class="empty">Paso 3: escribe cuánto quieres ganar por bandeja.</div>';
     if(ba) ba.style.display = 'none';
     return;
   }
@@ -2904,14 +2904,15 @@ function calcVender(){
   const dif = Math.round(btMes * (obj - objAct));
   const color = dif > 0 ? '#16a34a' : (dif < 0 ? '#dc2626' : '#666');
   c.innerHTML =
+    '<div style="font-size:12px;font-weight:800;color:#7c3aed;margin-bottom:6px;">💡 Si vendes a este precio:</div>'+
     '<div class="stat3"><div class="s"><div class="v">' + fmt(precio) + '</div><div class="l">por bandeja</div></div>'+
-    '<div class="s"><div class="v">' + fmt(precio * 6) + '</div><div class="l">la caja</div></div>'+
-    '<div class="s"><div class="v">' + pct + '%</div><div class="l">margen</div></div></div>'+
-    '<div class="gan-line"><span class="k">Vendes ~' + fmt(btMes) + ' btx/mes</span><span class="v">ganarias ' + fmt(ganMes) + '/mes</span></div>'+
-    '<div class="gan-line"><span class="k">vs precio actual (' + fmt(precioAct) + ')</span><span class="v" style="color:' + color + ';">' + (dif >= 0 ? '+' : '') + fmt(dif) + '/mes</span></div>';
+    '<div class="s"><div class="v">' + fmt(precio * 6) + '</div><div class="l">por caja</div></div>'+
+    '<div class="s"><div class="v">' + pct + '%</div><div class="l">de margen</div></div></div>'+
+    '<div class="gan-line"><span class="k">Vendes ~' + fmt(btMes) + ' btx al mes</span><span class="v">ganarías ' + fmt(ganMes) + '/mes</span></div>'+
+    '<div class="gan-line"><span class="k">Comparado con tu precio actual (' + fmt(precioAct) + ')</span><span class="v" style="color:' + color + ';">' + (dif >= 0 ? '+' : '') + fmt(dif) + '/mes</span></div>';
 }
 function aplicarPrecioCalc(){
-  if(!_ultimoPrecioCalc){ toast('Calcula un precio primero'); return; }
+  if(!_ultimoPrecioCalc){ toast('Completa los 3 pasos primero'); return; }
   const prod = document.getElementById('calcProdSel').value;
   if(prod === 'Tercera'){
     estado.tercera.activada = true;
@@ -2922,7 +2923,6 @@ function aplicarPrecioCalc(){
   guardar(); actualizarTodo(); cerrarModal('modalCalculadoras');
   toast('✅ Nuevo precio aplicado a ' + prod);
 }
-
 
 function diaBloqueado(){
   if(!estado.arqueoFecha) return false;
