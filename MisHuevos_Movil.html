@@ -263,7 +263,7 @@ body.dark .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316;
       <button class="util-btn" onclick="abrirModal('modalClientes')"><span class="ic">👤</span>Clientes</button>
       <button class="util-btn" onclick="abrirModal('modalReportes')"><span class="ic">📊</span>Reportes</button>
       <button class="util-btn" onclick="abrirModal('modalMiDinero')"><span class="ic">💵</span>Mi dinero</button>
-      <button class="util-btn" onclick="abrirModal('modalCalculadoras')"><span class="ic">🧮</span>Calculadoras</button>
+      
       <button class="util-btn" onclick="abrirModal('modalDatos')"><span class="ic">💾</span>Datos</button>
       <button class="util-btn" onclick="abrirModal('modalHistorial')"><span class="ic">📋</span>Historial</button>
       <button class="util-btn" onclick="exportarExcel()"><span class="ic">📊</span>Excel</button>
@@ -568,21 +568,6 @@ if ('serviceWorker' in navigator) {
 </div>
 
 <!-- ═══ MODAL CALCULADORAS ═══ -->
-<div class="modal-back" id="modalCalculadoras">
-  <div class="modal">
-    <div class="modal-header"><h3>🧮 Calculadora de precios</h3><button class="modal-close" onclick="cerrarModal('modalCalculadoras')">✕</button></div>
-    <p style="font-size:12px;color:#777;margin-bottom:10px;">Calcula el precio de venta ideal según tu costo y margen deseado.</p>
-    <div class="paso-titulo">Costo por caja ($)</div>
-    <input type="number" class="field" id="calcCostoCaja" placeholder="Ej: 29950" oninput="calcularPrecioIdeal()">
-    <div class="paso-titulo">Margen deseado (%)</div>
-    <input type="number" class="field" id="calcMargen" value="18" placeholder="18" oninput="calcularPrecioIdeal()">
-    <div class="paso-titulo">Huevos por bandeja</div>
-    <input type="number" class="field" id="calcHuevosBtx" value="30" placeholder="30" oninput="calcularPrecioIdeal()">
-    <div id="calcResultado" style="margin-top:12px;"></div>
-    <div class="modal-btns"><button class="btn-cancel" onclick="cerrarModal('modalCalculadoras')">Cerrar</button></div>
-  </div>
-</div>
-
 <!-- ═══ MODAL MI DINERO ═══ -->
 <div class="modal-back" id="modalMiDinero">
   <div class="modal">
@@ -1060,7 +1045,6 @@ function abrirModal(id){
   if(id==='modalApertura') llenarApertura();
   if(id==='modalReportes'){ reportesTab('resumen'); }
   if(id==='modalMerma') mermaProducto('Primera');
-  if(id==='modalCalculadoras'){ abrirAQueVendo(); }
   if(id==='modalMiDinero'){ llenarCajaResumen(); calcularVuelto(); }
   if(id==='modalAjustar'){
     document.getElementById('ajPrimInput').value = estado.stock.Primera;
@@ -2813,117 +2797,6 @@ function simularPrecio(){
 }
 
 
-// ================= A CUANTO VENDO (calculadora clara por pasos) =================
-function instalarExtras2(){
-  const modal = document.getElementById('modalCalculadoras');
-  if(!modal || modal.dataset.nuevaOk) { return; }
-  const host = modal.querySelector('.modal');
-  const form = modal.querySelector('form');
-  if(form){ form.style.display = 'none'; }
-  if(host){
-    const viejoP = host.querySelector('p');
-    if(viejoP){ viejoP.style.display = 'none'; }
-    const controles = document.createElement('div');
-    controles.innerHTML =
-      '<p style="font-size:13px;color:#555;margin-bottom:10px;">Te digo a cuánto vender según lo que te costó la bandeja y cuánto quieres ganar.</p>'+
-      '<div style="font-size:13px;font-weight:800;margin-bottom:4px;">1️⃣ Elige el producto</div>'+
-      '<select id="calcProdSel" onchange="cambioProdCalc()" style="width:100%;padding:10px;border:2px solid #e5e7eb;border-radius:8px;font-size:14px;box-sizing:border-box;">'+
-      '<option value="Primera">Primera</option><option value="Segunda">Segunda</option><option value="Tercera">Tercera</option></select>'+
-      '<div style="height:10px"></div>'+
-      '<div style="font-size:13px;font-weight:800;margin-bottom:4px;">2️⃣ Lo que te costó cada bandeja</div>'+
-      '<div style="font-size:11px;color:#888;margin-bottom:4px;">Se llena solo con tus compras registradas. Puedes cambiarlo si quieres.</div>'+
-      '<input id="calcCostoReal" type="number" inputmode="numeric" oninput="calcVender()" style="width:100%;padding:10px;border:2px solid #e5e7eb;border-radius:8px;font-size:15px;font-weight:700;box-sizing:border-box;">'+
-      '<div style="height:10px"></div>'+
-      '<div style="font-size:13px;font-weight:800;margin-bottom:4px;color:#16a34a;">3️⃣ Cuánto quieres GANAR por cada bandeja</div>'+
-      '<div style="font-size:11px;color:#888;margin-bottom:4px;">Ejemplo: si escribes 800 y la bandeja te costó 6.000, te sugerirá venderla a $6.800.</div>'+
-      '<input id="calcObjetivo" type="number" inputmode="numeric" oninput="calcVender()" placeholder="Ej: 800" style="width:100%;padding:10px;border:2px solid #16a34a;border-radius:8px;font-size:15px;font-weight:800;color:#16a34a;box-sizing:border-box;">'+
-      '<div id="calcNuevoRes" style="margin-top:12px;"></div>'+
-      '<button id="btnAplicarPrecio" onclick="aplicarPrecioCalc()" style="width:100%;margin-top:6px;background:#16a34a;color:#fff;border:none;border-radius:10px;padding:12px;font-weight:800;cursor:pointer;font-size:14px;display:none;">✅ Usar este precio en la app</button>';
-    host.insertBefore(controles, host.querySelector('.modal-btns'));
-  }
-  modal.dataset.nuevaOk = '1';
-  if(document.querySelectorAll){
-    document.querySelectorAll("button[onclick*='modalCalculadoras']").forEach(function(btn){
-      btn.innerHTML = btn.innerHTML.replace('¿A cuánto vendo?', '🔮 ¿A cuánto vendo?').replace('Calculadoras', '🔮 ¿A cuánto vendo?');
-    });
-  }
-}
-function cambioProdCalc(){
-  const prod = document.getElementById('calcProdSel').value;
-  document.getElementById('calcCostoReal').value = costoBtx(prod) || '';
-  document.getElementById('calcObjetivo').value = '';
-  calcVender();
-}
-function abrirAQueVendo(){
-  instalarExtras2();
-  const sel = document.getElementById('calcProdSel');
-  if(sel){
-    const opT = sel.querySelector('option[value="Tercera"]');
-    if(opT) opT.style.display = estado.tercera && estado.tercera.activada ? '' : 'none';
-  }
-  const prod = sel.value;
-  document.getElementById('calcCostoReal').value = costoBtx(prod) || '';
-  if(!document.getElementById('calcObjetivo').value){
-    const precioAct = prod === 'Tercera' ? (estado.tercera.precio||0) : (estado.precios[prod]||0);
-    document.getElementById('calcObjetivo').value = Math.max(0, precioAct - costoBtx(prod));
-  }
-  calcVender();
-}
-let _ultimoPrecioCalc = 0;
-function calcVender(){
-  const prod = document.getElementById('calcProdSel').value;
-  const costo = parseInt(document.getElementById('calcCostoReal').value) || 0;
-  const obj = parseInt(document.getElementById('calcObjetivo').value) || 0;
-  const c = document.getElementById('calcNuevoRes');
-  _ultimoPrecioCalc = 0;
-  const ba = document.getElementById('btnAplicarPrecio');
-  if(costo <= 0){
-    if(c) c.innerHTML = '<div class="empty">Paso 2: escribe cuánto te costó la bandeja (o registra una compra primero).</div>';
-    if(ba) ba.style.display = 'none';
-    return;
-  }
-  if(obj <= 0){
-    if(c) c.innerHTML = '<div class="empty">Paso 3: escribe cuánto quieres ganar por bandeja.</div>';
-    if(ba) ba.style.display = 'none';
-    return;
-  }
-  const precio = costo + obj;
-  _ultimoPrecioCalc = precio;
-  if(ba) ba.style.display = '';
-  const pct = Math.round(obj / costo * 100);
-  const desde = Date.now() - 30 * 86400000;
-  let bt30 = 0, dias = {};
-  estado.ventas.forEach(function(v){
-    if((v.prod || '') === prod && v.f >= desde){ bt30 += (v.bandejas || 0); dias[new Date(v.f).toDateString()] = 1; }
-  });
-  const meses = Math.max(0.25, Object.keys(dias).length / 30);
-  const btMes = Math.round(bt30 / meses);
-  const ganMes = Math.round(btMes * obj);
-  const precioAct = prod === 'Tercera' ? (estado.tercera.precio||0) : (estado.precios[prod]||0);
-  const objAct = precioAct - costo;
-  const dif = Math.round(btMes * (obj - objAct));
-  const color = dif > 0 ? '#16a34a' : (dif < 0 ? '#dc2626' : '#666');
-  c.innerHTML =
-    '<div style="font-size:12px;font-weight:800;color:#7c3aed;margin-bottom:6px;">💡 Si vendes a este precio:</div>'+
-    '<div class="stat3"><div class="s"><div class="v">' + fmt(precio) + '</div><div class="l">por bandeja</div></div>'+
-    '<div class="s"><div class="v">' + fmt(precio * 6) + '</div><div class="l">por caja</div></div>'+
-    '<div class="s"><div class="v">' + pct + '%</div><div class="l">de margen</div></div></div>'+
-    '<div class="gan-line"><span class="k">Vendes ~' + fmt(btMes) + ' btx al mes</span><span class="v">ganarías ' + fmt(ganMes) + '/mes</span></div>'+
-    '<div class="gan-line"><span class="k">Comparado con tu precio actual (' + fmt(precioAct) + ')</span><span class="v" style="color:' + color + ';">' + (dif >= 0 ? '+' : '') + fmt(dif) + '/mes</span></div>';
-}
-function aplicarPrecioCalc(){
-  if(!_ultimoPrecioCalc){ toast('Completa los 3 pasos primero'); return; }
-  const prod = document.getElementById('calcProdSel').value;
-  if(prod === 'Tercera'){
-    estado.tercera.activada = true;
-    estado.tercera.precio = _ultimoPrecioCalc;
-  } else {
-    estado.precios[prod] = _ultimoPrecioCalc;
-  }
-  guardar(); actualizarTodo(); cerrarModal('modalCalculadoras');
-  toast('✅ Nuevo precio aplicado a ' + prod);
-}
-
 function diaBloqueado(){
   if(!estado.arqueoFecha) return false;
   return estado.arqueoFecha !== new Date().toDateString();
@@ -3129,7 +3002,7 @@ function autoBackup(){
 
 // ── INIT ──
 function actualizarTodo(){
-  try{ instalarExtras(); instalarExtras2(); }catch(e){} actualizarAvisoDia(); actualizarStockUI(); actualizarPreciosUI(); actualizarHistorial(); actualizarBtnApertura(); }
+  try{ instalarExtras(); }catch(e){} actualizarAvisoDia(); actualizarStockUI(); actualizarPreciosUI(); actualizarHistorial(); actualizarBtnApertura(); }
 async function initApp(){
   const s = cargar();
   document.getElementById('fechaHoy').textContent = 'Hoy: '+hoy();
