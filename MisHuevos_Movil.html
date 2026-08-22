@@ -869,6 +869,7 @@ function aplicarDefaults(d){
   if(d.tema===undefined) d.tema='naranja';
   if(d.umbral===undefined) d.umbral=2;
   if(!d.deudas) d.deudas=[];
+  if(!d.clientesFonos) d.clientesFonos={};
   if(!d.ventas) d.ventas=[];
   if(d.arqueoInicial===undefined) d.arqueoInicial=0;
   if(d.arqueoFecha===undefined) d.arqueoFecha='';
@@ -1489,7 +1490,7 @@ function confirmarVenta(){
   if(venta.pago==='deuda' && !cliente){ toast('Escribe el nombre del cliente'); return; }
   if(venta.pago==='deuda'){
     const exist = estado.deudas.find(d=>d.nombre===cliente);
-    if(exist) exist.monto += precio; else estado.deudas.push({nombre:cliente, monto:precio});
+    if(exist) exist.monto += precio; else estado.deudas.push({nombre:cliente, monto:precio, f:Date.now()});
   }
   
   // Descontar del stock (priorizando bandejas parciales)
@@ -1717,7 +1718,10 @@ function confirmarCompra(){
     toast('🥚 Tercera activada automáticamente');
   }
   estado.stock[categoria] += totalBandejas;
-  estado.compras.push({ f:fecha?new Date(fecha).getTime():Date.now(), proveedor, prod:categoria, cajas:cajas, bandejas:bandejas, precio:precioCaja, total:total });
+  var _fkc = _fotoPendCompra ? 'foto:compra:'+Date.now() : null;
+  if(_fkc){ idbPut(_fkc, _fotoPendCompra); }
+  _fotoPendCompra = null;
+  estado.compras.push({ foto:_fkc||null, f:fecha?new Date(fecha).getTime():Date.now(), proveedor, prod:categoria, cajas:cajas, bandejas:bandejas, precio:precioCaja, total:total });
   logAccion('COMPRA', categoria+' · '+cajas+' cajas + '+bandejas+' bandejas · '+fmt(total)+' · '+proveedor);
   guardar(); actualizarTodo();
   toast('🛒 '+categoria+' · '+cajas+' cajas + '+bandejas+' btx · '+fmt(total));
@@ -1781,7 +1785,11 @@ function confirmarGasto(){
   const monto = parseInt(document.getElementById('gastoMonto').value)||0;
   if(!concepto){ toast('Escribe el concepto'); return; }
   if(monto<=0){ toast('Ingresa un monto'); return; }
-  estado.gastos.push({ f:Date.now(), concepto, monto });
+  var _fk = null;
+  if(_fotoPendGasto){ _fk = 'foto:gasto:'+Date.now(); idbPut(_fk, _fotoPendGasto); }
+  estado.gastos.push({ f:Date.now(), concepto, monto, foto:_fk||null });
+  _fotoPendGasto = null;
+  var _fes = document.getElementById('fotoEstado_gasto'); if(_fes) _fes.textContent='';
   document.getElementById('gastoConcepto').value='';
   document.getElementById('gastoMonto').value='';
   guardar(); actualizarTodo();
@@ -1821,7 +1829,7 @@ function llenarDeudas(){
   const c = document.getElementById('deudasLista');
   if(estado.deudas.length===0){ c.innerHTML='<div class="empty">No hay deudas. Las ventas "a deuda" se anotan aquí.</div>'; return; }
   c.innerHTML = estado.deudas.map(d=>{
-    return '<div class="gan-line"><span class="k" style="font-weight:800;">'+d.nombre+'</span><span style="display:flex;gap:6px;align-items:center;"><span style="color:#dc2626;font-weight:800;">'+fmt(d.monto)+'</span> <button class="btn-ok" style="padding:6px 10px;border:none;border-radius:8px;color:#fff;font-weight:800;font-size:11px;cursor:pointer;background:#16a34a;" onclick="pagarDeuda(\''+d.nombre+'\')">Pagó</button> <button style="padding:6px 10px;border:none;border-radius:8px;color:#fff;font-weight:800;font-size:11px;cursor:pointer;background:#dc2626;" onclick="borrarDeuda(\''+d.nombre+'\')">✕</button></span></div>';
+    return '<div class="gan-line"><span class="k" style="font-weight:800;">'+d.nombre+'</span><span style="display:flex;gap:6px;align-items:center;"><span style="color:#dc2626;font-weight:800;">'+fmt(d.monto)+'</span> <button style="padding:6px 10px;border:none;border-radius:8px;color:#fff;font-weight:800;font-size:11px;cursor:pointer;background:#25D366;" onclick="cobrarWhatsApp(\''+d.nombre+'\')">💬</button> <button class="btn-ok" style="padding:6px 10px;border:none;border-radius:8px;color:#fff;font-weight:800;font-size:11px;cursor:pointer;background:#16a34a;" onclick="pagarDeuda(\''+d.nombre+'\')">Pagó</button> <button style="padding:6px 10px;border:none;border-radius:8px;color:#fff;font-weight:800;font-size:11px;cursor:pointer;background:#dc2626;" onclick="borrarDeuda(\''+d.nombre+'\')">✕</button></span></div>';
   }).join('');
   const total = estado.deudas.reduce((a,d)=>a+d.monto,0);
   c.innerHTML += '<div class="gan-line"><span class="k">Total por cobrar</span><span class="v" style="color:#dc2626;">'+fmt(total)+'</span></div>';
@@ -1855,7 +1863,7 @@ function registrarDarEfectivo(){
   if(!nombre){ toast('Escribe el nombre'); return; }
   if(monto<=0){ toast('Ingresa un monto válido'); return; }
   const exist = estado.deudas.find(d=>d.nombre===nombre);
-  if(exist) exist.monto += monto; else estado.deudas.push({nombre:nombre, monto:monto, tipo:'prestamo'});
+  if(exist) exist.monto += monto; else estado.deudas.push({nombre:nombre, monto:monto, tipo:'prestamo', f:Date.now()});
   logAccion('PRÉSTAMO', nombre+' · '+fmt(monto));
   guardar(); llenarDeudas(); actualizarTodo();
   document.getElementById('darEfectivoNombre').value='';
@@ -2609,6 +2617,217 @@ function actualizarAvisoDia(){
   }
 }
 
+// ================= COBRANZA WHATSAPP =================
+function fonos(){
+  if(!estado.clientesFonos) estado.clientesFonos = {};
+  return estado.clientesFonos;
+}
+function cobrarWhatsApp(nombre){
+  const d = estado.deudas.find(function(x){ return x.nombre === nombre; });
+  if(!d){ toast('Deuda no encontrada'); return; }
+  let tel = (fonos()[nombre] || '').replace(/\D/g,'');
+  if(tel.length < 9){ pedirFono(nombre, function(){ enviarCobro(nombre, d); }); return; }
+  enviarCobro(nombre, d, tel);
+}
+function normalizaFono(t){
+  t = (t||'').replace(/\D/g,'');
+  if(t.length >= 10 && t.indexOf('56') !== 0) t = '56' + t.slice(-9);
+  else if(t.length === 9) t = '56' + t;
+  return t;
+}
+function enviarCobro(nombre, d, tel){
+  tel = normalizaFono(tel || fonos()[nombre]);
+  if(tel.length < 11){ toast('Numero de telefono invalido'); return; }
+  let dias = '';
+  if(d.f){
+    const dd = Math.floor((Date.now() - d.f) / 86400000);
+    if(dd >= 1) dias = ' (' + dd + ' dia' + (dd > 1 ? 's' : '') + ')';
+  }
+  const msg = 'Hola ' + nombre + ' 👋 Te recuerdo tu deuda de ' + fmt(d.monto) + dias +
+              ' por los huevos 🥚. ¿Te la puedo pasar a cobrar hoy? ¡Gracias!';
+  window.open('https://wa.me/' + tel + '?text=' + encodeURIComponent(msg), '_blank');
+}
+function pedirFono(nombre, cb){
+  if(!document.getElementById('modalFono')){
+    document.body.insertAdjacentHTML('beforeend',
+      '<div class="modal-back" id="modalFono"><div class="modal">'+
+      '<div class="modal-header"><h3>📞 Telefono de ' + nombre + '</h3>'+
+      '<button class="modal-close" onclick="cerrarModal(\'modalFono\')">✕</button></div>'+
+      '<p style="font-size:12px;color:#666;">Se guarda una sola vez para cobranzas por WhatsApp</p>'+
+      '<input id="fonoInput" type="tel" inputmode="numeric" placeholder="Ej: 912345678" '+
+      'style="width:100%;padding:10px;border:2px solid #e5e7eb;border-radius:8px;font-size:15px;box-sizing:border-box;">'+
+      '<div class="modal-btns">'+
+      '<button class="btn-cancel" onclick="cerrarModal(\'modalFono\')">Cancelar</button>'+
+      '<button class="btn-ok" style="color:#fff;font-weight:700;border:none;border-radius:10px;padding:12px 18px;cursor:pointer;" onclick="guardarFono()">Guardar</button>'+
+      '</div></div></div>');
+  }
+  document.getElementById('fonoInput').value = fonos()[nombre] || '';
+  window._fonoCb = cb; window._fonoNombre = nombre;
+  abrirModal('modalFono');
+}
+function guardarFono(){
+  const val = document.getElementById('fonoInput').value.trim();
+  if(val.replace(/\D/g,'').length < 9){ toast('Ingresa un numero valido'); return; }
+  fonos()[window._fonoNombre] = val;
+  guardar(); cerrarModal('modalFono');
+  toast('📱 Telefono guardado');
+  if(window._fonoCb) window._fonoCb();
+}
+
+// ================= FOTOS DE BOLETAS =================
+let _fotoPendGasto = null, _fotoPendCompra = null;
+function comprimirImagen(file, max, q){
+  max = max || 900; q = q || 0.65;
+  return new Promise(function(res, rej){
+    const fr = new FileReader();
+    fr.onload = function(){
+      const img = new Image();
+      img.onload = function(){
+        const sc = Math.min(1, max / Math.max(img.width, img.height));
+        const cv = document.createElement('canvas');
+        cv.width = Math.round(img.width * sc);
+        cv.height = Math.round(img.height * sc);
+        cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+        res(cv.toDataURL('image/jpeg', q));
+      };
+      img.onerror = rej;
+      img.src = fr.result;
+    };
+    fr.onerror = rej;
+    fr.readAsDataURL(file);
+  });
+}
+window.__fotoPend = async function(pref, input){
+  if(!input.files || !input.files[0]) return;
+  try{
+    const dataUrl = await comprimirImagen(input.files[0]);
+    if(pref === 'gasto') _fotoPendGasto = dataUrl; else _fotoPendCompra = dataUrl;
+    const st = document.getElementById('fotoEstado_' + pref);
+    if(st) st.textContent = '✔ foto lista';
+  }catch(e){ toast('No se pudo leer la imagen'); }
+};
+function instalarExtras(){
+  // picker de foto en modales gasto y compra (una sola vez)
+  [['modalGasto','gasto'],['modalCompra','compra']].forEach(function(par){
+    const modal = document.getElementById(par[0]);
+    if(!modal || modal.dataset.fotoOk) return;
+    const btns = modal.querySelector('.modal-btns');
+    if(!btns) return;
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'margin-bottom:6px;';
+    wrap.innerHTML = '<label style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#2563eb;cursor:pointer;font-weight:700;">'+
+      '🧾 Adjuntar boleta (foto)'+
+      '<input type="file" accept="image/*" capture="environment" style="display:none" onchange="window.__fotoPend(\'' + par[1] + '\', this)">'+
+      '</label><span id="fotoEstado_' + par[1] + '" style="font-size:12px;color:#16a34a;font-weight:700;"></span>';
+    btns.parentNode.insertBefore(wrap, btns);
+    modal.dataset.fotoOk = '1';
+  });
+  // boton simulador dentro del modal de precios
+  const pPrim = document.getElementById('precioPrimBtx');
+  if(pPrim){
+    const pm = pPrim.closest('.modal');
+    if(pm && !pm.dataset.simOk){
+      const btns = pm.querySelector('.modal-btns');
+      if(btns){
+        const b = document.createElement('button');
+        b.textContent = '🔮 Simulador de precios';
+        b.style.cssText = 'width:100%;margin-top:6px;background:#7c3aed;color:#fff;border:none;border-radius:10px;padding:11px;font-weight:800;cursor:pointer;font-size:13px;';
+        b.onclick = abrirSimulador;
+        btns.parentNode.insertBefore(b, btns);
+        pm.dataset.simOk = '1';
+      }
+    }
+  }
+}
+function contarBoletas(){
+  let n = 0;
+  estado.compras.forEach(function(c){ if(c.foto) n++; });
+  estado.gastos.forEach(function(g){ if(g.foto) n++; });
+  return n;
+}
+function verBoletas(){
+  const items = [];
+  estado.compras.forEach(function(c){ if(c.foto) items.push({ k:c.foto, tipo:'Compra', det:c.proveedor, f:c.f }); });
+  estado.gastos.forEach(function(g){ if(g.foto) items.push({ k:g.foto, tipo:'Gasto', det:g.concepto, f:g.f }); });
+  if(items.length === 0){ toast('Aun no hay boletas con foto'); return; }
+  items.sort(function(a,b){ return b.f - a.f; });
+  if(!document.getElementById('modalBoletas')){
+    document.body.insertAdjacentHTML('beforeend',
+      '<div class="modal-back" id="modalBoletas"><div class="modal" style="max-height:85vh;overflow-y:auto;">'+
+      '<div class="modal-header"><h3>🧾 Boletas guardadas</h3>'+
+      '<button class="modal-close" onclick="cerrarModal(\'modalBoletas\')">✕</button></div>'+
+      '<div id="boletasLista"></div></div></div>');
+  }
+  const cont = document.getElementById('boletasLista');
+  cont.innerHTML = '<div class="empty">Cargando fotos...</div>';
+  abrirModal('modalBoletas');
+  Promise.all(items.map(function(it){
+    return idbGet(it.k).then(function(v){ it.img = v; return it; });
+  })).then(function(list){
+    cont.innerHTML = list.map(function(it){
+      return '<div style="margin-bottom:14px;">'+
+        '<div style="font-size:12px;color:#666;margin-bottom:4px;"><b>'+it.tipo+'</b> · '+it.det+' · '+fDate(it.f)+'</div>'+
+        (it.img ? '<img src="'+it.img+'" style="width:100%;border-radius:10px;border:1px solid #eee;">'
+                : '<div class="empty">Foto no encontrada en este dispositivo</div>')+
+        '</div>';
+    }).join('');
+  });
+}
+
+// ================= SIMULADOR DE PRECIOS =================
+function abrirSimulador(){
+  if(!document.getElementById('modalSimulador')){
+    document.body.insertAdjacentHTML('beforeend',
+      '<div class="modal-back" id="modalSimulador"><div class="modal">'+
+      '<div class="modal-header"><h3>🔮 Simulador de precios</h3>'+
+      '<button class="modal-close" onclick="cerrarModal(\'modalSimulador\')">✕</button></div>'+
+      '<label style="font-size:12px;font-weight:700;">Producto</label>'+
+      '<select id="simProd" onchange="simularPrecio()" style="width:100%;padding:10px;border:2px solid #e5e7eb;border-radius:8px;font-size:14px;box-sizing:border-box;">'+
+      '<option value="Primera">Primera</option><option value="Segunda">Segunda</option><option value="Tercera">Tercera</option>'+
+      '</select>'+
+      '<div style="height:8px"></div>'+
+      '<label style="font-size:12px;font-weight:700;">Nuevo precio por bandeja</label>'+
+      '<input id="simNuevo" type="number" inputmode="numeric" oninput="simularPrecio()" '+
+      'style="width:100%;padding:10px;border:2px solid #e5e7eb;border-radius:8px;font-size:15px;font-weight:700;box-sizing:border-box;">'+
+      '<div id="simResultado" style="margin-top:12px;"></div>'+
+      '</div></div>');
+  }
+  const sel = document.getElementById('simProd');
+  const opT = sel.querySelector('option[value="Tercera"]');
+  opT.style.display = estado.tercera && estado.tercera.activada ? '' : 'none';
+  const p0 = sel.value === 'Tercera' ? estado.tercera.precio : estado.precios[sel.value];
+  document.getElementById('simNuevo').value = p0;
+  simularPrecio();
+  abrirModal('modalSimulador');
+}
+function simularPrecio(){
+  const prod = document.getElementById('simProd').value;
+  const actual = prod === 'Tercera' ? (estado.tercera.precio||0) : (estado.precios[prod]||0);
+  const nuevo = parseInt(document.getElementById('simNuevo').value) || 0;
+  const desde = Date.now() - 30 * 86400000;
+  let bt30 = 0, diasConVenta = {};
+  estado.ventas.forEach(function(v){
+    if((v.prod || '') === prod && v.f >= desde){ bt30 += (v.bandejas || 0); diasConVenta[new Date(v.f).toDateString()] = 1; }
+  });
+  const meses = Math.max(0.25, Object.keys(diasConVenta).length / 30);
+  const btMes = bt30 / meses;
+  const dif = (nuevo - actual) * btMes;
+  const costo = COSTO_BTX[prod] || Math.round(actual / (1 + estado.margen / 100));
+  const ganNueva = nuevo - costo, ganVieja = actual - costo;
+  const color = dif > 0 ? '#16a34a' : (dif < 0 ? '#dc2626' : '#666');
+  document.getElementById('simResultado').innerHTML =
+    '<div class="stat3"><div class="s"><div class="v">' + fmt(Math.round(btMes)) + '</div><div class="l">btx/mes vendidas</div></div>'+
+    '<div class="s"><div class="v">' + fmt(actual) + '</div><div class="l">precio actual</div></div>'+
+    '<div class="s"><div class="v">' + fmt(nuevo) + '</div><div class="l">precio nuevo</div></div></div>'+
+    '<div style="margin-top:10px;padding:12px;border-radius:10px;background:#f8fafc;text-align:center;">'+
+    '<div style="font-size:20px;font-weight:900;color:' + color + ';">' + (dif >= 0 ? '+' : '') + fmt(Math.round(dif)) + ' /mes</div>'+
+    '<div style="font-size:11px;color:#777;margin-top:2px;">si mantienes el volumen actual</div></div>'+
+    '<div class="gan-line" style="margin-top:8px;"><span class="k">Margen por bandeja</span><span class="v">' +
+    fmt(ganVieja) + ' → ' + fmt(ganNueva) + ' (' + (costo > 0 ? Math.round(ganNueva / costo * 100) : 0) + '%)</span></div>'+
+    (ganNueva <= 0 ? '<div style="color:#dc2626;font-size:12px;font-weight:700;margin-top:6px;text-align:center;">⚠️ Ese precio estaria bajo tu costo</div>' : '');
+}
+
+
 function diaBloqueado(){
   if(!estado.arqueoFecha) return false;
   return estado.arqueoFecha !== new Date().toDateString();
@@ -2813,7 +3032,8 @@ function autoBackup(){
 }
 
 // ── INIT ──
-function actualizarTodo(){ actualizarAvisoDia(); actualizarStockUI(); actualizarPreciosUI(); actualizarHistorial(); actualizarBtnApertura(); }
+function actualizarTodo(){
+  try{ instalarExtras(); }catch(e){} actualizarAvisoDia(); actualizarStockUI(); actualizarPreciosUI(); actualizarHistorial(); actualizarBtnApertura(); }
 async function initApp(){
   const s = cargar();
   document.getElementById('fechaHoy').textContent = 'Hoy: '+hoy();
