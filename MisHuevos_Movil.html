@@ -1060,7 +1060,7 @@ function abrirModal(id){
   if(id==='modalApertura') llenarApertura();
   if(id==='modalReportes'){ reportesTab('resumen'); }
   if(id==='modalMerma') mermaProducto('Primera');
-  if(id==='modalCalculadoras'){ document.getElementById('calcCostoCaja').value=COSTO_BTX.Primera*6; calcularPrecioIdeal(); }
+  if(id==='modalCalculadoras'){ abrirAQueVendo(); }
   if(id==='modalMiDinero'){ llenarCajaResumen(); calcularVuelto(); }
   if(id==='modalAjustar'){
     document.getElementById('ajPrimInput').value = estado.stock.Primera;
@@ -2722,21 +2722,16 @@ function instalarExtras(){
     btns.parentNode.insertBefore(wrap, btns);
     modal.dataset.fotoOk = '1';
   });
-  // boton simulador dentro del modal de precios
+    // boton simulador bajo los precios de la pantalla principal
   const pPrim = document.getElementById('precioPrimBtx');
-  if(pPrim){
-    const pm = pPrim.closest('.modal');
-    if(pm && !pm.dataset.simOk){
-      const btns = pm.querySelector('.modal-btns');
-      if(btns){
-        const b = document.createElement('button');
-        b.textContent = '🔮 Simulador de precios';
-        b.style.cssText = 'width:100%;margin-top:6px;background:#7c3aed;color:#fff;border:none;border-radius:10px;padding:11px;font-weight:800;cursor:pointer;font-size:13px;';
-        b.onclick = abrirSimulador;
-        btns.parentNode.insertBefore(b, btns);
-        pm.dataset.simOk = '1';
-      }
-    }
+  if(pPrim && !document.getElementById('btnSimuladorHome')){
+    const cont = pPrim.closest('.precios') || pPrim.parentNode;
+    const b = document.createElement('button');
+    b.id = 'btnSimuladorHome';
+    b.textContent = '🔮 Simulador de precios';
+    b.style.cssText = 'width:100%;margin-top:8px;background:#7c3aed;color:#fff;border:none;border-radius:10px;padding:11px;font-weight:800;cursor:pointer;font-size:13px;';
+    b.onclick = function(){ abrirModal('modalCalculadoras'); };
+    (cont.parentNode || cont).insertBefore(b, cont.nextSibling);
   }
 }
 function contarBoletas(){
@@ -2825,6 +2820,107 @@ function simularPrecio(){
     '<div class="gan-line" style="margin-top:8px;"><span class="k">Margen por bandeja</span><span class="v">' +
     fmt(ganVieja) + ' → ' + fmt(ganNueva) + ' (' + (costo > 0 ? Math.round(ganNueva / costo * 100) : 0) + '%)</span></div>'+
     (ganNueva <= 0 ? '<div style="color:#dc2626;font-size:12px;font-weight:700;margin-top:6px;text-align:center;">⚠️ Ese precio estaria bajo tu costo</div>' : '');
+}
+
+
+// ================= A CUANTO VENDO (nueva calculadora unica) =================
+function instalarExtras2(){
+  const modal = document.getElementById('modalCalculadoras');
+  if(!modal || modal.dataset.nuevaOk) { return; }
+  const form = modal.querySelector('form');
+  if(form){ form.style.display='none'; }
+  const host = modal.querySelector('.modal');
+  if(host){
+    const controles = document.createElement('div');
+    controles.innerHTML =
+      '<label style="font-size:12px;font-weight:700;">Producto</label>'+
+      '<select id="calcProdSel" onchange="cambioProdCalc()" style="width:100%;padding:10px;border:2px solid #e5e7eb;border-radius:8px;font-size:14px;box-sizing:border-box;">'+
+      '<option value="Primera">Primera</option><option value="Segunda">Segunda</option><option value="Tercera">Tercera</option></select>'+
+      '<div style="height:8px"></div>'+
+      '<label style="font-size:12px;font-weight:700;">Costo por bandeja (de tus compras)</label>'+
+      '<input id="calcCostoReal" type="number" inputmode="numeric" oninput="calcVender()" style="width:100%;padding:10px;border:2px solid #e5e7eb;border-radius:8px;font-size:15px;font-weight:700;box-sizing:border-box;">'+
+      '<div style="height:8px"></div>'+
+      '<label style="font-size:12px;font-weight:700;">Quiero ganar por bandeja</label>'+
+      '<input id="calcObjetivo" type="number" inputmode="numeric" oninput="calcVender()" placeholder="Ej: 800" style="width:100%;padding:10px;border:2px solid #16a34a;border-radius:8px;font-size:15px;font-weight:800;color:#16a34a;box-sizing:border-box;">'+
+      '<div id="calcNuevoRes" style="margin-top:12px;"></div>'+
+      '<button id="btnAplicarPrecio" onclick="aplicarPrecioCalc()" style="width:100%;margin-top:6px;background:#16a34a;color:#fff;border:none;border-radius:10px;padding:12px;font-weight:800;cursor:pointer;font-size:14px;">✅ Aplicar este precio</button>';
+    host.insertBefore(controles, host.querySelector('.modal-btns'));
+  }
+  modal.dataset.nuevaOk = '1';
+  if(document.querySelectorAll){
+    document.querySelectorAll("button[onclick*='modalCalculadoras']").forEach(function(btn){
+      btn.innerHTML = btn.innerHTML.replace('Calculadoras', '¿A cuánto vendo?');
+    });
+  }
+}
+function cambioProdCalc(){
+  const prod = document.getElementById('calcProdSel').value;
+  document.getElementById('calcCostoReal').value = costoBtx(prod) || '';
+  document.getElementById('calcObjetivo').value = '';
+  calcVender();
+}
+function abrirAQueVendo(){
+  instalarExtras2();
+  const sel = document.getElementById('calcProdSel');
+  if(sel){
+    const opT = sel.querySelector('option[value="Tercera"]');
+    if(opT) opT.style.display = estado.tercera && estado.tercera.activada ? '' : 'none';
+  }
+  const prod = sel.value;
+  document.getElementById('calcCostoReal').value = costoBtx(prod) || '';
+  if(!document.getElementById('calcObjetivo').value){
+    const precioAct = prod === 'Tercera' ? (estado.tercera.precio||0) : (estado.precios[prod]||0);
+    document.getElementById('calcObjetivo').value = Math.max(0, precioAct - costoBtx(prod));
+  }
+  calcVender();
+}
+let _ultimoPrecioCalc = 0;
+function calcVender(){
+  const prod = document.getElementById('calcProdSel').value;
+  const costo = parseInt(document.getElementById('calcCostoReal').value) || 0;
+  const obj = parseInt(document.getElementById('calcObjetivo').value) || 0;
+  const c = document.getElementById('calcNuevoRes');
+  _ultimoPrecioCalc = 0;
+  const ba = document.getElementById('btnAplicarPrecio');
+  if(costo <= 0){
+    if(c) c.innerHTML = '<div class="empty">Registra una compra o escribe el costo</div>';
+    if(ba) ba.style.display = 'none';
+    return;
+  }
+  const precio = costo + obj;
+  _ultimoPrecioCalc = precio;
+  if(ba) ba.style.display = '';
+  const pct = Math.round(obj / costo * 100);
+  const desde = Date.now() - 30 * 86400000;
+  let bt30 = 0, dias = {};
+  estado.ventas.forEach(function(v){
+    if((v.prod || '') === prod && v.f >= desde){ bt30 += (v.bandejas || 0); dias[new Date(v.f).toDateString()] = 1; }
+  });
+  const meses = Math.max(0.25, Object.keys(dias).length / 30);
+  const btMes = Math.round(bt30 / meses);
+  const ganMes = Math.round(btMes * obj);
+  const precioAct = prod === 'Tercera' ? (estado.tercera.precio||0) : (estado.precios[prod]||0);
+  const objAct = precioAct - costo;
+  const dif = Math.round(btMes * (obj - objAct));
+  const color = dif > 0 ? '#16a34a' : (dif < 0 ? '#dc2626' : '#666');
+  c.innerHTML =
+    '<div class="stat3"><div class="s"><div class="v">' + fmt(precio) + '</div><div class="l">por bandeja</div></div>'+
+    '<div class="s"><div class="v">' + fmt(precio * 6) + '</div><div class="l">la caja</div></div>'+
+    '<div class="s"><div class="v">' + pct + '%</div><div class="l">margen</div></div></div>'+
+    '<div class="gan-line"><span class="k">Vendes ~' + fmt(btMes) + ' btx/mes</span><span class="v">ganarias ' + fmt(ganMes) + '/mes</span></div>'+
+    '<div class="gan-line"><span class="k">vs precio actual (' + fmt(precioAct) + ')</span><span class="v" style="color:' + color + ';">' + (dif >= 0 ? '+' : '') + fmt(dif) + '/mes</span></div>';
+}
+function aplicarPrecioCalc(){
+  if(!_ultimoPrecioCalc){ toast('Calcula un precio primero'); return; }
+  const prod = document.getElementById('calcProdSel').value;
+  if(prod === 'Tercera'){
+    estado.tercera.activada = true;
+    estado.tercera.precio = _ultimoPrecioCalc;
+  } else {
+    estado.precios[prod] = _ultimoPrecioCalc;
+  }
+  guardar(); actualizarTodo(); cerrarModal('modalCalculadoras');
+  toast('✅ Nuevo precio aplicado a ' + prod);
 }
 
 
@@ -3033,7 +3129,7 @@ function autoBackup(){
 
 // ── INIT ──
 function actualizarTodo(){
-  try{ instalarExtras(); }catch(e){} actualizarAvisoDia(); actualizarStockUI(); actualizarPreciosUI(); actualizarHistorial(); actualizarBtnApertura(); }
+  try{ instalarExtras(); instalarExtras2(); }catch(e){} actualizarAvisoDia(); actualizarStockUI(); actualizarPreciosUI(); actualizarHistorial(); actualizarBtnApertura(); }
 async function initApp(){
   const s = cargar();
   document.getElementById('fechaHoy').textContent = 'Hoy: '+hoy();
