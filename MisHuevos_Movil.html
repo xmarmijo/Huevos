@@ -492,6 +492,9 @@ if ('serviceWorker' in navigator) {
       <button class="btn-cancel" onclick="cerrarModal('modalGasto')">Cancelar</button>
       <button class="btn-ok" onclick="confirmarGasto()">✓ Registrar gasto</button>
     </div>
+    <div style="margin-top:12px;border-top:2px dashed #eee;padding-top:12px;">
+      <button class="btn-cancel" style="width:100%;" onclick="abrirModal('modalHistorialVentas');abrirHistorialFiltrado('gastos')">📜 Ver gastos registrados</button>
+    </div>
   </div>
 </div>
 
@@ -603,7 +606,7 @@ if ('serviceWorker' in navigator) {
 
 <div class="modal-back" id="modalCierre">
   <div class="modal">
-    <div class="modal-header"><h3>id="tituloModalCierre" 🌙 Cierre de hoy</h3><button class="modal-close" onclick="cerrarModal('modalCierre')">✕</button></div>
+    <div class="modal-header"><h3 id="tituloModalCierre">🌙 Cierre de hoy</h3><button class="modal-close" onclick="cerrarModal('modalCierre')">✕</button></div>
     <div style="display:flex;gap:4px;margin-bottom:10px;">
       <button onclick="cierreTab('resumen')" id="cTabResumen" style="flex:1;padding:8px;border:2px solid #2563eb;background:#eff6ff;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;">📊 Resumen</button>
       <button onclick="cierreTab('cuadratura')" id="cTabCuad" style="flex:1;padding:8px;border:2px solid #e5e7eb;background:#fff;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;">🧮 Cuadratura</button>
@@ -860,6 +863,24 @@ function aplicarDefaults(d){
   if(d.arqueoFecha===undefined) d.arqueoFecha='';
   if(d.arqueoInicialManana===undefined) d.arqueoInicialManana=0;
   if(d.diaAbierto===undefined) d.diaAbierto=false;
+  if(d.diaAbiertoFecha===undefined) d.diaAbiertoFecha='';
+  if(!d.gastos) d.gastos=[];
+  if(!d.compras) d.compras=[];
+  if(!d.mermas) d.mermas=[];
+  if(d.cuadratura===undefined||d.cuadratura===null) d.cuadratura={};
+  if(d.cuadraturaFecha===undefined) d.cuadraturaFecha='';
+  const _hoyStr = new Date().toDateString();
+  const _movs = [].concat(d.ventas,d.gastos,d.compras,d.mermas);
+  if(d.diaAbierto===true && !d.diaAbiertoFecha){
+    let _maxF=0;
+    _movs.forEach(x=>{ if(x&&x.f){ const _ds=new Date(x.f).toDateString(); if(_ds!==_hoyStr && x.f>_maxF) _maxF=x.f; } });
+    d.diaAbiertoFecha = _maxF ? new Date(_maxF).toDateString() : '';
+  }
+  if(!Array.isArray(d.cierres)){
+    const _dias=new Set();
+    _movs.forEach(x=>{ if(x&&x.f) _dias.add(new Date(x.f).toDateString()); });
+    d.cierres=[..._dias].filter(f=>f!==_hoyStr && f!==d.diaAbiertoFecha);
+  }
   if(!d.productosExtra) d.productosExtra={};
   if(d.ultimoRespaldo===undefined) d.ultimoRespaldo=null;
   if(!d.logs) d.logs=[];
@@ -1041,7 +1062,7 @@ function abrirModal(id){
   if(id==='modalCompra'){ document.getElementById('compraFecha').value=new Date().toISOString().slice(0,10); }
   if(id==='modalDeudas') llenarDeudas();
   if(id==='modalClientes') llenarClientes();
-  if(id==='modalCierre'){ llenarCierre(); renderCuadratura(); cierreTab('resumen'); }
+  if(id==='modalCierre'){ document.getElementById('cierreContado').value = ''; llenarCierre(); renderCuadratura(); cierreTab('resumen'); }
   if(id==='modalApertura') llenarApertura();
   if(id==='modalReportes'){ reportesTab('resumen'); }
   if(id==='modalMerma') mermaProducto('Primera');
@@ -1310,6 +1331,23 @@ function costoBtx(prod){
   if(prod==='Tercera') return COSTO_BTX_TERCEIRA;
   return COSTO_BTX[prod]||0;
 }
+function costoPromedioBtx(prod){
+  const comps = (estado.compras||[]).filter(c=>c.prod===prod);
+  if(!comps.length) return costoBtx(prod);
+  let tb=0, tc=0;
+  comps.forEach(c=>{ tb += (c.cajas*6)+(c.bandejas||0); tc += c.total; });
+  return tb>0 ? Math.round(tc/tb) : costoBtx(prod);
+}
+function ganVenta(v){
+  if(!v) return 0;
+  if(v.tipo==='otro') return v.precio - (v.costo||0);
+  return v.precio - (v.bandejas||0)*costoPromedioBtx(v.prod);
+}
+function desgloseCosto(vHoy){
+  const prods = [...new Set((vHoy||[]).map(v=>v.prod).filter(Boolean))];
+  if(!prods.length) return '';
+  return ' ('+prods.map(p=>p+': '+fmt(costoPromedioBtx(p))+'/btx').join(' · ')+')';
+}
 
 // ── PRECIOS (escribes el precio, la app te dice cuánto ganas) ──
 function gananciaInfo(precio, prod){
@@ -1496,7 +1534,7 @@ function confirmarVenta(){
     estado.stock[prod] -= btxRestantes;
   }
   
-  const costoTotal = btx * costoBtx(prod);
+  const costoTotal = btx * costoPromedioBtx(prod);
   const vReg = { id:Date.now()+'-'+Math.random().toString(36).slice(2,7), f:Date.now(), prod:prod, tipo:venta.tipo, cant:venta.cant, bandejas:btx, precio:precio, gan:precio - costoTotal, pago:venta.pago, quien:cliente };
   estado.ventas.push(vReg);
   venta.sesion.push(vReg);
@@ -1616,7 +1654,7 @@ function confirmarFeria(){
     estado.stock[prod] -= btxRestantes;
   }
   
-  const costoTotal = bandejas * costoBtx(prod);
+  const costoTotal = bandejas * costoPromedioBtx(prod);
   const vReg = { id:Date.now()+'-'+Math.random().toString(36).slice(2,7), f:Date.now(), prod:prod, tipo:feria.tipo, cant:feria.cant, bandejas:bandejas, precio:precio, gan:precio - costoTotal, pago:'efectivo', quien:'Feria' };
   estado.ventas.push(vReg);
   feria.sesion.push(vReg);
@@ -1813,7 +1851,12 @@ function llenarDeudas(){
   const c = document.getElementById('deudasLista');
   if(estado.deudas.length===0){ c.innerHTML='<div class="empty">No hay deudas. Las ventas "a deuda" se anotan aquí.</div>'; return; }
   c.innerHTML = estado.deudas.map(d=>{
-    return '<div class="gan-line"><span class="k" style="font-weight:800;">'+d.nombre+'</span><span style="display:flex;gap:6px;align-items:center;"><span style="color:#dc2626;font-weight:800;">'+fmt(d.monto)+'</span> <button style="padding:6px 10px;border:none;border-radius:8px;color:#fff;font-weight:800;font-size:11px;cursor:pointer;background:#25D366;" onclick="cobrarWhatsApp(\''+d.nombre+'\')">💬</button> <button class="btn-ok" style="padding:6px 10px;border:none;border-radius:8px;color:#fff;font-weight:800;font-size:11px;cursor:pointer;background:#16a34a;" onclick="pagarDeuda(\''+d.nombre+'\')">Pagó</button> <button style="padding:6px 10px;border:none;border-radius:8px;color:#fff;font-weight:800;font-size:11px;cursor:pointer;background:#dc2626;" onclick="borrarDeuda(\''+d.nombre+'\')">✕</button></span></div>';
+    let sub = '';
+    if(d.f){
+      const diasD = Math.floor((Date.now()-d.f)/86400000);
+      sub = '<div style="font-size:10px;color:#9ca3af;font-weight:700;margin-top:1px;">Desde '+fDate(d.f)+(diasD>=1?' · '+diasD+' día'+(diasD!==1?'s':''):' (hoy)')+'</div>';
+    }
+    return '<div class="gan-line"><span class="k" style="font-weight:800;">'+d.nombre+sub+'</span><span style="display:flex;gap:6px;align-items:center;"><span style="color:#dc2626;font-weight:800;">'+fmt(d.monto)+'</span> <button style="padding:6px 10px;border:none;border-radius:8px;color:#fff;font-weight:800;font-size:11px;cursor:pointer;background:#25D366;" onclick="cobrarWhatsApp(\''+d.nombre+'\')">💬</button> <button class="btn-ok" style="padding:6px 10px;border:none;border-radius:8px;color:#fff;font-weight:800;font-size:11px;cursor:pointer;background:#16a34a;" onclick="pagarDeuda(\''+d.nombre+'\')">Pagó</button> <button style="padding:6px 10px;border:none;border-radius:8px;color:#fff;font-weight:800;font-size:11px;cursor:pointer;background:#dc2626;" onclick="borrarDeuda(\''+d.nombre+'\')">✕</button></span></div>';
   }).join('');
   const total = estado.deudas.reduce((a,d)=>a+d.monto,0);
   c.innerHTML += '<div class="gan-line"><span class="k">Total por cobrar</span><span class="v" style="color:#dc2626;">'+fmt(total)+'</span></div>';
@@ -1958,7 +2001,7 @@ function llenarCierre(){
   const mHoy = estado.mermas.filter(m=>m.f>=hoy0&&m.f<HASTA);
   const cHoy = estado.compras.filter(c=>c.f>=hoy0&&c.f<HASTA);
   const ventas = vHoy.reduce((a,v)=>a+v.precio,0);
-  const ganancia = vHoy.reduce((a,v)=>a+v.gan,0);
+  const ganancia = vHoy.reduce((a,v)=>a+ganVenta(v),0);
   const efectivo = vHoy.filter(v=>v.pago==='efectivo').reduce((a,v)=>a+v.precio,0);
   const transf = vHoy.filter(v=>v.pago==='transferencia').reduce((a,v)=>a+v.precio,0);
   const gastos = gHoy.reduce((a,g)=>a+g.monto,0);
@@ -1971,6 +2014,7 @@ function llenarCierre(){
     '<div class="stat3"><div class="s"><div class="v">'+fmt(ventas)+'</div><div class="l">Ventas hoy</div></div>'+
     '<div class="s"><div class="v" style="color:#16a34a;">'+fmt(ganancia)+'</div><div class="l">Ganancia</div></div>'+
     '<div class="s"><div class="v">'+btx+'</div><div class="l">Bandejas</div></div></div>'+
+    '<div style="font-size:10px;color:#9ca3af;text-align:center;margin-top:4px;padding:0 6px;">Ganancia = ventas − costo de compra'+desgloseCosto(vHoy)+'</div>'+
     '<div class="gan-line" style="margin-top:6px;"><span class="k">📦 Cajas vendidas</span><span class="v">'+(cajas%1?cajas.toFixed(1):cajas)+' cajas ('+btx+' bandejas)</span></div>'+
     '<div style="height:10px"></div>'+
     '<div class="gan-line"><span class="k">💵 Efectivo cobrado</span><span class="v">'+fmt(efectivo)+'</span></div>'+
@@ -1993,6 +2037,8 @@ function llenarApertura(){
 function abrirDia(){
   const efectivo = parseInt(document.getElementById('aperturaEfectivo').value)||0;
   if(efectivo<=0){ toast('Ingresa cuánto efectivo tienes para iniciar'); return; }
+  const pend = fechaVencida();
+  if(pend){ toast('⚠️ Cierra primero el día '+fmtDiaVenc(pend)); forzarCierreModal(); return; }
   estado.arqueoInicial = efectivo;
   estado.arqueoFecha = '';
   estado.diaAbierto = true; estado.diaAbiertoFecha = new Date().toDateString();
@@ -2023,12 +2069,15 @@ function cerrarDia(){
   }
   logAccion('CIERRE', 'Día cerrado con '+fmt(contado)+' (esperado '+fmt(esperado)+', diff '+(diferencia>=0?'+':'')+diferencia+') · '+new Date().toLocaleString('es-CL'));
   estado.arqueoInicial = contado;
+  if(!Array.isArray(estado.cierres)) estado.cierres = [];
   if(modoCierreForzado){
     estado.arqueoFecha = modoCierreForzado.toDateString();
+    if(!estado.cierres.includes(estado.arqueoFecha)) estado.cierres.push(estado.arqueoFecha);
     modoCierreForzado = null;
     setTimeout(()=>toast('Dia pendiente cerrado. Abre el dia de hoy'),700);
   } else {
     estado.arqueoFecha = new Date().toDateString();
+    if(!estado.cierres.includes(estado.arqueoFecha)) estado.cierres.push(estado.arqueoFecha);
   }
   estado.diaAbiertoFecha = '';
   estado.arqueoInicialManana = contado;
@@ -2043,7 +2092,7 @@ function llenarResumen(){
   const hoy0 = new Date(); hoy0.setHours(0,0,0,0);
   const semana0 = new Date(hoy0); semana0.setDate(hoy0.getDate()-hoy0.getDay());
   const mes0 = new Date(hoy0.getFullYear(), hoy0.getMonth(), 1);
-  const sum = arr => arr.reduce((a,v)=>a+v.gan,0);
+  const sum = arr => arr.reduce((a,v)=>a+ganVenta(v),0);
   document.getElementById('rsHoy').textContent = fmt(sum(estado.ventas.filter(v=>v.f>=hoy0.getTime())));
   document.getElementById('rsSemana').textContent = fmt(sum(estado.ventas.filter(v=>v.f>=semana0.getTime())));
   document.getElementById('rsMes').textContent = fmt(sum(estado.ventas.filter(v=>v.f>=mes0.getTime())));
@@ -2191,7 +2240,7 @@ function editInfoUpdate(){
   const v = estado.ventas.find(x=>x.id===ventaEditando);
   const np = parseInt(document.getElementById('editPrecioInput').value)||0;
   if(!v){ document.getElementById('editInfo').innerHTML=''; return; }
-  const gan = v.tipo==='otro' ? np : np - v.bandejas*costoBtx(v.prod);
+  const gan = v.tipo==='otro' ? np : np - v.bandejas*costoPromedioBtx(v.prod);
   document.getElementById('editInfo').innerHTML = '<div class="gan-line"><span class="k">Ganancia actual</span><span class="v">'+fmt(v.gan)+'</span></div><div class="gan-line"><span class="k">Con el nuevo precio</span><span class="v" style="color:'+(gan>=0?'#15803d':'#dc2626')+';">'+fmt(gan)+'</span></div>';
 }
 function guardarEdicionVenta(){
@@ -2217,7 +2266,7 @@ function guardarEdicionVenta(){
     if(d && d.monto<=0) estado.deudas = estado.deudas.filter(x=>x.nombre!==v.quien);
   }
   v.precio = np;
-  v.gan = v.tipo==='otro' ? np : np - v.bandejas*costoBtx(v.prod);
+  v.gan = v.tipo==='otro' ? np : np - v.bandejas*costoPromedioBtx(v.prod);
   v.pago = nuevoPago;
   v.quien = nuevoPago==='deuda' ? nuevoQuien : (v.quien && v.quien!=='Feria' ? null : v.quien);
   if(nuevoPago==='deuda'){
@@ -2236,14 +2285,20 @@ const BILLETES = [20000,10000,5000,2000,1000];
 const MONEDAS = [500,100,50,10];
 function renderCuadratura(){
   if(!estado.cuadratura) estado.cuadratura = {};
+  const _hoyCuad = new Date().toDateString();
+  if(estado.cuadraturaFecha !== _hoyCuad){
+    estado.cuadratura = {};
+    estado.cuadraturaFecha = _hoyCuad;
+    guardar();
+  }
   let html = '';
   BILLETES.forEach(b=>{
-    html += '<div class="gan-line"><span class="k" style="font-weight:900;">$'+b.toLocaleString('es-CL')+'</span><span style="display:flex;align-items:center;gap:6px;"><input type="number" min="0" value="'+(estado.cuadratura[b]||0)+'" class="field" style="width:70px;text-align:center;font-weight:800;font-size:16px;" onchange="actualizarCuadratura()" data-cuad="'+b+'"><span style="font-size:11px;color:#888;">× $'+b.toLocaleString('es-CL')+' = <b>$'+R(b*(estado.cuadratura[b]||0)).toLocaleString('es-CL')+'</b></span></span></div>';
+    html += '<div class="gan-line"><span class="k" style="font-weight:900;">$'+b.toLocaleString('es-CL')+'</span><span style="display:flex;align-items:center;gap:6px;"><input type="number" min="0" value="'+(estado.cuadratura[b]||'')+'" class="field" style="width:70px;text-align:center;font-weight:800;font-size:16px;" onchange="actualizarCuadratura()" data-cuad="'+b+'"><span style="font-size:11px;color:#888;">× $'+b.toLocaleString('es-CL')+' = <b>$'+R(b*(estado.cuadratura[b]||0)).toLocaleString('es-CL')+'</b></span></span></div>';
   });
   document.getElementById('cuadBilletes').innerHTML = html;
   let mh = '<p style="font-size:12px;font-weight:800;color:#555;margin-bottom:8px;">🪙 Monedas</p>';
   MONEDAS.forEach(m=>{
-    mh += '<div class="gan-line"><span class="k">$'+m.toLocaleString('es-CL')+'</span><span style="display:flex;align-items:center;gap:6px;"><input type="number" min="0" value="'+(estado.cuadratura['moneda'+m]||0)+'" class="field" style="width:70px;text-align:center;font-weight:800;font-size:16px;" onchange="actualizarCuadratura()" data-cuad="moneda'+m+'"><span style="font-size:11px;color:#888;">× $'+m+' = <b>$'+R(m*(estado.cuadratura['moneda'+m]||0)).toLocaleString('es-CL')+'</b></span></span></div>';
+    mh += '<div class="gan-line"><span class="k">$'+m.toLocaleString('es-CL')+'</span><span style="display:flex;align-items:center;gap:6px;"><input type="number" min="0" value="'+(estado.cuadratura['moneda'+m]||'')+'" class="field" style="width:70px;text-align:center;font-weight:800;font-size:16px;" onchange="actualizarCuadratura()" data-cuad="moneda'+m+'"><span style="font-size:11px;color:#888;">× $'+m+' = <b>$'+R(m*(estado.cuadratura['moneda'+m]||0)).toLocaleString('es-CL')+'</b></span></span></div>';
   });
   document.getElementById('cuadMonedas').innerHTML = mh;
   document.getElementById('cuadEsperado').value = estado.cuadratura.efectivoReal || '';
@@ -2270,6 +2325,7 @@ function actualizarCuadratura(){
 }
 function guardarCuadratura(){
   estado.cuadratura.efectivoReal = parseInt(document.getElementById('cuadEsperado').value)||0;
+  estado.cuadraturaFecha = new Date().toDateString();
   guardar(); cerrarModal('modalCuadratura'); toast('🧮 Cuadratura guardada');
 }
 
@@ -2542,8 +2598,18 @@ function toggleTema(){
 let modoCierreForzado = null;
 
 function fechaVencida(){
-  if(!estado.diaAbierto || !estado.diaAbiertoFecha) return null;
-  return estado.diaAbiertoFecha === new Date().toDateString() ? null : estado.diaAbiertoFecha;
+  const hoyStr = new Date().toDateString();
+  if(!Array.isArray(estado.cierres)) estado.cierres = [];
+  const dias = new Set();
+  [].concat(estado.ventas||[],estado.gastos||[],estado.compras||[],estado.mermas||[]).forEach(x=>{
+    if(x && x.f) dias.add(new Date(x.f).toDateString());
+  });
+  const cerrados = new Set(estado.cierres);
+  if(estado.arqueoFecha) cerrados.add(estado.arqueoFecha);
+  const pendientes = [...dias].filter(f=>f!==hoyStr && !cerrados.has(f));
+  if(pendientes.length===0) return null;
+  pendientes.sort((a,b)=>new Date(a)-new Date(b));
+  return pendientes[0];
 }
 function rangoCorte(){
   if(modoCierreForzado){
@@ -2815,7 +2881,7 @@ function exportarPDF(){
   const gHoy = estado.gastos.filter(g=>g.f>=hoy0&&g.f<HASTA);
   const mHoy = estado.mermas.filter(m=>m.f>=hoy0&&m.f<HASTA);
   const venHoy = vHoy.reduce((a,v)=>a+v.precio,0);
-  const ganHoy = vHoy.reduce((a,v)=>a+v.gan,0);
+  const ganHoy = vHoy.reduce((a,v)=>a+ganVenta(v),0);
   const gasHoy = gHoy.reduce((a,g)=>a+g.monto,0);
   const merHoy = mHoy.reduce((a,m)=>a+m.perdida,0);
   const neto = venHoy - gasHoy - merHoy;
@@ -2896,10 +2962,10 @@ function renderHistorialFiltrado(){
   } else if(historialFiltro==='deudas'){
     const items = [...estado.deudas];
     if(!items.length){ c.innerHTML='<div class="empty">No hay deudas</div>'; return; }
-    html = '<table class="tab"><tr><th>Cliente</th><th>Monto</th><th>Estado</th></tr>';
+    html = '<table class="tab"><tr><th>Cliente</th><th>Desde</th><th>Monto</th><th>Estado</th></tr>';
     items.forEach(d=>{
       const dias = Math.floor((Date.now()-new Date(d.f||Date.now()))/(1000*60*60*24));
-      html+='<tr><td>'+d.nombre+'</td><td>'+fmt(d.monto)+'</td><td>'+(dias>=7?'🔴 VENCIDA':'🟡 PENDIENTE')+'</td></tr>';
+      html+='<tr><td>'+d.nombre+'</td><td>'+(d.f?fDate(d.f):'—')+'</td><td>'+fmt(d.monto)+'</td><td>'+(dias>=7?'🔴 VENCIDA':'🟡 PENDIENTE')+'</td></tr>';
     });
     html += '</table>';
   }
@@ -3000,6 +3066,12 @@ function autoBackup(){
   }catch(e){}
 }
 
+// Al tocar un campo numérico se selecciona todo: si dice 0 y escribes 20, queda 20 (no 020)
+document.addEventListener('focusin',function(e){
+  const t=e.target;
+  if(t && t.tagName==='INPUT' && t.type==='number'){ try{ t.select(); }catch(err){} }
+});
+
 // ── INIT ──
 function actualizarTodo(){
   try{ instalarExtras(); }catch(e){} actualizarAvisoDia(); actualizarStockUI(); actualizarPreciosUI(); actualizarHistorial(); actualizarBtnApertura(); }
@@ -3010,18 +3082,9 @@ async function initApp(){
     const recuperado = await recuperarIndexedDB();
     if(recuperado) toast('↩️ Se recuperaron tus datos guardados');
   }
-  // Recordatorio si hay cierre pendiente
-  if(estado.arqueoFecha && estado.arqueoFecha !== new Date().toDateString()){
-    const fechaCierre = new Date(estado.arqueoFecha).getTime();
-    const ventasDesde = estado.ventas.filter(v=>v.f>fechaCierre);
-    if(ventasDesde.length>0){
-      setTimeout(()=>{
-        toast('⚠️ Tienes '+ventasDesde.length+' venta(s) sin cerrar desde '+estado.arqueoFecha+'. Cierra el día desde 🔒 Cierre.');
-      },2500);
-    }
-    estado.arqueoFecha = '';
-    estado.diaAbierto = false;
-    guardar();
+  // Recordatorio si hay cierre pendiente (detectado desde los datos, no desde flags)
+  if(fechaVencida()){
+    setTimeout(()=>{ actualizarAvisoDia(); toast('⚠️ Hay un día sin cerrar. Toca el aviso rojo para cuadrar.'); },1500);
   }
   if(!localStorage.getItem('misHuevos')){ guardar(); }
   aplicarTema(estado.tema);
