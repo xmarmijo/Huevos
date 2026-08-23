@@ -758,6 +758,11 @@ if ('serviceWorker' in navigator) {
     <div class="gan-line"><span class="k">Debe</span><span class="v" id="pagoDeudaMonto"></span></div>
     <div class="paso-titulo">¿Cuánto paga?</div>
     <input type="number" class="field" id="pagoDeudaInput" min="0" style="font-size:20px;font-weight:800;">
+    <div class="paso-titulo">¿Cómo te paga?</div>
+    <div style="display:flex;gap:8px;">
+      <button id="pdMetEfec" onclick="elegirPagoDeudaMetodo('efectivo')" style="flex:1;padding:10px;border:2px solid #2563eb;background:#eff6ff;border-radius:10px;font-weight:800;font-size:13px;cursor:pointer;">💵 Efectivo</button>
+      <button id="pdMetTrans" onclick="elegirPagoDeudaMetodo('transferencia')" style="flex:1;padding:10px;border:2px solid #e5e7eb;background:#fff;border-radius:10px;font-weight:800;font-size:13px;cursor:pointer;">🏦 Transferencia</button>
+    </div>
     <div class="modal-btns">
       <button class="btn-cancel" onclick="cerrarModal('pagoDeudaModal')">Cancelar</button>
       <button class="btn-ok" onclick="confirmarPagoDeuda()">✓ Registrar pago</button>
@@ -832,6 +837,7 @@ let estado = {
   versiones: [],
   clientesPrecios: {},
   cuadratura: {},
+  flujoCaja: [],
   darkMode: false,
   stockParcial: {},
   lastModified: Date.now()
@@ -869,6 +875,7 @@ function aplicarDefaults(d){
   if(!d.mermas) d.mermas=[];
   if(d.cuadratura===undefined||d.cuadratura===null) d.cuadratura={};
   if(d.cuadraturaFecha===undefined) d.cuadraturaFecha='';
+  if(!d.flujoCaja) d.flujoCaja=[];
   const _hoyStr = new Date().toDateString();
   const _movs = [].concat(d.ventas,d.gastos,d.compras,d.mermas);
   if(d.diaAbierto===true && !d.diaAbiertoFecha){
@@ -1783,7 +1790,7 @@ function mermaCant(d){
   actualizarMermaInfo();
 }
 function actualizarMermaInfo(){
-  const costoHuevo = costoBtx(merma.prod)/DATOS.huevosTrx;
+  const costoHuevo = costoPromedioBtx(merma.prod)/DATOS.huevosTrx;
   const perdida = merma.cant * costoHuevo;
   document.getElementById('mermaInfo').innerHTML = '<div class="gan-line"><span class="k">Pérdida estimada</span><span class="v" style="color:#dc2626;">'+fmt(perdida)+'</span></div><div style="font-size:11px;color:#888;margin-top:4px;">🥚 '+merma.cant+' huevo(s) quebrado(s) · La bandeja incompleta queda como repuesto.</div>';
 }
@@ -1791,7 +1798,7 @@ function confirmarMerma(){
   if(!verificarBloqueo()) return;
   const prod = merma.prod;
   const huevosRotos = merma.cant;
-  const costoHuevo = costoBtx(prod)/DATOS.huevosTrx;
+  const costoHuevo = costoPromedioBtx(prod)/DATOS.huevosTrx;
   const perdida = huevosRotos*costoHuevo;
   estado.mermas.push({ f:Date.now(), prod, huevos:huevosRotos, perdida });
   logAccion('MERMA', huevosRotos+' huevo(s) rotos de '+prod+' · Pérdida: '+fmt(perdida));
@@ -1826,17 +1833,26 @@ function llenarCaja(){
   const vHoy = estado.ventas.filter(v=>v.f>=ts);
   const gHoy = estado.gastos.filter(g=>g.f>=ts);
   const cHoy = estado.compras.filter(c=>c.f>=ts);
-  const entra = vHoy.filter(v=>v.pago==='efectivo').reduce((a,v)=>a+v.precio,0);
+  if(!estado.flujoCaja) estado.flujoCaja=[];
+  const fcHoy = estado.flujoCaja.filter(x=>x.f>=ts);
+  const entra = vHoy.filter(v=>v.pago==='efectivo').reduce((a,v)=>a+v.precio,0)
+    + fcHoy.filter(x=>x.tipo==='pagoDeuda' && x.metodo!=='transferencia').reduce((a,x)=>a+x.monto,0);
+  const transf = vHoy.filter(v=>v.pago==='transferencia').reduce((a,v)=>a+v.precio,0)
+    + fcHoy.filter(x=>x.tipo==='pagoDeuda' && x.metodo==='transferencia').reduce((a,x)=>a+x.monto,0);
   const saleG = gHoy.reduce((a,g)=>a+g.monto,0);
-  const saleC = cHoy.reduce((a,c)=>a+c.cajas*c.precio,0);
-  const sale = saleG + saleC;
+  const saleC = cHoy.reduce((a,c)=>a+(c.total!==undefined?c.total:c.cajas*c.precio),0);
+  const saleP = fcHoy.filter(x=>x.tipo==='prestamo').reduce((a,x)=>a+x.monto,0);
+  const sale = saleG + saleC + saleP;
   document.getElementById('cajaTotalEntra').textContent = fmt(entra);
   document.getElementById('cajaTotalSale').textContent = fmt(sale);
   document.getElementById('cajaSaldo').textContent = fmt(entra - sale);
   const movs = [];
   vHoy.filter(v=>v.pago==='efectivo').forEach(v=>movs.push({f:v.f, txt:'Venta '+(v.quien||''), monto:v.precio, tipo:'+' }));
+  vHoy.filter(v=>v.pago==='transferencia').forEach(v=>movs.push({f:v.f, txt:'Transferencia '+(v.quien||''), monto:v.precio, tipo:'+' }));
+  fcHoy.filter(x=>x.tipo==='pagoDeuda').forEach(x=>movs.push({f:x.f, txt:'Cobro deuda: '+x.nombre, monto:x.monto, tipo:'+'}));
   gHoy.forEach(g=>movs.push({f:g.f, txt:'Gasto: '+g.concepto, monto:g.monto, tipo:'-'}));
-  cHoy.forEach(c=>movs.push({f:c.f, txt:'Compra '+c.prod+' ('+c.cajas+' cajas)', monto:c.cajas*c.precio, tipo:'-'}));
+  cHoy.forEach(c=>movs.push({f:c.f, txt:'Compra '+c.prod+' ('+c.cajas+' cajas)', monto:(c.total!==undefined?c.total:c.cajas*c.precio), tipo:'-'}));
+  fcHoy.filter(x=>x.tipo==='prestamo').forEach(x=>movs.push({f:x.f, txt:'Prestaste a '+x.nombre, monto:x.monto, tipo:'-'}));
   movs.sort((a,b)=>b.f-a.f);
   let html = '<table class="tab"><tr><th>Fecha</th><th>Concepto</th><th>Entra/Sale</th></tr>';
   movs.slice(0,40).forEach(m=>{
@@ -1859,7 +1875,14 @@ function llenarDeudas(){
     return '<div class="gan-line"><span class="k" style="font-weight:800;">'+d.nombre+sub+'</span><span style="display:flex;gap:6px;align-items:center;"><span style="color:#dc2626;font-weight:800;">'+fmt(d.monto)+'</span> <button style="padding:6px 10px;border:none;border-radius:8px;color:#fff;font-weight:800;font-size:11px;cursor:pointer;background:#25D366;" onclick="cobrarWhatsApp(\''+d.nombre+'\')">💬</button> <button class="btn-ok" style="padding:6px 10px;border:none;border-radius:8px;color:#fff;font-weight:800;font-size:11px;cursor:pointer;background:#16a34a;" onclick="pagarDeuda(\''+d.nombre+'\')">Pagó</button> <button style="padding:6px 10px;border:none;border-radius:8px;color:#fff;font-weight:800;font-size:11px;cursor:pointer;background:#dc2626;" onclick="borrarDeuda(\''+d.nombre+'\')">✕</button></span></div>';
   }).join('');
   const total = estado.deudas.reduce((a,d)=>a+d.monto,0);
-  c.innerHTML += '<div class="gan-line"><span class="k">Total por cobrar</span><span class="v" style="color:#dc2626;">'+fmt(total)+'</span></div>';
+  const totalClientes = estado.deudas.filter(d=>d.tipo!=='prestamo').reduce((a,d)=>a+d.monto,0);
+  const totalPrestado = estado.deudas.filter(d=>d.tipo==='prestamo').reduce((a,d)=>a+d.monto,0);
+  if(totalPrestado>0){
+    c.innerHTML += '<div class="gan-line"><span class="k">Total por cobrar (clientes)</span><span class="v" style="color:#dc2626;">'+fmt(totalClientes)+'</span></div>';
+    c.innerHTML += '<div class="gan-line"><span class="k">💰 Total prestado</span><span class="v" style="color:#c2410c;">'+fmt(totalPrestado)+'</span></div>';
+  } else {
+    c.innerHTML += '<div class="gan-line"><span class="k">Total por cobrar</span><span class="v" style="color:#dc2626;">'+fmt(total)+'</span></div>';
+  }
 }
 function pagarDeuda(nombre){
   const d = estado.deudas.find(x=>x.nombre===nombre);
@@ -1867,7 +1890,14 @@ function pagarDeuda(nombre){
   document.getElementById('pagoDeudaNombre').textContent = nombre;
   document.getElementById('pagoDeudaMonto').textContent = fmt(d.monto);
   document.getElementById('pagoDeudaInput').value = d.monto;
+  elegirPagoDeudaMetodo('efectivo');
   abrirModal('pagoDeudaModal');
+}
+function elegirPagoDeudaMetodo(m){
+  window._pagoDeudaMetodo = m;
+  const e = document.getElementById('pdMetEfec'), t = document.getElementById('pdMetTrans');
+  if(e){ e.style.borderColor = m==='efectivo'?'#2563eb':'#e5e7eb'; e.style.background = m==='efectivo'?'#eff6ff':'#fff'; }
+  if(t){ t.style.borderColor = m==='transferencia'?'#2563eb':'#e5e7eb'; t.style.background = m==='transferencia'?'#eff6ff':'#fff'; }
 }
 function confirmarPagoDeuda(){
   const nombre = document.getElementById('pagoDeudaNombre').textContent;
@@ -1877,6 +1907,9 @@ function confirmarPagoDeuda(){
   if(pago<=0){ toast('Ingresa un monto válido'); return; }
   d.monto = Math.max(0, d.monto - pago);
   if(d.monto===0) estado.deudas = estado.deudas.filter(x=>x.nombre!==nombre);
+  if(!estado.flujoCaja) estado.flujoCaja=[];
+  estado.flujoCaja.push({ f:Date.now(), tipo:'pagoDeuda', nombre:nombre, monto:pago, metodo:(window._pagoDeudaMetodo||'efectivo') });
+  logAccion('COBRO', nombre+' pagó '+fmt(pago)+' ('+(window._pagoDeudaMetodo||'efectivo')+')');
   guardar(); llenarDeudas(); actualizarTodo(); cerrarModal('pagoDeudaModal');
   toast('💵 Pago registrado: '+fmt(pago));
 }
@@ -1891,6 +1924,8 @@ function registrarDarEfectivo(){
   if(monto<=0){ toast('Ingresa un monto válido'); return; }
   const exist = estado.deudas.find(d=>d.nombre===nombre);
   if(exist) exist.monto += monto; else estado.deudas.push({nombre:nombre, monto:monto, tipo:'prestamo', f:Date.now()});
+  if(!estado.flujoCaja) estado.flujoCaja=[];
+  estado.flujoCaja.push({ f:Date.now(), tipo:'prestamo', nombre:nombre, monto:monto });
   logAccion('PRÉSTAMO', nombre+' · '+fmt(monto));
   guardar(); llenarDeudas(); actualizarTodo();
   document.getElementById('darEfectivoNombre').value='';
@@ -2009,7 +2044,7 @@ function llenarCierre(){
   const merma = mHoy.reduce((a,m)=>a+m.perdida,0);
   const btx = vHoy.reduce((a,v)=>a+v.bandejas,0);
   const cajas = vHoy.reduce((a,v)=>a+v.bandejas/6,0);
-  const neto = ventas - gastos - merma;
+  const neto = ganancia - gastos - merma;
   document.getElementById('cierreContenido').innerHTML =
     '<div class="stat3"><div class="s"><div class="v">'+fmt(ventas)+'</div><div class="l">Ventas hoy</div></div>'+
     '<div class="s"><div class="v" style="color:#16a34a;">'+fmt(ganancia)+'</div><div class="l">Ganancia</div></div>'+
@@ -2021,9 +2056,10 @@ function llenarCierre(){
     '<div class="gan-line"><span class="k">🏦 Transferencias</span><span class="v">'+fmt(transf)+'</span></div>'+
     '<div class="gan-line"><span class="k">💸 Gastos del día</span><span class="v" style="color:#dc2626;">-'+fmt(gastos)+'</span></div>'+
     '<div class="gan-line"><span class="k">🛒 Compras del día</span><span class="v" style="color:#dc2626;">-'+fmt(compras)+'</span></div>'+
+    '<div style="font-size:10px;color:#9ca3af;text-align:right;">las compras no restan ganancia: son mercadería</div>'+
     '<div class="gan-line"><span class="k">🥚 Merma del día</span><span class="v" style="color:#dc2626;">-'+fmt(merma)+'</span></div>'+
     '<div class="gan-line"><span class="k">📒 Por cobrar (deudas)</span><span class="v">'+fmt(estado.deudas.reduce((a,d)=>a+d.monto,0))+'</span></div>'+
-    '<div style="margin-top:10px;padding:12px;background:#f0fdf4;border-radius:10px;text-align:center;"><div style="font-size:11px;color:#6b7280;">NETO DEL DÍA<br><small>ventas − gastos − merma</small></div><div style="font-size:24px;font-weight:900;color:#15803d;">'+fmt(neto)+'</div></div>';
+    '<div style="margin-top:10px;padding:12px;background:#f0fdf4;border-radius:10px;text-align:center;"><div style="font-size:11px;color:#6b7280;">NETO REAL DEL DÍA<br><small>ganancia sobre ventas − gastos − merma</small></div><div style="font-size:24px;font-weight:900;color:#15803d;">'+fmt(neto)+'</div></div>';
 }
 function llenarApertura(){
   const info = document.getElementById('aperturaInfo');
@@ -2056,11 +2092,20 @@ function cerrarDia(){
   const mHoy = estado.mermas.filter(m=>m.f>=hoy0&&m.f<HASTA);
   const efectivoVentas = vHoy.filter(v=>v.pago==='efectivo').reduce((a,v)=>a+v.precio,0);
   const gastosEfectivo = gHoy.reduce((a,g)=>a+g.monto,0);
-  const mermasEfectivo = mHoy.reduce((a,m)=>a+m.perdida,0);
-  const esperado = estado.arqueoInicial + efectivoVentas - gastosEfectivo - mermasEfectivo;
+  const comprasHoy = cHoy.reduce((a,c)=>a+(c.total!==undefined?c.total:c.cajas*c.precio),0);
+  if(!estado.flujoCaja) estado.flujoCaja=[];
+  const fcHoy = estado.flujoCaja.filter(x=>x.f>=hoy0&&x.f<HASTA);
+  const cobrosEfectivo = fcHoy.filter(x=>x.tipo==='pagoDeuda' && x.metodo!=='transferencia').reduce((a,x)=>a+x.monto,0);
+  const prestamosHoy = fcHoy.filter(x=>x.tipo==='prestamo').reduce((a,x)=>a+x.monto,0);
+  // Caja real = inicio + ventas efectivo + cobros de deudas en efectivo − gastos − compras − prestado
+  // (la merma NO se descuenta: ya pagaste esa mercadería, no saca billetes de la caja)
+  const esperado = estado.arqueoInicial + efectivoVentas + cobrosEfectivo - gastosEfectivo - comprasHoy - prestamosHoy;
   const diferencia = contado - esperado;
+  const det = '<div style="font-size:10px;color:#6b7280;margin-top:6px;line-height:1.6;">Inicio '+fmt(estado.arqueoInicial)+
+    ' · +Ventas ef. '+fmt(efectivoVentas)+' · +Cobros '+fmt(cobrosEfectivo)+
+    '<br>−Gastos '+fmt(gastosEfectivo)+' · −Compras '+fmt(comprasHoy)+' · −Prestado '+fmt(prestamosHoy)+'</div>';
   const difHtml = '<div style="padding:12px;border-radius:10px;background:'+(diferencia===0?'#f0fdf4':'#fef2f2')+';text-align:center;">'+
-    '<div style="font-size:11px;color:#6b7280;">ESPERADO: '+fmt(esperado)+' · CONTADO: '+fmt(contado)+'</div>'+
+    '<div style="font-size:11px;color:#6b7280;">ESPERADO: '+fmt(esperado)+' · CONTADO: '+fmt(contado)+'</div>'+det+
     '<div style="font-size:20px;font-weight:900;color:'+(diferencia===0?'#16a34a':'#dc2626')+';">'+
     (diferencia===0?'✅ Cuadrado':(diferencia>0?'🟢 Sobrante: +':'🔴 Faltante: ')+fmt(Math.abs(diferencia)))+'</div></div>';
   document.getElementById('cierreDiferencia').innerHTML = difHtml;
@@ -2137,17 +2182,22 @@ function calcularVuelto(){
 function llenarCajaResumen(){
   const hoy = new Date().toDateString();
   const esHoy = (f)=>new Date(f).toDateString()===hoy;
-  const entra = estado.ventas.filter(v=>v.pago==='efectivo' && esHoy(v.f)).reduce((a,v)=>a+v.precio,0);
-  const transf = estado.ventas.filter(v=>v.pago==='transferencia' && esHoy(v.f)).reduce((a,v)=>a+v.precio,0);
+  if(!estado.flujoCaja) estado.flujoCaja=[];
+  const fcHoy = estado.flujoCaja.filter(x=>esHoy(x.f));
+  const cobrosEf = fcHoy.filter(x=>x.tipo==='pagoDeuda' && x.metodo!=='transferencia').reduce((a,x)=>a+x.monto,0);
+  const cobrosTr = fcHoy.filter(x=>x.tipo==='pagoDeuda' && x.metodo==='transferencia').reduce((a,x)=>a+x.monto,0);
+  const entra = estado.ventas.filter(v=>v.pago==='efectivo' && esHoy(v.f)).reduce((a,v)=>a+v.precio,0) + cobrosEf;
+  const transf = estado.ventas.filter(v=>v.pago==='transferencia' && esHoy(v.f)).reduce((a,v)=>a+v.precio,0) + cobrosTr;
   const saleG = estado.gastos.filter(g=>esHoy(g.f)).reduce((a,g)=>a+g.monto,0);
-  const saleC = estado.compras.filter(c=>esHoy(c.f)).reduce((a,c)=>a+c.cajas*c.precio,0);
+  const saleC = estado.compras.filter(c=>esHoy(c.f)).reduce((a,c)=>a+(c.total!==undefined?c.total:c.cajas*c.precio),0);
+  const saleP = fcHoy.filter(x=>x.tipo==='prestamo').reduce((a,x)=>a+x.monto,0);
   document.getElementById('cajaSaldoGrande').textContent = fmt(entra);
   document.getElementById('cajaTransf2').textContent = fmt(transf);
   document.getElementById('cajaEntra2').textContent = fmt(entra);
   document.getElementById('cajaTransfer2').textContent = fmt(transf);
   document.getElementById('cajaSale2').textContent = fmt(saleG);
   document.getElementById('cajaCompra2').textContent = fmt(saleC);
-  document.getElementById('cajaNeto2').textContent = fmt(entra + transf - saleG - saleC);
+  document.getElementById('cajaNeto2').textContent = fmt(entra + transf - saleG - saleC - saleP);
 }
 
 // ── ARQUEO DE CAJA ──
@@ -2884,7 +2934,7 @@ function exportarPDF(){
   const ganHoy = vHoy.reduce((a,v)=>a+ganVenta(v),0);
   const gasHoy = gHoy.reduce((a,g)=>a+g.monto,0);
   const merHoy = mHoy.reduce((a,m)=>a+m.perdida,0);
-  const neto = venHoy - gasHoy - merHoy;
+  const neto = ganHoy - gasHoy - merHoy;
   let html = '<html><head><style>body{font-family:Arial,sans-serif;padding:20px;color:#333;}h1{color:#f97316;border-bottom:2px solid #f97316;padding-bottom:8px;}table{width:100%;border-collapse:collapse;margin:10px 0;}th{background:#f97316;color:#fff;padding:8px;text-align:left;}td{padding:6px 8px;border-bottom:1px solid #eee;}.total{font-size:18px;font-weight:bold;color:#15803d;background:#f0fdf4;padding:12px;border-radius:8px;margin-top:12px;}</style></head><body>';
   html += '<h1>🥚 Mis Huevos - Cierre del Día</h1>';
   html += '<p><b>Fecha:</b> '+new Date().toLocaleDateString('es-CL')+' '+new Date().toLocaleTimeString('es-CL')+'</p>';
