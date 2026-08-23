@@ -29,6 +29,11 @@ header h1 { font-size:19px; font-weight:800; }
 header .hoy { font-size:11px; opacity:.9; text-align:right; }
 header .gan { font-size:15px; font-weight:800; margin-top:2px; text-align:right; }
 main { max-width:520px; margin:0 auto; padding:12px; }
+/* ── BARRA INFERIOR FIJA ── */
+.bottombar { position:fixed; bottom:0; left:0; right:0; display:flex; gap:6px; z-index:240; background:#fff; box-shadow:0 -2px 12px rgba(0,0,0,.15); padding:8px 10px calc(8px + env(safe-area-inset-bottom)); max-width:520px; margin:0 auto; }
+.bottombar button { flex:1; padding:13px 4px; border:none; border-radius:14px; font-weight:900; font-size:15px; cursor:pointer; color:#fff; }
+.bottombar button:active { transform:scale(.97); }
+body.dark .bottombar { background:#111827; }
 .card { background:#fff; border-radius:14px; padding:14px; margin-bottom:12px; box-shadow:0 1px 4px rgba(0,0,0,.08); }
 .card-titulo { font-size:13px; font-weight:800; color:#555; text-transform:uppercase; letter-spacing:.5px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; }
 .stock-wrap { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
@@ -133,7 +138,7 @@ label.campo { font-size:12px; font-weight:700; color:#555; display:block; margin
 .sesion-resumen .v { font-size:18px; font-weight:900; color:#15803d; }
 .sesion-resumen .l { font-size:10px; color:#6b7280; }
 .alert-banner { background:#fef2f2; border:1.5px solid #fecaca; color:#dc2626; border-radius:10px; padding:10px 12px; margin-bottom:10px; font-size:13px; font-weight:700; text-align:center; }
-.caja-dia { background:#eff6ff; border:1.5px solid #bfdbfe; border-radius:12px; padding:10px 6px; margin-bottom:10px; display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:4px; text-align:center; }
+.caja-dia { background:#eff6ff; border:1.5px solid #bfdbfe; border-radius:12px; padding:10px 6px; margin-bottom:10px; display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:4px; text-align:center; }
 .caja-dia .v { font-size:14px; font-weight:900; color:#1d4ed8; overflow-wrap:anywhere; white-space:nowrap; }
 .caja-dia .l { font-size:9px; color:#6b7280; }
 /* ── MODO OSCURO ── */
@@ -221,8 +226,9 @@ body.dark .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316;
       <div><div class="v" id="cajaDiaEfectivo">$0</div><div class="l">💵 Efectivo</div></div>
       <div><div class="v" id="cajaDiaTransf">$0</div><div class="l">🏦 Transferencia</div></div>
       <div><div class="v" id="cajaDiaGasto">$0</div><div class="l">💸 Gastos</div></div>
+      <div><div class="v" id="cajaDiaNeto">$0</div><div class="l">✅ Neto real</div></div>
     </div>
-    <button class="big-vender" onclick="abrirVenta()">➕ VENDER <span class="sub">registra varias ventas sin cerrar</span></button>
+    <button class="big-vender" onclick="abrirVenta()">➕ VENDER <span class="sub">bandejas y cajas</span></button>
     <button class="big-feria" onclick="abrirFeria()">🎪 FERIA <span class="sub" id="feriaSub">rápido a $6.000 la bandeja</span></button>
     <div class="precios">
       <div class="precio-box" id="precioPrimBox"><div class="lb">Primera $/bandeja</div><input type="number" id="precioPrimBtx" inputmode="decimal"></div>
@@ -248,31 +254,45 @@ body.dark .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316;
     <div class="historial" id="historialLista"><div class="empty">Aún no hay ventas</div></div>
   </div>
 
-  <!-- ═══ UTILIDADES ═══ -->
+  <!-- ═══ MENÚ ═══ -->
   <div class="card">
-    <div class="card-titulo">Utilidades</div>
-    <button class="btn-ok" style="width:100%;padding:14px;border:none;border-radius:12px;color:#fff;font-weight:800;font-size:15px;cursor:pointer;margin-bottom:10px;" onclick="guardarManual()">💾 GUARDAR AHORA</button>
+    <div class="card-titulo">Menú</div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;">
+      <button class="btn-ok util-btn" id="btnApertura" onclick="abrirModal('modalApertura')" style="flex:1;padding:14px 4px;background:#dcfce7;border:2px solid #16a34a;"><span class="ic">☀️</span>Abrir día</button>
+      <button class="util-btn" onclick="abrirModal('modalCierre')" style="flex:1;padding:14px 4px;background:#fef2f2;border:2px solid #dc2626;"><span class="ic">🔒</span>Cerrar día</button>
+    </div>
+    <div class="card-titulo" style="font-size:11px;color:#999;">Día a día</div>
     <div class="util-grid">
-      <button class="util-btn" id="btnApertura" onclick="abrirModal('modalApertura')" style="background:#dcfce7;border:2px solid #16a34a;"><span class="ic">☀️</span>Abrir día</button>
-      <button class="util-btn" onclick="abrirModal('modalCierre')" style="background:#fef2f2;border:2px solid #dc2626;"><span class="ic">🔒</span>Cerrar día</button>
       <button class="util-btn" onclick="abrirModal('modalCompra')"><span class="ic">🛒</span>Nueva compra</button>
-      <button class="util-btn" onclick="abrirModal('modalMerma')"><span class="ic">🥚</span>Merma</button>
       <button class="util-btn" onclick="abrirModal('modalGasto')"><span class="ic">💸</span>Gastos</button>
+      <button class="util-btn" onclick="abrirModal('modalMerma')"><span class="ic">🥚</span>Merma</button>
       <button class="util-btn" onclick="abrirModal('modalDeudas')"><span class="ic">📒</span>Deudas</button>
+    </div>
+    <div class="card-titulo" style="font-size:11px;color:#999;margin-top:12px;">Para revisar</div>
+    <div class="util-grid">
       <button class="util-btn" onclick="abrirModal('modalHistorialVentas');abrirHistorialFiltrado('ventas')"><span class="ic">🔍</span>Buscar</button>
       <button class="util-btn" onclick="abrirModal('modalClientes')"><span class="ic">👤</span>Clientes</button>
       <button class="util-btn" onclick="abrirModal('modalReportes')"><span class="ic">📊</span>Reportes</button>
       <button class="util-btn" onclick="abrirModal('modalMiDinero')"><span class="ic">💵</span>Mi dinero</button>
-      
-      <button class="util-btn" onclick="abrirModal('modalDatos')"><span class="ic">💾</span>Datos</button>
-      <button class="util-btn" onclick="abrirModal('modalHistorial')"><span class="ic">📋</span>Historial</button>
-      <button class="util-btn" onclick="exportarExcel()"><span class="ic">📊</span>Excel</button>
-      <button class="util-btn" onclick="abrirModal('modalAjustar')"><span class="ic">🔧</span>Ajustar</button>
-      <button class="util-btn" onclick="abrirModal('modalReset')"><span class="ic">🗑️</span>Reiniciar</button>
+    </div>
+    <div class="card-titulo" style="font-size:11px;color:#999;margin-top:12px;">Ajustes</div>
+    <div class="util-grid">
+      <button class="util-btn" onclick="abrirModal('modalAjustar')"><span class="ic">🔧</span>Ajustar stock</button>
+      <button class="util-btn" onclick="abrirModal('modalDatos')"><span class="ic">💾</span>Respaldos</button>
+      <button class="util-btn" onclick="exportarExcel()"><span class="ic">📊</span>Exportar Excel</button>
+      <button class="util-btn" onclick="abrirModal('modalHistorial')"><span class="ic">📋</span>Registro técnico</button>
     </div>
   </div>
 
+  <div style="height:86px"></div>
 </main>
+
+<!-- ═══ BARRA INFERIOR FIJA ═══ -->
+<nav class="bottombar">
+  <button style="background:linear-gradient(135deg,#16a34a,#15803d);" onclick="abrirVenta()">➕ VENDER</button>
+  <button style="background:linear-gradient(135deg,#f97316,#ea580c);" onclick="abrirFeria()">🎪 FERIA</button>
+  <button style="background:linear-gradient(135deg,#dc2626,#b91c1c);" onclick="abrirModal('modalCierre')">🌙 CIERRE</button>
+</nav>
 <script>
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').then(reg => {
@@ -784,6 +804,9 @@ if ('serviceWorker' in navigator) {
       <div style="height:10px"></div>
       <button class="btn-ok" style="width:100%;padding:14px;border:none;border-radius:12px;background:#f97316;color:#fff;font-weight:800;font-size:15px;cursor:pointer;" onclick="document.getElementById('fileImport').click()">📥 Importar datos</button>
       <input type="file" id="fileImport" accept=".json" style="display:none;" onchange="importarDatos(event)">
+      <div style="height:10px"></div>
+      <button class="btn-cancel" style="width:100%;padding:12px;" onclick="guardarManual()">💾 Guardar ahora</button>
+      <button class="btn-cancel" style="width:100%;padding:12px;margin-top:8px;color:#dc2626;border-color:#fecaca;font-weight:800;" onclick="abrirModal('modalReset')">🗑️ Reiniciar app (borra todo)</button>
     </div>
     <div id="datosPanelSync" style="display:none;">
       <p style="font-size:13px;color:#555;margin-bottom:10px;">Conecta a <b>Firebase</b> para sincronizar datos en tiempo real entre dispositivos.</p>
@@ -2217,7 +2240,7 @@ function actualizarHistorial(){
   }
   const hoyVentas = estado.ventas.filter(v=>new Date(v.f).toDateString()===new Date().toDateString());
   document.getElementById('hoyCont').textContent = hoyVentas.length ? hoyVentas.length+' hoy' : '';
-  document.getElementById('ganHoy').textContent = fmt(hoyVentas.reduce((a,v)=>a+v.gan,0));
+  document.getElementById('ganHoy').textContent = fmt(hoyVentas.reduce((a,v)=>a+ganVenta(v),0));
   const gHoy = estado.gastos.filter(g=>new Date(g.f).toDateString()===new Date().toDateString());
   const cHoy = estado.compras.filter(c=>new Date(c.f).toDateString()===new Date().toDateString());
   const ventasDia = hoyVentas.reduce((a,v)=>a+v.precio,0);
@@ -2225,10 +2248,15 @@ function actualizarHistorial(){
   const transferDia = hoyVentas.reduce((a,v)=>a+(v.pago==='transferencia'?v.precio:0),0);
   const gastosDia = gHoy.reduce((a,g)=>a+g.monto,0);
   const comprasDia = cHoy.reduce((a,c)=>a+c.cajas*c.precio,0);
+  const mHoy = estado.mermas.filter(m=>new Date(m.f).toDateString()===new Date().toDateString());
+  const netoDia = hoyVentas.reduce((a,v)=>a+ganVenta(v),0) - gastosDia - mHoy.reduce((a,m)=>a+(m.perdida||0),0);
   document.getElementById('cajaDiaVentas').textContent = fmtShort(ventasDia);
   document.getElementById('cajaDiaEfectivo').textContent = fmtShort(efectivoDia);
   document.getElementById('cajaDiaTransf').textContent = fmtShort(transferDia);
   document.getElementById('cajaDiaGasto').textContent = fmtShort(gastosDia);
+  const netoEl = document.getElementById('cajaDiaNeto');
+  netoEl.textContent = fmtShort(netoDia);
+  netoEl.style.color = netoDia >= 0 ? '#16a34a' : '#dc2626';
 }
 function logAccion(tipo, detalle){
   estado.logs.unshift({ t: Date.now(), tipo, detalle });
