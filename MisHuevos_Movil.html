@@ -352,9 +352,9 @@ if ('serviceWorker' in navigator) {
       </div>
       <div style="font-size:12px;font-weight:800;color:#555;margin-bottom:6px;">📅 Filtrar por fecha</div>
       <div style="display:flex;gap:6px;align-items:center;">
-        <input type="date" id="histDesde" style="flex:1;padding:8px;border:1.5px solid #ccc;border-radius:8px;font-size:12px;">
+        <input type="date" id="histDesde" onchange="applyDateFilter()" style="flex:1;padding:8px;border:1.5px solid #ccc;border-radius:8px;font-size:12px;">
         <span style="color:#999;font-weight:700;">→</span>
-        <input type="date" id="histHasta" style="flex:1;padding:8px;border:1.5px solid #ccc;border-radius:8px;font-size:12px;">
+        <input type="date" id="histHasta" onchange="applyDateFilter()" style="flex:1;padding:8px;border:1.5px solid #ccc;border-radius:8px;font-size:12px;">
         <button class="filtro-btn" onclick="applyDateFilter()" style="white-space:nowrap;">🔍 Buscar</button>
       </div>
     </div>
@@ -2921,54 +2921,81 @@ function applyDateFilter(){
   filtroHasta = hasta || null;
   renderHistorialFiltrado();
 }
+// Convierte '2026-08-23' a medianoche HORA LOCAL (new Date() directo usa UTC y corre el día)
+function parseDiaLocal(s){
+  const p = s.split('-').map(Number);
+  return new Date(p[0], p[1]-1, p[2]);
+}
 function renderHistorialFiltrado(){
-  // Apply date range filter if set
-  const from = filtroDesde ? new Date(filtroDesde) : null;
-  const to = filtroHasta ? new Date(filtroHasta) : null;
+  const from = filtroDesde ? parseDiaLocal(filtroDesde) : null;
+  let to = filtroHasta ? parseDiaLocal(filtroHasta) : null;
+  if(to) to = new Date(to.getTime()+86399999);
   const withinRange = (date)=>{
     if (from && date < from) return false;
     if (to && date > to) return false;
     return true;
   };
+  const fh = f => { const x=new Date(f); return fDate(x)+' '+String(x.getHours()).padStart(2,'0')+':'+String(x.getMinutes()).padStart(2,'0'); };
   const c = document.getElementById('histLista');
+  const stT = document.getElementById('histTotal');
+  const stG = document.getElementById('histGanancia');
+  const rangoTxt = (from||to) ? ' ('+(filtroDesde||'inicio')+' → '+(filtroHasta||'hoy')+')' : '';
   let html = '';
+  let total = null, gan = null, n = 0;
   if(historialFiltro==='ventas'){
     const items = [...estado.ventas].reverse().filter(v=>withinRange(new Date(v.f)));
-    if(!items.length){ c.innerHTML='<div class="empty">No hay ventas</div>'; return; }
-    html = '<table class="tab"><tr><th>Fecha</th><th>Prod</th><th>Cant</th><th>Total</th><th>Pago</th></tr>';
+    n = items.length;
+    if(!items.length){ if(stT) stT.textContent='$0'; if(stG) stG.textContent='$0'; c.innerHTML='<div class="empty">Sin ventas registradas'+rangoTxt+'</div>'; return; }
+    total = items.reduce((a,v)=>a+v.precio,0);
+    gan = items.reduce((a,v)=>a+ganVenta(v),0);
+    html += '<div style="font-size:12px;font-weight:800;color:#374151;margin-bottom:6px;">'+n+' venta(s)</div>';
+    html += '<table class="tab"><tr><th>Fecha</th><th>Prod</th><th>Cant</th><th>Total</th><th>Pago</th></tr>';
     items.forEach(v=>{
-      const d = new Date(v.f);
-      html+='<tr><td>'+d.toLocaleDateString('es-CL')+'</td><td>'+v.prod+'</td><td>'+v.cant+' '+v.tipo+'</td><td>'+fmt(v.precio)+'</td><td>'+v.pago+'</td></tr>';
+      html+='<tr><td>'+fh(v.f)+'</td><td>'+v.prod+'</td><td>'+v.cant+' '+v.tipo+'</td><td>'+fmt(v.precio)+'</td><td>'+v.pago+'</td></tr>';
     });
     html += '</table>';
   } else if(historialFiltro==='gastos'){
-    const items = [...estado.gastos].reverse();
-    if(!items.length){ c.innerHTML='<div class="empty">No hay gastos</div>'; return; }
-    html = '<table class="tab"><tr><th>Fecha</th><th>Concepto</th><th>Monto</th></tr>';
-    items.forEach(g=>html+='<tr><td>'+fDate(g.f)+'</td><td>'+g.concepto+'</td><td>'+fmt(g.monto)+'</td></tr>');
+    const items = [...estado.gastos].reverse().filter(g=>withinRange(new Date(g.f)));
+    n = items.length;
+    if(!items.length){ if(stT) stT.textContent='$0'; if(stG) stG.textContent='—'; c.innerHTML='<div class="empty">Sin gastos registrados'+rangoTxt+'</div>'; return; }
+    total = items.reduce((a,g)=>a+g.monto,0);
+    html += '<div style="font-size:12px;font-weight:800;color:#374151;margin-bottom:6px;">'+n+' gasto(s)</div>';
+    html += '<table class="tab"><tr><th>Fecha</th><th>Concepto</th><th>Monto</th></tr>';
+    items.forEach(g=>html+='<tr><td>'+fh(g.f)+'</td><td>'+g.concepto+'</td><td>'+fmt(g.monto)+'</td></tr>');
     html += '</table>';
   } else if(historialFiltro==='compras'){
-    const items = [...estado.compras].reverse();
-    if(!items.length){ c.innerHTML='<div class="empty">No hay compras</div>'; return; }
-    html = '<table class="tab"><tr><th>Fecha</th><th>Proveedor</th><th>Prod</th><th>Cajas</th><th>Total</th></tr>';
-    items.forEach(c2=>html+='<tr><td>'+fDate(c2.f)+'</td><td>'+c2.proveedor+'</td><td>'+c2.prod+'</td><td>'+c2.cajas+'</td><td>'+fmt(c2.cajas*c2.precio)+'</td></tr>');
+    const items = [...estado.compras].reverse().filter(c2=>withinRange(new Date(c2.f)));
+    n = items.length;
+    if(!items.length){ if(stT) stT.textContent='$0'; if(stG) stG.textContent='—'; c.innerHTML='<div class="empty">Sin compras registradas'+rangoTxt+'</div>'; return; }
+    total = items.reduce((a,c2)=>a+(c2.total!==undefined?c2.total:c2.cajas*c2.precio),0);
+    html += '<div style="font-size:12px;font-weight:800;color:#374151;margin-bottom:6px;">'+n+' compra(s)</div>';
+    html += '<table class="tab"><tr><th>Fecha</th><th>Proveedor</th><th>Prod</th><th>Cajas</th><th>Total</th></tr>';
+    items.forEach(c2=>html+='<tr><td>'+fh(c2.f)+'</td><td>'+c2.proveedor+'</td><td>'+c2.prod+'</td><td>'+c2.cajas+'</td><td>'+fmt(c2.total!==undefined?c2.total:c2.cajas*c2.precio)+'</td></tr>');
     html += '</table>';
   } else if(historialFiltro==='merma'){
-    const items = [...estado.mermas].reverse();
-    if(!items.length){ c.innerHTML='<div class="empty">No hay merma</div>'; return; }
-    html = '<table class="tab"><tr><th>Fecha</th><th>Prod</th><th>Huevos</th><th>Pérdida</th></tr>';
-    items.forEach(m=>html+='<tr><td>'+fDate(m.f)+'</td><td>'+m.prod+'</td><td>'+m.huevos+'</td><td>'+fmt(m.perdida)+'</td></tr>');
+    const items = [...estado.mermas].reverse().filter(m=>withinRange(new Date(m.f)));
+    n = items.length;
+    if(!items.length){ if(stT) stT.textContent='$0'; if(stG) stG.textContent='—'; c.innerHTML='<div class="empty">Sin merma registrada'+rangoTxt+'</div>'; return; }
+    total = items.reduce((a,m)=>a+m.perdida,0);
+    html += '<div style="font-size:12px;font-weight:800;color:#374151;margin-bottom:6px;">'+n+' merma(s)</div>';
+    html += '<table class="tab"><tr><th>Fecha</th><th>Prod</th><th>Huevos</th><th>Pérdida</th></tr>';
+    items.forEach(m=>html+='<tr><td>'+fh(m.f)+'</td><td>'+m.prod+'</td><td>'+m.huevos+'</td><td>'+fmt(m.perdida)+'</td></tr>');
     html += '</table>';
   } else if(historialFiltro==='deudas'){
     const items = [...estado.deudas];
-    if(!items.length){ c.innerHTML='<div class="empty">No hay deudas</div>'; return; }
-    html = '<table class="tab"><tr><th>Cliente</th><th>Desde</th><th>Monto</th><th>Estado</th></tr>';
+    n = items.length;
+    if(!items.length){ if(stT) stT.textContent='$0'; if(stG) stG.textContent='—'; c.innerHTML='<div class="empty">No hay deudas</div>'; return; }
+    total = items.reduce((a,d)=>a+d.monto,0);
+    html += '<div style="font-size:12px;font-weight:800;color:#374151;margin-bottom:6px;">'+n+' deuda(s)</div>';
+    html += '<table class="tab"><tr><th>Cliente</th><th>Desde</th><th>Monto</th><th>Estado</th></tr>';
     items.forEach(d=>{
       const dias = Math.floor((Date.now()-new Date(d.f||Date.now()))/(1000*60*60*24));
       html+='<tr><td>'+d.nombre+'</td><td>'+(d.f?fDate(d.f):'—')+'</td><td>'+fmt(d.monto)+'</td><td>'+(dias>=7?'🔴 VENCIDA':'🟡 PENDIENTE')+'</td></tr>';
     });
     html += '</table>';
   }
+  if(stT) stT.textContent = fmt(total||0);
+  if(stG) stG.textContent = (historialFiltro==='ventas'&&gan!==null) ? fmt(gan) : '—';
   c.innerHTML = html;
 }
 
