@@ -791,18 +791,6 @@ if ('serviceWorker' in navigator) {
   </div>
 </div>
 
-<!-- ═══ MODAL CONFIRMAR ═══ -->
-<div class="modal-back" id="confirmModal">
-  <div class="modal">
-    <div class="modal-header"><h3 id="confirmTitulo">Confirmar</h3><button class="modal-close" onclick="cerrarModal('confirmModal')">✕</button></div>
-    <div id="confirmMsj" style="font-size:15px;color:#374151;padding:4px 0 8px;"></div>
-    <div class="modal-btns">
-      <button class="btn-cancel" onclick="cerrarModal('confirmModal')">Cancelar</button>
-      <button class="btn-ok" id="confirmOkBtn" onclick="ejecutarConfirmar()">Sí</button>
-    </div>
-  </div>
-</div>
-
 <!-- ═══ MODAL PAGAR DEUDA ═══ -->
 <div class="modal-back" id="pagoDeudaModal">
   <div class="modal">
@@ -856,6 +844,18 @@ if ('serviceWorker' in navigator) {
       <button class="btn-cancel" style="width:100%;margin-top:6px;" onclick="desconectarSync()">Desconectar</button>
     </div>
     <div class="modal-btns"><button class="btn-cancel" onclick="cerrarModal('modalDatos')">Cerrar</button></div>
+  </div>
+</div>
+
+<!-- ═══ MODAL CONFIRMAR ═══ -->
+<div class="modal-back" id="confirmModal">
+  <div class="modal">
+    <div class="modal-header"><h3 id="confirmTitulo">Confirmar</h3><button class="modal-close" onclick="cerrarModal('confirmModal')">✕</button></div>
+    <div id="confirmMsj" style="font-size:15px;color:#374151;padding:4px 0 8px;"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="cerrarModal('confirmModal')">Cancelar</button>
+      <button class="btn-ok" id="confirmOkBtn" onclick="ejecutarConfirmar()">Sí</button>
+    </div>
   </div>
 </div>
 
@@ -1135,6 +1135,7 @@ function fDate(d){ return new Date(d).toLocaleDateString('es-CL',{day:'2-digit',
 
 // ── MODALES + botón atrás ──
 function abrirModal(id){
+  if(id!=='confirmModal'){ cerrarTodosModales(); }
   document.getElementById(id).classList.add('show');
   try{ history.pushState({modal:id}, ''); }catch(e){}
   if(id==='modalCompra'){ document.getElementById('compraFecha').value=new Date().toISOString().slice(0,10); }
