@@ -184,7 +184,7 @@ body.dark .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316;
 
 <header>
   <div class="top">
-    <h1>🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span> <span id="appVer" style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:6px;background:#374151;color:#d1d5db;font-weight:700;vertical-align:middle;">v20</span></h1>
+    <h1 data-qa="1">🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span> <span id="appVer" style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:6px;background:#374151;color:#d1d5db;font-weight:700;vertical-align:middle;">QA</span></h1>
     <div>
       <div class="hoy"><button id="btnTema" onclick="toggleTema()" style="background:none;border:1px solid rgba(255,255,255,.4);color:#fff;padding:3px 8px;border-radius:12px;font-size:11px;cursor:pointer;margin-bottom:3px;">🌙</button> <span id="fechaHoy"></span></div>
       <div class="gan">Ganancia hoy: <span id="ganHoy">$0</span></div>
@@ -959,8 +959,8 @@ function guardar(){
   estado.lastModified = Date.now();
   const json = JSON.stringify(estado);
   let lok = true;
-  try{ localStorage.setItem('misHuevos', json); }catch(e){ lok = false; }
-  try{ sessionStorage.setItem('misHuevos', json); }catch(e){}
+  try{ localStorage.setItem('misHuevosQA', json); }catch(e){ lok = false; }
+  try{ sessionStorage.setItem('misHuevosQA', json); }catch(e){}
   try{ idbPut('estado', json); }catch(e){}
   if(!lok && !document.getElementById('alertaGuardado').innerHTML){
     document.getElementById('alertaGuardado').innerHTML = '<div class="alert-banner">⚠️ Tu navegador no está guardando los datos. Ábrelo en Chrome o añádelo a la pantalla de inicio, o usa Respaldar → Exportar.</div>';
@@ -969,8 +969,8 @@ function guardar(){
 }
 function cargar(){
   let s = null;
-  try{ s = localStorage.getItem('misHuevos'); }catch(e){}
-  if(!s){ try{ s = sessionStorage.getItem('misHuevos'); }catch(e){} }
+  try{ s = localStorage.getItem('misHuevosQA'); }catch(e){}
+  if(!s){ try{ s = sessionStorage.getItem('misHuevosQA'); }catch(e){} }
   if(s){ try{ const d=JSON.parse(s); aplicarDefaults(d); if(!d.lastModified) d.lastModified = Date.now(); estado=Object.assign(estado,d); }catch(e){} }
   return s;
 }
@@ -982,7 +982,7 @@ async function recuperarIndexedDB(){
       aplicarDefaults(d);
       if(!d.lastModified) d.lastModified = Date.now();
       estado = Object.assign(estado, d);
-      try{ localStorage.setItem('misHuevos', JSON.stringify(estado)); }catch(e){}
+      try{ localStorage.setItem('misHuevosQA', JSON.stringify(estado)); }catch(e){}
       return true;
     }
   }catch(e){}
@@ -991,7 +991,7 @@ async function recuperarIndexedDB(){
 function idbOpen(){
   return new Promise((res,rej)=>{
     try{
-      const req = indexedDB.open('misHuevosDB', 1);
+      const req = indexedDB.open('misHuevosQADB', 1);
       req.onupgradeneeded = e => { e.target.result.createObjectStore('datos'); };
       req.onsuccess = e => res(e.target.result);
       req.onerror = e => rej(e);
@@ -3147,7 +3147,7 @@ function exportarPDF(){
   const merHoy = mHoy.reduce((a,m)=>a+m.perdida,0);
   const neto = ganHoy - gasHoy - merHoy;
   let html = '<html><head><style>body{font-family:Arial,sans-serif;padding:20px;color:#333;}h1{color:#f97316;border-bottom:2px solid #f97316;padding-bottom:8px;}table{width:100%;border-collapse:collapse;margin:10px 0;}th{background:#f97316;color:#fff;padding:8px;text-align:left;}td{padding:6px 8px;border-bottom:1px solid #eee;}.total{font-size:18px;font-weight:bold;color:#15803d;background:#f0fdf4;padding:12px;border-radius:8px;margin-top:12px;}</style></head><body>';
-  html += '<h1>🥚 Mis Huevos - Cierre del Día</h1>';
+  html += '<h1 data-qa="1">🥚 Mis Huevos - Cierre del Día</h1>';
   html += '<p><b>Fecha:</b> '+new Date().toLocaleDateString('es-CL')+' '+new Date().toLocaleTimeString('es-CL')+'</p>';
   html += '<table><tr><th>Concepto</th><th>Monto</th></tr>';
   html += '<tr><td>Ventas</td><td>'+fmt(venHoy)+'</td></tr>';
@@ -3374,7 +3374,7 @@ async function initApp(){
   if(fechaVencida()){
     setTimeout(()=>{ actualizarAvisoDia(); toast('⚠️ Hay un día sin cerrar. Toca el aviso rojo para cuadrar.'); },1500);
   }
-  if(!localStorage.getItem('misHuevos')){ guardar(); }
+  if(!localStorage.getItem('misHuevosQA')){ guardar(); }
   aplicarTema(estado.tema);
   if(estado.darkMode) document.body.classList.add('dark');
   actualizarTodo();
