@@ -1140,10 +1140,6 @@ function abrirModal(id){
     document.getElementById('ajTerceraWrap').style.display = estado.tercera.activada ? 'block' : 'none';
     if(estado.tercera.activada){
       document.getElementById('ajTerceraInput').value = estado.stock.Tercera||0;
-      document.getElementById('ajTerceraBotones').style.display = 'block';
-      document.getElementById('ajTercera').textContent = estado.stock.Tercera||0;
-    } else {
-      document.getElementById('ajTerceraBotones').style.display = 'none';
     }
   }
   if(id==='modalHistorialVentas') llenarHistorialVentas();
