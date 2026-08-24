@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = 'mis-huevos-v20';
+﻿const CACHE_NAME = 'mis-huevos-v21';
 const ASSETS = [
   './',
   './MisHuevos_Movil.html',
