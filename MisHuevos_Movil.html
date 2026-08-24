@@ -141,9 +141,15 @@ label.campo { font-size:12px; font-weight:700; color:#555; display:block; margin
 .sesion-resumen .v { font-size:18px; font-weight:900; color:#15803d; }
 .sesion-resumen .l { font-size:10px; color:#6b7280; }
 .alert-banner { background:#fef2f2; border:1.5px solid #fecaca; color:#dc2626; border-radius:10px; padding:10px 12px; margin-bottom:10px; font-size:13px; font-weight:700; text-align:center; }
-.caja-dia { background:#eff6ff; border:1.5px solid #bfdbfe; border-radius:12px; padding:10px 6px; margin-bottom:10px; display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:4px; text-align:center; }
-.caja-dia .v { font-size:14px; font-weight:900; color:#1d4ed8; overflow-wrap:anywhere; white-space:nowrap; }
-.caja-dia .l { font-size:9px; color:#6b7280; }
+.caja-dia { background:#eff6ff; border:1.5px solid #bfdbfe; border-radius:12px; padding:10px; margin-bottom:10px; }
+.cd-hero { text-align:center; padding:4px 0 10px; border-bottom:1.5px dashed #bfdbfe; margin-bottom:8px; }
+.cd-hero .v { font-size:30px; font-weight:900; color:#16a34a; line-height:1.15; }
+.cd-hero .l { font-size:11px; color:#374151; font-weight:800; letter-spacing:.6px; margin-bottom:2px; }
+.cd-sub { font-size:10px; color:#6b7280; margin-top:3px; }
+.cd-chips { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; }
+.cd-chips .chip { background:#fff; border:1px solid #dbeafe; border-radius:9px; padding:7px 2px; text-align:center; }
+.cd-chips .chip .v { font-size:12.5px; font-weight:900; color:#1d4ed8; white-space:nowrap; overflow-wrap:anywhere; }
+.cd-chips .chip .l { font-size:9px; color:#6b7280; }
 /* ── MODO OSCURO ── */
 body.dark{ background:#111827; color:#e5e7eb; }
 body.dark .card{ background:#1f2937; box-shadow:0 1px 4px rgba(0,0,0,.3); }
@@ -225,13 +231,18 @@ body.dark .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316;
 
   <!-- ═══ VENDER ═══ -->
   <div class="card">
-    <div class="caja-dia">
-      <div><div class="v" id="cajaDiaVentas">$0</div><div class="l">Vendido hoy</div></div>
-      <div><div class="v" id="cajaDiaEfectivo">$0</div><div class="l">💵 Efectivo</div></div>
-      <div><div class="v" id="cajaDiaTransf">$0</div><div class="l">🏦 Transferencia</div></div>
-      <div><div class="v" id="cajaDiaGasto">$0</div><div class="l">💸 Gastos</div></div>
-      <div><div class="v" id="cajaDiaNeto">$0</div><div class="l">💰 Tuyo hoy</div></div>
-    </div>
+      <div class="caja-dia">
+        <div class="cd-hero">
+          <div class="l">💰 TUYO HOY</div>
+          <div class="v" id="cajaDiaNeto">$0</div>
+        </div>
+        <div class="cd-chips">
+          <div class="chip"><div class="v" id="cajaDiaVentas">$0</div><div class="l">Vendido</div></div>
+          <div class="chip"><div class="v" id="cajaDiaEfectivo">$0</div><div class="l">💵 Efec.</div></div>
+          <div class="chip"><div class="v" id="cajaDiaTransf">$0</div><div class="l">🏦 Transf.</div></div>
+          <div class="chip"><div class="v" id="cajaDiaGasto">$0</div><div class="l">💸 Gastos</div></div>
+        </div>
+      </div>
     <button class="big-vender" onclick="abrirVenta()">➕ VENDER <span class="sub">bandejas y cajas</span></button>
     <button class="big-feria" id="bigFeriaBtn" onclick="abrirBotonFeria()">🎪 FERIA <span class="sub" id="feriaSub">rápido a $6.000 la bandeja</span></button>
     <div class="precios">
@@ -749,7 +760,7 @@ if ('serviceWorker' in navigator) {
     </div>
     <div class="modal-btns">
       <button class="btn-cancel" onclick="cerrarModal('modalReset')">Cancelar</button>
-      <button class="btn-ok" id="btnResetConfirmar" style="background:#dc2626 !important;opacity:0.5;" onclick="reiniciarTodo()" disabled>Sí, reiniciar</button>
+      <button class="btn-ok" id="btnResetConfirmar" style="background:#dc2626 !important;" onclick="reiniciarTodo()">Sí, reiniciar</button>
     </div>
   </div>
 </div>
@@ -776,18 +787,6 @@ if ('serviceWorker' in navigator) {
     <div class="modal-btns">
       <button class="btn-cancel" onclick="cerrarModal('editarVentaModal')">Cancelar</button>
       <button class="btn-ok" onclick="guardarEdicionVenta()">✓ Guardar cambio</button>
-    </div>
-  </div>
-</div>
-
-<!-- ═══ MODAL CONFIRMAR ═══ -->
-<div class="modal-back" id="confirmModal">
-  <div class="modal">
-    <div class="modal-header"><h3 id="confirmTitulo">Confirmar</h3><button class="modal-close" onclick="cerrarModal('confirmModal')">✕</button></div>
-    <div id="confirmMsj" style="font-size:15px;color:#374151;padding:4px 0 8px;"></div>
-    <div class="modal-btns">
-      <button class="btn-cancel" onclick="cerrarModal('confirmModal')">Cancelar</button>
-      <button class="btn-ok" id="confirmOkBtn" onclick="ejecutarConfirmar()">Sí</button>
     </div>
   </div>
 </div>
@@ -845,6 +844,18 @@ if ('serviceWorker' in navigator) {
       <button class="btn-cancel" style="width:100%;margin-top:6px;" onclick="desconectarSync()">Desconectar</button>
     </div>
     <div class="modal-btns"><button class="btn-cancel" onclick="cerrarModal('modalDatos')">Cerrar</button></div>
+  </div>
+</div>
+
+<!-- ═══ MODAL CONFIRMAR ═══ -->
+<div class="modal-back" id="confirmModal">
+  <div class="modal">
+    <div class="modal-header"><h3 id="confirmTitulo">Confirmar</h3><button class="modal-close" onclick="cerrarModal('confirmModal')">✕</button></div>
+    <div id="confirmMsj" style="font-size:15px;color:#374151;padding:4px 0 8px;"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="cerrarModal('confirmModal')">Cancelar</button>
+      <button class="btn-ok" id="confirmOkBtn" onclick="ejecutarConfirmar()">Sí</button>
+    </div>
   </div>
 </div>
 
@@ -1124,6 +1135,7 @@ function fDate(d){ return new Date(d).toLocaleDateString('es-CL',{day:'2-digit',
 
 // ── MODALES + botón atrás ──
 function abrirModal(id){
+  if(id!=='confirmModal'){ cerrarTodosModales(); }
   document.getElementById(id).classList.add('show');
   try{ history.pushState({modal:id}, ''); }catch(e){}
   if(id==='modalCompra'){ document.getElementById('compraFecha').value=new Date().toISOString().slice(0,10); }
@@ -1138,12 +1150,12 @@ function abrirModal(id){
     document.getElementById('ajPrimInput').value = estado.stock.Primera;
     document.getElementById('ajSegInput').value = estado.stock.Segunda;
     document.getElementById('ajTerceraWrap').style.display = estado.tercera.activada ? 'block' : 'none';
+    const _dimCal=(id,val)=>{ try{ const el=document.getElementById(id); if(!el) return; const w=el.closest('.campo'); if(w) w.style.opacity = val>0 ? '1' : '0.45'; }catch(e){} };
+    _dimCal('ajPrimInput', estado.stock.Primera||0);
+    _dimCal('ajSegInput', estado.stock.Segunda||0);
+    if(estado.tercera.activada) _dimCal('ajTerceraInput', estado.stock.Tercera||0);
     if(estado.tercera.activada){
       document.getElementById('ajTerceraInput').value = estado.stock.Tercera||0;
-      document.getElementById('ajTerceraBotones').style.display = 'block';
-      document.getElementById('ajTercera').textContent = estado.stock.Tercera||0;
-    } else {
-      document.getElementById('ajTerceraBotones').style.display = 'none';
     }
   }
   if(id==='modalHistorialVentas') llenarHistorialVentas();
@@ -1520,6 +1532,7 @@ function deudasVencidas(){
 
 // ── VENTA ──
 function abrirVenta(){
+  if(!verificarBloqueo()) return;
   venta = { producto:'Primera', tipo:'bandeja', cant:1, pago:'efectivo', sesion:[] };
   const candidatos=['Primera','Segunda','Tercera'];
   let elegido='Primera';
@@ -1634,7 +1647,7 @@ function actualizarSesionVenta(){
   if(s.length===0){ c.innerHTML='<div class="empty">Aquí verás lo que vas registrando</div>'; }
   else {
     c.innerHTML = s.slice().reverse().map(v=>{
-      const pg = v.pago==='transferencia' ? '🏦' : v.pago==='deuda' ? '📒' : '💵';
+      const pg = (v.quien==='Feria'?'🎪':'')+(v.pago==='transferencia' ? '🏦' : v.pago==='deuda' ? '📒' : '💵');
       return '<div class="venta-list-item"><span><b>'+((v.nombre||v.prod)+'').slice(0,12)+'</b> '+v.cant+' '+v.tipo+' · '+v.quien+' '+pg+'</span><span class="v-t">'+fmt(v.precio)+'</span></div>';
     }).join('');
   }
@@ -1758,7 +1771,7 @@ function actualizarSesionFeria(){
   const c = document.getElementById('feriaList');
   if(s.length===0){ c.innerHTML='<div class="empty">Aquí verás lo que vas vendiendo</div>'; }
   else {
-    c.innerHTML = s.slice().reverse().map(v=>'<div class="venta-list-item"><span><b>'+((v.nombre||v.prod)+'').slice(0,12)+'</b> '+v.cant+' bandeja(s)</span><span class="v-t">'+fmt(v.precio)+'</span></div>').join('');
+    c.innerHTML = s.slice().reverse().map(v=>'<div class="venta-list-item"><span><b>'+((v.nombre||v.prod)+'').slice(0,12)+'</b> '+v.cant+' bandeja(s) '+(v.quien==='Feria'?'🎪':'')+(v.pago==='transferencia'?'🏦':v.pago==='deuda'?'📒':'💵')+'</span><span class="v-t">'+fmt(v.precio)+'</span></div>').join('');
   }
 }
 // ── SALIDA A FERIA (modo domingo) ──
@@ -1870,6 +1883,7 @@ window.addEventListener('load', ()=>{
 });
 
 function agregarOtro(dest){
+  if(!verificarBloqueo()) return;
   const esFeria = dest==='feria';
   const nombre = document.getElementById(esFeria?'feriaOtroNombre':'otroNombre').value.trim();
   const precio = parseInt(document.getElementById(esFeria?'feriaOtroPrecio':'otroPrecio').value)||0;
@@ -2226,12 +2240,16 @@ function llenarCierre(){
   const btx = vHoy.reduce((a,v)=>a+v.bandejas,0);
   const cajas = vHoy.reduce((a,v)=>a+v.bandejas/6,0);
   const neto = ganancia - gastos - merma;
+  const feriaV = vHoy.filter(v=>v.quien==='Feria').reduce((a,v)=>a+v.precio,0);
+  const otrosV = ventas - feriaV;
   document.getElementById('cierreContenido').innerHTML =
     '<div class="stat3"><div class="s"><div class="v">'+fmt(ventas)+'</div><div class="l">Ventas hoy</div></div>'+
     '<div class="s"><div class="v" style="color:#16a34a;">'+fmt(ganancia)+'</div><div class="l">Ganancia</div></div>'+
     '<div class="s"><div class="v">'+btx+'</div><div class="l">Bandejas</div></div></div>'+
     '<div style="font-size:10px;color:#9ca3af;text-align:center;margin-top:4px;padding:0 6px;">Ganancia = ventas − costo de compra'+desgloseCosto(vHoy)+'</div>'+
     '<div class="gan-line" style="margin-top:6px;"><span class="k">📦 Cajas vendidas</span><span class="v">'+(cajas%1?cajas.toFixed(1):cajas)+' cajas ('+btx+' bandejas)</span></div>'+
+    (ventas>0?'<div class="gan-line"><span class="k">🎪&nbsp; De la feria</span><span class="v">'+fmt(feriaV)+'</span></div>'+
+    '<div class="gan-line"><span class="k">🏢&nbsp; Otros</span><span class="v">'+fmt(otrosV)+'</span></div>':'')+
     '<div style="height:10px"></div>'+
     '<div class="gan-line"><span class="k">💵 Efectivo cobrado</span><span class="v">'+fmt(efectivo)+'</span></div>'+
     '<div class="gan-line"><span class="k">🏦 Transferencias</span><span class="v">'+fmt(transf)+'</span></div>'+
@@ -2273,6 +2291,7 @@ function cerrarDia(){
   const mHoy = estado.mermas.filter(m=>m.f>=hoy0&&m.f<HASTA);
   const efectivoVentas = vHoy.filter(v=>v.pago==='efectivo').reduce((a,v)=>a+v.precio,0);
   const gastosEfectivo = gHoy.reduce((a,g)=>a+g.monto,0);
+  const cHoy = estado.compras.filter(c=>c.f>=hoy0&&c.f<HASTA);
   const comprasHoy = cHoy.reduce((a,c)=>a+(c.total!==undefined?c.total:c.cajas*c.precio),0);
   if(!estado.flujoCaja) estado.flujoCaja=[];
   const fcHoy = estado.flujoCaja.filter(x=>x.f>=hoy0&&x.f<HASTA);
@@ -2392,7 +2411,7 @@ function actualizarHistorial(){
       const f = fDate(v.f);
       const h = new Date(v.f).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
       const quien = v.quien ? ' → '+v.quien : '';
-      const pg = v.pago==='transferencia' ? '🏦' : v.pago==='deuda' ? '📒' : '💵';
+      const pg = (v.quien==='Feria'?'🎪':'')+(v.pago==='transferencia' ? '🏦' : v.pago==='deuda' ? '📒' : '💵');
       return '<div class="h-item"><span><b>'+((v.nombre||v.prod)+'').slice(0,12)+'</b> '+v.tipo+' · <span class="d">'+f+' '+h+quien+' '+pg+'</span></span><span class="t">'+fmt(v.precio)+' <button style="background:none;border:none;font-size:13px;cursor:pointer;" onclick="editarVenta(\''+v.id+'\')">✏️</button> <button style="background:none;border:none;font-size:13px;cursor:pointer;" onclick="eliminarVenta(\''+v.id+'\')">🗑️</button></span></div>';
     }).join('');
   }
