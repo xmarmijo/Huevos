@@ -642,7 +642,7 @@ if ('serviceWorker' in navigator) {
 
 <div class="modal-back" id="modalSalidaFeria">
   <div class="modal">
-    <div class="modal-header"><h3>🎪 Salir a feria</h3><button class="modal-close" onclick="cerrarModal('modalSalidaFeria')">✕</button></div>
+    <div class="modal-header"><h3 id="sfTitulo">🎪 Salir a feria</h3><button class="modal-close" onclick="cerrarModal('modalSalidaFeria')">✕</button></div>
     <p style="font-size:13px;color:#555;margin-bottom:12px;">¿Cuántas cajas llevas? Esas pasan a <b>En feria</b> y lo que no vendas podrá volver al stock cuando termines.</p>
     <div style="display:flex;flex-direction:column;gap:10px;">
       <label class="campo" id="sfPrimWrap">🥚 Cajas de Primera <span id="sfPrimHint" style="font-size:11px;color:#6b7280;font-weight:600;"></span><input type="number" class="field" id="sfPrim" inputmode="numeric" placeholder="0"></label>
@@ -652,7 +652,7 @@ if ('serviceWorker' in navigator) {
     <div id="sfPreview" style="margin-top:10px;"></div>
     <div class="modal-btns">
       <button class="btn-cancel" onclick="cerrarModal('modalSalidaFeria')">Cancelar</button>
-      <button class="btn-ok" onclick="confirmarSalidaFeria()">🎪 Activar feria</button>
+      <button class="btn-ok" id="sfBtnOk" onclick="confirmarSalidaFeria()">🎪 Activar feria</button>
     </div>
   </div>
 </div>
@@ -1792,7 +1792,12 @@ function abrirSalidaFeria(){
   }
   _abrirSalidaFeriaModal();
 }
-function _abrirSalidaFeriaModal(){
+let sfModo='salida';
+function _abrirSalidaFeriaModal(modo){
+  sfModo=modo||'salida';
+  const esRef=sfModo==='refuerzo';
+  document.getElementById('sfTitulo').textContent = esRef ? '🎪 Refuerzo de feria' : '🎪 Salir a feria';
+  document.getElementById('sfBtnOk').textContent = esRef ? '✓ Agregar y seguir vendiendo' : '🎪 Activar feria';
   ['sfPrim','sfSeg','sfTerc'].forEach(id=>{ document.getElementById(id).value=''; });
   const calidades=[['sfPrimWrap','sfPrimHint','Primera'],['sfSegWrap','sfSegHint','Segunda'],['sfTercWrap','sfTercHint','Tercera']];
   let alguna=false;
@@ -1804,9 +1809,13 @@ function _abrirSalidaFeriaModal(){
     w.style.display=''; h.textContent='(tienes '+cajas+' en casa)';
     alguna=true;
   });
-  if(!alguna){ toast('📦 No tienes cajas completas para llevar a feria'); return; }
+  if(!alguna){ toast(esRef?'📦 No tienes cajas completas en casa':'📦 No tienes cajas completas para llevar a feria'); return; }
   sfPreviewUpdate();
   abrirModal('modalSalidaFeria');
+}
+function abrirRefuerzoFeria(){
+  if(!salidaActiva()){ toast('No hay feria activa'); return; }
+  _abrirSalidaFeriaModal('refuerzo');
 }
 function sfPreviewUpdate(){
   const p=parseInt(document.getElementById('sfPrim').value)||0, s=parseInt(document.getElementById('sfSeg').value)||0, t=parseInt(document.getElementById('sfTerc').value)||0;
@@ -1820,12 +1829,24 @@ function sfPreviewUpdate(){
 ['sfPrim','sfSeg','sfTerc'].forEach(id=>{ try{ const el=document.getElementById(id); if(el) el.addEventListener('input', sfPreviewUpdate); }catch(err){ window.dispatchEvent(new ErrorEvent('error',{message:'listener '+id+': '+err.message})); } });
 function confirmarSalidaFeria(){
   if(!verificarBloqueo()) return;
-  if(salidaActiva()){ toast('Ya hay una feria activa'); cerrarModal('modalSalidaFeria'); return; }
   const p=parseInt(document.getElementById('sfPrim').value)||0, s=parseInt(document.getElementById('sfSeg').value)||0, t=estado.tercera.activada?(parseInt(document.getElementById('sfTerc').value)||0):0;
   if(p+s+t<=0){ toast('Escribe cuántas cajas llevas'); return; }
   if(p*6>(estado.stock.Primera||0)){ toast('⚠️ No tienes tantas bandejas de Primera ('+Math.floor((estado.stock.Primera||0)/6)+' cajas en casa)'); return; }
   if(s*6>(estado.stock.Segunda||0)){ toast('⚠️ No tienes tantas bandejas de Segunda ('+Math.floor((estado.stock.Segunda||0)/6)+' cajas en casa)'); return; }
   if(t*6>(estado.stock.Tercera||0)){ toast('⚠️ No tienes tantas bandejas de Tercera'); return; }
+  if(sfModo==='refuerzo'){
+    const F=estado.salidaFeria;
+    F.llevadas.Primera+=p*6; F.llevadas.Segunda+=s*6; F.llevadas.Tercera=(F.llevadas.Tercera||0)+t*6;
+    F.quedan.Primera+=p*6; F.quedan.Segunda+=s*6; F.quedan.Tercera=(F.quedan.Tercera||0)+t*6;
+    estado.stock.Primera-=p*6; estado.stock.Segunda-=s*6; estado.stock.Tercera=(estado.stock.Tercera||0)-t*6;
+    logAccion('FERIA', 'Refuerzo: +'+p+'P / +'+s+'S / +'+t+'T caja(s) desde casa');
+    guardar(); actualizarTodo();
+    cerrarModal('modalSalidaFeria');
+    feedbackVenta();
+    toast('➕ Refuerzo agregado · quedan '+((F.quedan.Primera||0)+(F.quedan.Segunda||0)+(F.quedan.Tercera||0))+' btx');
+    return;
+  }
+  if(salidaActiva()){ toast('Ya hay una feria activa'); cerrarModal('modalSalidaFeria'); return; }
   estado.salidaFeria={ activa:true, f:Date.now(), llevadas:{Primera:p*6,Segunda:s*6,Tercera:t*6}, quedan:{Primera:p*6,Segunda:s*6,Tercera:t*6} };
   estado.stock.Primera-=p*6; estado.stock.Segunda-=s*6; estado.stock.Tercera=(estado.stock.Tercera||0)-t*6;
   logAccion('FERIA', 'Saliste a feria con '+p+' caja(s) Primera, '+s+' Segunda'+(t?', '+t+' Tercera':''));
@@ -1860,7 +1881,7 @@ function actualizarBannerFeria(){
   const quedanTot=(F.quedan.Primera||0)+(F.quedan.Segunda||0)+(F.quedan.Tercera||0);
   let parts=[];
   if(F.quedan.Primera>0) parts.push(F.quedan.Primera+' P'); if(F.quedan.Segunda>0) parts.push(F.quedan.Segunda+' S'); if((F.quedan.Tercera||0)>0) parts.push(F.quedan.Tercera+' T');
-  el.innerHTML='<div class="feria-banner"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;"><div><b style="color:#c2410c;">🎪 En feria</b> · quedan <b>'+quedanTot+'</b> bandeja'+(quedanTot===1?'':'s')+(parts.length?' ('+parts.join(', ')+')':'')+'</div><button onclick="terminarSalidaFeria()" style="background:#dc2626;color:#fff;border:none;border-radius:10px;padding:8px 12px;font-weight:800;font-size:12px;cursor:pointer;white-space:nowrap;">Terminar feria</button></div></div>';
+  el.innerHTML='<div class="feria-banner"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;"><div><b style="color:#c2410c;">🎪 En feria</b> · quedan <b>'+quedanTot+'</b> bandeja'+(quedanTot===1?'':'s')+(parts.length?' ('+parts.join(', ')+')':'')+'</div><div style="display:flex;gap:6px;"><button onclick="abrirRefuerzoFeria()" title="Traer más cajas" style="background:#2563eb;color:#fff;border:none;border-radius:10px;padding:8px 12px;font-weight:800;font-size:12px;cursor:pointer;white-space:nowrap;">➕ Refuerzo</button><button onclick="terminarSalidaFeria()" style="background:#dc2626;color:#fff;border:none;border-radius:10px;padding:8px 12px;font-weight:800;font-size:12px;cursor:pointer;white-space:nowrap;">Terminar feria</button></div></div></div>';
   if(big){ if(!big.dataset.base) big.dataset.base=big.innerHTML; big.innerHTML='🎪 VENTA FERIA <span class="sub">de tu salida · quedan '+quedanTot+' btx</span>'; }
 }
 // ── PRESIÓN LARGA sobre FERIA = activar/desactivar salida ──
