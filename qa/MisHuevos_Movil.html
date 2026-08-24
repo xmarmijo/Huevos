@@ -2222,12 +2222,16 @@ function llenarCierre(){
   const btx = vHoy.reduce((a,v)=>a+v.bandejas,0);
   const cajas = vHoy.reduce((a,v)=>a+v.bandejas/6,0);
   const neto = ganancia - gastos - merma;
+  const feriaV = vHoy.filter(v=>v.quien==='Feria').reduce((a,v)=>a+v.precio,0);
+  const otrosV = ventas - feriaV;
   document.getElementById('cierreContenido').innerHTML =
     '<div class="stat3"><div class="s"><div class="v">'+fmt(ventas)+'</div><div class="l">Ventas hoy</div></div>'+
     '<div class="s"><div class="v" style="color:#16a34a;">'+fmt(ganancia)+'</div><div class="l">Ganancia</div></div>'+
     '<div class="s"><div class="v">'+btx+'</div><div class="l">Bandejas</div></div></div>'+
     '<div style="font-size:10px;color:#9ca3af;text-align:center;margin-top:4px;padding:0 6px;">Ganancia = ventas − costo de compra'+desgloseCosto(vHoy)+'</div>'+
     '<div class="gan-line" style="margin-top:6px;"><span class="k">📦 Cajas vendidas</span><span class="v">'+(cajas%1?cajas.toFixed(1):cajas)+' cajas ('+btx+' bandejas)</span></div>'+
+    (ventas>0?'<div class="gan-line"><span class="k">🎪&nbsp; De la feria</span><span class="v">'+fmt(feriaV)+'</span></div>'+
+    '<div class="gan-line"><span class="k">🏢&nbsp; Otros</span><span class="v">'+fmt(otrosV)+'</span></div>':'')+
     '<div style="height:10px"></div>'+
     '<div class="gan-line"><span class="k">💵 Efectivo cobrado</span><span class="v">'+fmt(efectivo)+'</span></div>'+
     '<div class="gan-line"><span class="k">🏦 Transferencias</span><span class="v">'+fmt(transf)+'</span></div>'+
