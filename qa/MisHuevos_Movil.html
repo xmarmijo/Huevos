@@ -2269,6 +2269,7 @@ function cerrarDia(){
   const mHoy = estado.mermas.filter(m=>m.f>=hoy0&&m.f<HASTA);
   const efectivoVentas = vHoy.filter(v=>v.pago==='efectivo').reduce((a,v)=>a+v.precio,0);
   const gastosEfectivo = gHoy.reduce((a,g)=>a+g.monto,0);
+  const cHoy = estado.compras.filter(c=>c.f>=hoy0&&c.f<HASTA);
   const comprasHoy = cHoy.reduce((a,c)=>a+(c.total!==undefined?c.total:c.cajas*c.precio),0);
   if(!estado.flujoCaja) estado.flujoCaja=[];
   const fcHoy = estado.flujoCaja.filter(x=>x.f>=hoy0&&x.f<HASTA);
