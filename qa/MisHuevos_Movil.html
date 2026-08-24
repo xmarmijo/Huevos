@@ -145,6 +145,7 @@ label.campo { font-size:12px; font-weight:700; color:#555; display:block; margin
       .cd-hero { text-align:center; padding:4px 0 10px; border-bottom:1.5px dashed #bfdbfe; margin-bottom:8px; }
       .cd-hero .v { font-size:30px; font-weight:900; color:#16a34a; line-height:1.15; }
       .cd-hero .l { font-size:11px; color:#374151; font-weight:800; letter-spacing:.6px; margin-bottom:2px; }
+      .cd-sub { font-size:10px; color:#6b7280; margin-top:3px; }
       .cd-chips { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; }
       .cd-chips .chip { background:#fff; border:1px solid #dbeafe; border-radius:9px; padding:7px 2px; text-align:center; }
       .cd-chips .chip .v { font-size:12.5px; font-weight:900; color:#1d4ed8; white-space:nowrap; overflow-wrap:anywhere; }
@@ -234,6 +235,7 @@ body.dark .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316;
         <div class="cd-hero">
           <div class="l">💰 TUYO HOY</div>
           <div class="v" id="cajaDiaNeto">$0</div>
+          <div class="cd-sub" id="cajaDiaSub"></div>
         </div>
         <div class="cd-chips">
           <div class="chip"><div class="v" id="cajaDiaVentas">$0</div><div class="l">Vendido</div></div>
@@ -2430,6 +2432,12 @@ function actualizarHistorial(){
   const netoEl = document.getElementById('cajaDiaNeto');
   netoEl.textContent = fmtShort(netoDia);
   netoEl.style.color = netoDia >= 0 ? '#16a34a' : '#dc2626';
+  const ganDia = hoyVentas.reduce((a,v)=>a+ganVenta(v),0);
+  const merDia = mHoy.reduce((a,m)=>a+(m.perdida||0),0);
+  let _partes=[];
+  if(gastosDia>0) _partes.push('gastos '+fmtShort(gastosDia));
+  if(merDia>0) _partes.push('merma '+fmtShort(merDia));
+  document.getElementById('cajaDiaSub').textContent = 'ganancia '+fmtShort(ganDia)+(gastosDia>0||merDia>0?' − '+_partes.join(' − '):'');
 }
 function logAccion(tipo, detalle){
   estado.logs.unshift({ t: Date.now(), tipo, detalle });
