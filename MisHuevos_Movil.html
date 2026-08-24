@@ -190,7 +190,7 @@ body.dark .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316;
 
 <header>
   <div class="top">
-    <h1>🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span> <span id="appVer" style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:6px;background:#374151;color:#d1d5db;font-weight:700;vertical-align:middle;">v23</span></h1>
+    <h1>🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span> <span id="appVer" style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:6px;background:#374151;color:#d1d5db;font-weight:700;vertical-align:middle;">v24</span></h1>
     <div>
       <div class="hoy"><button id="btnTema" onclick="toggleTema()" style="background:none;border:1px solid rgba(255,255,255,.4);color:#fff;padding:3px 8px;border-radius:12px;font-size:11px;cursor:pointer;margin-bottom:3px;">🌙</button> <span id="fechaHoy"></span></div>
       <div class="gan">Ganancia hoy: <span id="ganHoy">$0</span></div>
@@ -934,6 +934,7 @@ function aplicarDefaults(d){
   if(d.umbral===undefined) d.umbral=2;
   if(!d.deudas) d.deudas=[];
   if(!d.clientesFonos) d.clientesFonos={};
+  if(!d.huevosRotos) d.huevosRotos={};
   if(!d.ventas) d.ventas=[];
   if(d.arqueoInicial===undefined) d.arqueoInicial=0;
   if(d.arqueoFecha===undefined) d.arqueoFecha='';
@@ -1993,6 +1994,11 @@ function confirmarCompra(){
   const precioCaja = parseInt(document.getElementById('compraPrecioCaja').value)||0;
   if(cajas===0 && bandejas===0){ toast('Ingresa al menos una caja o bandeja'); return; }
   if(precioCaja<=0){ toast('Ingresa el precio por caja'); return; }
+  var _fc = fecha ? new Date(fecha) : new Date();
+  var _h0 = new Date(); _h0.setHours(0,0,0,0);
+  if(_fc < _h0){
+    if(!confirm('Estas registrando una compra con fecha ANTERIOR a hoy.\nEso puede descuadrar los cierres ya hechos de ese dia.\n\nRegistrar de todos modos?')) return;
+  }
   const totalBandejas = (cajas * 6) + bandejas;
   const total = (cajas * precioCaja) + (bandejas * Math.round(precioCaja / 6));
   if(!estado.stock[categoria]) estado.stock[categoria] = 0;
@@ -2058,7 +2064,21 @@ function confirmarMerma(){
   const huevosRotos = merma.cant;
   const costoHuevo = costoPromedioBtx(prod)/DATOS.huevosTrx;
   const perdida = huevosRotos*costoHuevo;
-  estado.mermas.push({ f:Date.now(), prod, huevos:huevosRotos, perdida });
+  if(!estado.huevosRotos) estado.huevosRotos = {};
+  if(estado.huevosRotos[prod] === undefined) estado.huevosRotos[prod] = 0;
+  estado.huevosRotos[prod] += huevosRotos;
+  let btxDescontadas = 0;
+  const HB = DATOS.huevosTrx || 30;
+  while(estado.huevosRotos[prod] >= HB && (estado.stock[prod] || 0) > 0){
+    estado.huevosRotos[prod] -= HB;
+    estado.stock[prod] = (estado.stock[prod] || 0) - 1;
+    btxDescontadas++;
+  }
+  if((estado.stock[prod] || 0) <= 0) estado.huevosRotos[prod] = 0;
+  if(btxDescontadas > 0){
+    setTimeout(function(){ toast('Stock -' + btxDescontadas + ' bandeja(s) de ' + prod); }, 500);
+  }
+  estado.mermas.push({ f:Date.now(), prod, huevos:huevosRotos, perdida, btx:btxDescontadas });
   logAccion('MERMA', huevosRotos+' huevo(s) rotos de '+prod+' · Pérdida: '+fmt(perdida));
   guardar(); actualizarTodo();
   toast('🥚 '+huevosRotos+' huevo(s) rotos · Pérdida: '+fmt(perdida));
