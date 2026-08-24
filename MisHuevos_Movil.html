@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -2990,6 +2990,7 @@ function irCerrarPendiente(){
   const fv = fechaVencida();
   if(!fv) return;
   modoCierreForzado = new Date(fv);
+  prefillCierreRapido();
   cerrarModal('modalForzar');
   const t = document.getElementById('tituloModalCierre');
   if(t) t.textContent = '⏳ Cierre del día pendiente ('+fmtDiaVenc(fv)+')';
@@ -3206,6 +3207,50 @@ function simularPrecio(){
     '<div class="gan-line" style="margin-top:8px;"><span class="k">Margen por bandeja</span><span class="v">' +
     fmt(ganVieja) + ' → ' + fmt(ganNueva) + ' (' + (costo > 0 ? Math.round(ganNueva / costo * 100) : 0) + '%)</span></div>'+
     (ganNueva <= 0 ? '<div style="color:#dc2626;font-size:12px;font-weight:700;margin-top:6px;text-align:center;">⚠️ Ese precio estaria bajo tu costo</div>' : '');
+}
+
+
+// ================= MODO RAPIDO PARA CIERRE PENDIENTE =================
+function prefillCierreRapido(){
+  if(!modoCierreForzado) return;
+  cierreTab('cuadratura');
+  const rg = rangoCorte();
+  const d0 = rg.desde, h1 = rg.hasta;
+  const vF = estado.ventas.filter(function(v){ return v.f >= d0 && v.f < h1; });
+  const gF = estado.gastos.filter(function(g){ return g.f >= d0 && g.f < h1; });
+  const cF = estado.compras.filter(function(c){ return c.f >= d0 && c.f < h1; });
+  const efV = vF.filter(function(v){ return v.pago === 'efectivo'; }).reduce(function(a,v){ return a + v.precio; }, 0);
+  const gasE = gF.reduce(function(a,g){ return a + g.monto; }, 0);
+  const comH = cF.reduce(function(a,c){ return a + (c.total !== undefined ? c.total : c.cajas * c.precio); }, 0);
+  let cobE = 0, preH = 0;
+  (estado.flujoCaja || []).forEach(function(x){
+    if(x.f >= d0 && x.f < h1){
+      if(x.tipo === 'pagoDeuda' && x.metodo !== 'transferencia') cobE += x.monto;
+      if(x.tipo === 'prestamo') preH += x.monto;
+    }
+  });
+  const esperado = Math.max(0, estado.arqueoInicial + efV + cobE - gasE - comH - preH);
+  const ci = document.getElementById('cierreContado');
+  if(ci) ci.value = esperado;
+  const ce = document.getElementById('cuadEsperado');
+  if(ce) ce.value = esperado;
+  const panel = document.getElementById('cierrePanelCuad');
+  if(panel){
+    const p = panel.querySelector('p');
+    if(p) p.style.display = 'none';
+    ['cuadBilletes','cuadMonedas'].forEach(function(id){
+      const e = document.getElementById(id);
+      if(e) e.style.display = 'none';
+    });
+    Array.prototype.forEach.call(panel.querySelectorAll('button'), function(b){
+      if(b.textContent.indexOf('Guardar cuadratura') >= 0) b.style.display = 'none';
+    });
+  }
+  if(ci && !document.getElementById('notaRapida')){
+    ci.insertAdjacentHTML('afterend',
+      '<div id="notaRapida" style="font-size:12px;color:#15803d;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:8px;padding:8px;margin-top:6px;line-height:1.4;">'+
+      '⚡ <b>Modo rápido:</b> ya pusimos el total que la app calculó para ese día. Si sabes que fue distinto, cambia el número y cierra.</div>');
+  }
 }
 
 
