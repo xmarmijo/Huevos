@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -828,6 +828,10 @@ if ('serviceWorker' in navigator) {
       <div style="height:10px"></div>
       <button class="btn-cancel" style="width:100%;padding:12px;" onclick="guardarManual()">💾 Guardar ahora</button>
       <button class="btn-cancel" style="width:100%;padding:12px;margin-top:8px;color:#dc2626;border-color:#fecaca;font-weight:800;" onclick="abrirModal('modalReset')">🗑️ Reiniciar app (borra todo)</button>
+      <div style="height:14px"></div>
+      <div style="background:#fef9c3;border:1.5px solid #fde047;border-radius:10px;padding:10px 12px;font-size:12px;color:#854d0e;">🆘 Recuperación de emergencia: pega aquí el texto de un respaldo</div>
+      <textarea id="pasteImportTxt" class="field" rows="5" style="font-family:monospace;font-size:10px;margin-top:8px;" placeholder="Mantén presionado aquí y pega..."></textarea>
+      <button class="btn-ok" style="width:100%;padding:12px;border:none;border-radius:12px;background:#2563eb;color:#fff;font-weight:800;font-size:14px;cursor:pointer;margin-top:8px;" onclick="importarDesdeTexto()">♻️ Recuperar mis datos</button>
     </div>
     <div id="datosPanelSync" style="display:none;">
       <p style="font-size:13px;color:#555;margin-bottom:10px;">Conecta a <b>Firebase</b> para sincronizar datos en tiempo real entre dispositivos.</p>
@@ -2673,6 +2677,20 @@ function importarDatos(e){
   reader.readAsText(file);
   e.target.value='';
 }
+function importarDesdeTexto(){
+  const t=document.getElementById('pasteImportTxt').value.trim();
+  if(!t){ toast('Pega primero el texto del respaldo'); return; }
+  try{
+    const d=JSON.parse(t);
+    aplicarDefaults(d);
+    estado=Object.assign(estado,d);
+    logAccion('IMPORTAR', 'Datos recuperados desde texto pegado · '+new Date().toLocaleString('es-CL'));
+    guardar(); actualizarTodo();
+    document.getElementById('pasteImportTxt').value='';
+    toast('✅ Datos recuperados');
+    cerrarModal('modalDatos');
+  }catch(err){ toast('❌ El texto pegado no es válido'); }
+}
 
 // ── RESET ──
 document.getElementById('resetClave').addEventListener('input', function(){
@@ -2765,6 +2783,7 @@ function restaurarVersion(idx){
     estado.gastos = v.snapshot.gastos || [];
     estado.deudas = v.snapshot.deudas || [];
     estado.precios = v.snapshot.precios || estado.precios;
+    estado.salidaFeria = { activa:false, f:null, llevadas:{Primera:0,Segunda:0,Tercera:0}, quedan:{Primera:0,Segunda:0,Tercera:0} };
     logAccion('RESTAURAR', 'Restaurado desde '+v.label+' · '+new Date(v.fecha).toLocaleString('es-CL'));
     guardar(); actualizarTodo();
     toast('↩ Restaurado: '+v.label);
@@ -3287,7 +3306,7 @@ document.addEventListener('focusin',function(e){
 
 // ── INIT ──
 function actualizarTodo(){
-  try{ instalarExtras(); }catch(e){} actualizarAvisoDia(); actualizarStockUI(); actualizarPreciosUI(); actualizarHistorial(); actualizarBtnApertura(); }
+  try{ instalarExtras(); }catch(e){} actualizarAvisoDia(); actualizarStockUI(); actualizarPreciosUI(); actualizarHistorial(); actualizarBtnApertura(); actualizarBannerFeria(); }
 async function initApp(){
   const s = cargar();
   document.getElementById('fechaHoy').textContent = 'Hoy: '+hoy();
