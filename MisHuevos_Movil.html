@@ -824,7 +824,7 @@ if ('serviceWorker' in navigator) {
       <button class="btn-ok" style="width:100%;padding:14px;border:none;border-radius:12px;color:#fff;font-weight:800;font-size:15px;cursor:pointer;" onclick="exportarDatos()">📤 Exportar datos</button>
       <div style="height:10px"></div>
       <button class="btn-ok" style="width:100%;padding:14px;border:none;border-radius:12px;background:#f97316;color:#fff;font-weight:800;font-size:15px;cursor:pointer;" onclick="document.getElementById('fileImport').click()">📥 Importar datos</button>
-      <input type="file" id="fileImport" accept=".json" style="display:none;" onchange="importarDatos(event)">
+      <input type="file" id="fileImport" accept=".json,.txt" style="display:none;" onchange="importarDatos(event)">
       <div style="height:10px"></div>
       <button class="btn-cancel" style="width:100%;padding:12px;" onclick="guardarManual()">💾 Guardar ahora</button>
       <button class="btn-cancel" style="width:100%;padding:12px;margin-top:8px;color:#dc2626;border-color:#fecaca;font-weight:800;" onclick="abrirModal('modalReset')">🗑️ Reiniciar app (borra todo)</button>
