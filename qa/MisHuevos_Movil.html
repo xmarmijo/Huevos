@@ -1746,7 +1746,12 @@ function confirmarFeria(){
   if(precioUnit<=0){ toast('Ingresa un precio válido'); return; }
   const prod = feria.producto;
   const bandejas = feria.tipo==='caja' ? feria.cant * 6 : feria.cant;
-  
+  if(salidaActiva()){
+    const qTot=(estado.salidaFeria.quedan.Primera||0)+(estado.salidaFeria.quedan.Segunda||0)+(estado.salidaFeria.quedan.Tercera||0);
+    if(qTot<=0){ toast('🎪 Tu salida está vacía. Usa ➕ Refuerzo o Terminar feria'); return; }
+    if(!(estado.salidaFeria.quedan[prod]>0)){ toast('⚠️ Sin '+prod+' en la salida · ➕ Refuerzo o cambia de calidad'); return; }
+    if(bandejas>(estado.salidaFeria.quedan[prod]||0)){ toast('⚠️ Solo quedan '+(estado.salidaFeria.quedan[prod]||0)+' btx de '+prod+' en la salida'); return; }
+  }
   // Verificar stock disponible (incluyendo bandejas parciales)
   let bandejasDisponibles = estado.stock[prod]||0;
   if(salidaActiva()) bandejasDisponibles += (estado.salidaFeria.quedan[prod]||0);
