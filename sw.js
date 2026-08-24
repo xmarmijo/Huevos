@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = 'mis-huevos-v15';
+﻿const CACHE_NAME = 'mis-huevos-v16';
 const ASSETS = [
   './',
   './MisHuevos_Movil.html',
@@ -37,3 +37,4 @@ self.addEventListener('fetch', e => {
     })
   );
 });
+
