@@ -1149,6 +1149,10 @@ function abrirModal(id){
     document.getElementById('ajPrimInput').value = estado.stock.Primera;
     document.getElementById('ajSegInput').value = estado.stock.Segunda;
     document.getElementById('ajTerceraWrap').style.display = estado.tercera.activada ? 'block' : 'none';
+    const _dimCal=(id,val)=>{ try{ const el=document.getElementById(id); if(!el) return; const w=el.closest('.campo'); if(w) w.style.opacity = val>0 ? '1' : '0.45'; }catch(e){} };
+    _dimCal('ajPrimInput', estado.stock.Primera||0);
+    _dimCal('ajSegInput', estado.stock.Segunda||0);
+    if(estado.tercera.activada) _dimCal('ajTerceraInput', estado.stock.Tercera||0);
     if(estado.tercera.activada){
       document.getElementById('ajTerceraInput').value = estado.stock.Tercera||0;
     }
