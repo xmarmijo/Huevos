@@ -1312,6 +1312,32 @@ function ejecutarConfirmar(){
 function cerrarTodosModales(){ document.querySelectorAll('.modal-back.show').forEach(m=>m.classList.remove('show')); }
 window.addEventListener('popstate', ()=>{ cerrarTodosModales(); });
 document.addEventListener('keydown', e=>{ if(e.key==='Escape') cerrarTodosModales(); });
+// ── ENTER = BOTÓN PRINCIPAL DE CADA VENTANA ──
+document.addEventListener('keydown', function(e){
+  if(e.key!=='Enter' || e.shiftKey) return;
+  const t=e.target;
+  if(!t || (t.tagName!=='INPUT' && t.tagName!=='TEXTAREA')) return;
+  if(t.id==='resetClave') return;
+  const en=function(id){ let n=t; while(n){ if(n.id===id) return true; n=n.parentElement; } return false; };
+  let acc=null;
+  if(en('ventaModal')) acc=confirmarVenta;
+  else if(en('feriaModal')) acc=confirmarFeria;
+  else if(en('modalCompra')) acc=confirmarCompra;
+  else if(en('modalMerma')) acc=confirmarMerma;
+  else if(en('modalGasto')) acc=confirmarGasto;
+  else if(en('modalSalidaFeria')) acc=confirmarSalidaFeria;
+  else if(en('modalApertura')) acc=abrirDia;
+  else if(en('editarVentaModal')) acc=guardarEdicionVenta;
+  else if(en('pagoDeudaModal')) acc=confirmarPagoDeuda;
+  else if(en('modalCierre')) acc=(t.id==='cierreContado')?cerrarDia:guardarCuadratura;
+  else if(en('modalAjustar')) acc=(t.id==='umbralStock')?guardarUmbral:ajustarStockExacto;
+  else if(t.tagName==='TEXTAREA'){
+    if(t.id==='pasteImportTxt'){ e.preventDefault(); importarDesdeTexto(); }
+    else if(t.id==='syncConfig'){ e.preventDefault(); guardarSyncConfig(); }
+    return;
+  }
+  if(acc){ e.preventDefault(); try{ acc(); }catch(err){} }
+});
 
 // ── STOCK ──
 function actualizarStockUI(){
