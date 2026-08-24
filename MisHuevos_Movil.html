@@ -1749,6 +1749,13 @@ function salidaActiva(){ return !!(estado.salidaFeria && estado.salidaFeria.acti
 function abrirBotonFeria(){ if(salidaActiva()) abrirFeria(); else abrirSalidaFeria(); }
 function abrirSalidaFeria(){
   if(!verificarBloqueo()) return;
+  if(new Date().getDay()!==0){
+    miConfirmar('🎪 Hoy no es domingo.<br><br><span style="font-size:13px;color:#555;">El modo feria está pensado para tu día de venta en la feria. ¿Sales a feria igual?</span>', ()=>{ _abrirSalidaFeriaModal(); });
+    return;
+  }
+  _abrirSalidaFeriaModal();
+}
+function _abrirSalidaFeriaModal(){
   ['sfPrim','sfSeg','sfTerc'].forEach(id=>{ document.getElementById(id).value=''; });
   const tw = document.getElementById('sfTercWrap');
   tw.style.display = estado.tercera.activada ? '' : 'none';
