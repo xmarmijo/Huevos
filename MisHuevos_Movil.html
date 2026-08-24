@@ -184,7 +184,7 @@ body.dark .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316;
 
 <header>
   <div class="top">
-    <h1>🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span> <span id="appVer" style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:6px;background:#374151;color:#d1d5db;font-weight:700;vertical-align:middle;">v16</span></h1>
+    <h1>🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span> <span id="appVer" style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:6px;background:#374151;color:#d1d5db;font-weight:700;vertical-align:middle;">v17</span></h1>
     <div>
       <div class="hoy"><button id="btnTema" onclick="toggleTema()" style="background:none;border:1px solid rgba(255,255,255,.4);color:#fff;padding:3px 8px;border-radius:12px;font-size:11px;cursor:pointer;margin-bottom:3px;">🌙</button> <span id="fechaHoy"></span></div>
       <div class="gan">Ganancia hoy: <span id="ganHoy">$0</span></div>
@@ -295,7 +295,7 @@ body.dark .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316;
 <!-- ═══ BARRA INFERIOR FIJA ═══ -->
 <nav class="bottombar">
   <button style="background:linear-gradient(135deg,#16a34a,#15803d);" onclick="abrirVenta()">➕ VENDER</button>
-  <button style="background:linear-gradient(135deg,#f97316,#ea580c);" onclick="abrirBotonFeria()">🎪 FERIA</button>
+  <button style="background:linear-gradient(135deg,#f97316,#ea580c);" id="bbFeria" onclick="abrirBotonFeria()">🎪 FERIA</button>
   <button style="background:linear-gradient(135deg,#dc2626,#b91c1c);" onclick="abrirModal('modalCierre')">🌙 CIERRE</button>
 </nav>
 <script>
@@ -1747,7 +1747,12 @@ function agregarOtro(dest){
 
 // ── SALIDA A FERIA (modo domingo) ──
 function salidaActiva(){ return !!(estado.salidaFeria && estado.salidaFeria.activa); }
-function abrirBotonFeria(){ if(salidaActiva()) abrirFeria(); else abrirSalidaFeria(); }
+function abrirBotonFeria(){
+  try{
+    if(salidaActiva()){ abrirFeria(); return; }
+    abrirSalidaFeria();
+  }catch(err){ toast('⚠️ Error feria: '+err.message); }
+}
 function abrirSalidaFeria(){
   if(!verificarBloqueo()) return;
   if(new Date().getDay()!==0){
@@ -1815,9 +1820,29 @@ function actualizarBannerFeria(){
   const quedanTot=(F.quedan.Primera||0)+(F.quedan.Segunda||0)+(F.quedan.Tercera||0);
   let parts=[];
   if(F.quedan.Primera>0) parts.push(F.quedan.Primera+' P'); if(F.quedan.Segunda>0) parts.push(F.quedan.Segunda+' S'); if((F.quedan.Tercera||0)>0) parts.push(F.quedan.Tercera+' T');
-  el.innerHTML='<div class="feria-banner"><div style=\"display:flex;justify-content:space-between;align-items:center;gap:8px;\"><div><b style=\"color:#c2410c;\">🎪 En feria</b> · quedan <b>'+quedanTot+'</b> bandeja'+(quedanTot===1?'':'s')+(parts.length?' ('+parts.join(', ')+')':'')+'</div><button onclick=\"terminarSalidaFeria()\" style=\"background:#dc2626;color:#fff;border:none;border-radius:10px;padding:8px 12px;font-weight:800;font-size:12px;cursor:pointer;white-space:nowrap;\">Terminar feria</button></div></div>';
-  if(big){ if(!big.dataset.base) big.dataset.base=big.innerHTML; big.innerHTML='🎪 VENTA FERIA <span class=\"sub\">de tu salida · quedan '+quedanTot+' btx</span>'; }
+  el.innerHTML='<div class="feria-banner"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;"><div><b style="color:#c2410c;">🎪 En feria</b> · quedan <b>'+quedanTot+'</b> bandeja'+(quedanTot===1?'':'s')+(parts.length?' ('+parts.join(', ')+')':'')+'</div><button onclick="terminarSalidaFeria()" style="background:#dc2626;color:#fff;border:none;border-radius:10px;padding:8px 12px;font-weight:800;font-size:12px;cursor:pointer;white-space:nowrap;">Terminar feria</button></div></div>';
+  if(big){ if(!big.dataset.base) big.dataset.base=big.innerHTML; big.innerHTML='🎪 VENTA FERIA <span class="sub">de tu salida · quedan '+quedanTot+' btx</span>'; }
 }
+// ── PRESIÓN LARGA sobre FERIA = activar/desactivar salida ──
+let _flpTimer=null;
+function _feriaLongStart(){ _flpTimer=setTimeout(()=>{ _flpTimer=null; try{ navigator.vibrate&&navigator.vibrate(120); }catch(e){}
+  if(salidaActiva()){ terminarSalidaFeria(); } else { abrirSalidaFeria(); }
+},1500); }
+function _feriaLongCancel(){ if(_flpTimer){ clearTimeout(_flpTimer); _flpTimer=null; } }
+document.addEventListener('DOMContentLoaded', ()=>{
+  ['bigFeriaBtn','bbFeria'].forEach(id=>{ const b=document.getElementById(id); if(!b) return;
+    b.addEventListener('pointerdown', _feriaLongStart);
+    ['pointerup','pointerleave','pointercancel','touchmove'].forEach(ev=>b.addEventListener(ev,_feriaLongCancel));
+  });
+});
+// ── AUTO-APERTURA por enlace (?feria=1) ──
+window.addEventListener('load', ()=>{
+  try{
+    if(new URLSearchParams(location.search).get('feria')==='1'){
+      setTimeout(()=>{ try{ abrirSalidaFeria(); }catch(err){ alert('Error al abrir feria: '+err.message); } },700);
+    }
+  }catch(e){}
+});
   const esFeria = dest==='feria';
   const nombre = document.getElementById(esFeria?'feriaOtroNombre':'otroNombre').value.trim();
   const precio = parseInt(document.getElementById(esFeria?'feriaOtroPrecio':'otroPrecio').value)||0;
