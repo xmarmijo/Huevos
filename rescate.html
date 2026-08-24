@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>ðŸ†˜ Rescate de datos Â· Mis Huevos</title>
+<style>
+body{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,#f97316,#ea580c);margin:0;padding:20px;display:flex;justify-content:center;min-height:90vh;align-items:center;}
+.card{background:#fff;border-radius:20px;padding:24px;max-width:420px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,.25);text-align:center;}
+h1{font-size:20px;margin:0 0 6px;color:#c2410c;}
+p{font-size:14px;color:#555;line-height:1.5;}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:16px 0;text-align:center;}
+.stat{background:#fff7ed;border:1.5px solid #fed7aa;border-radius:12px;padding:10px 4px;font-size:12px;color:#9a3412;}
+.stat b{display:block;font-size:22px;color:#c2410c;}
+button{width:100%;padding:18px;border:none;border-radius:16px;background:#16a34a;color:#fff;font-size:18px;font-weight:900;cursor:pointer;margin-top:8px;}
+button.sec{background:#e5e7eb;color:#555;font-size:13px;padding:12px;margin-top:10px;}
+#msg{font-size:13px;font-weight:700;margin-top:10px;min-height:18px;}
+.ok{color:#16a34a;} .err{color:#dc2626;}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>ðŸ†˜ RecuperaciÃ³n de datos</h1>
+  <p>Esta pÃ¡gina contiene tu respaldo del <b id="fechaRespaldo"></b>. Toca el botÃ³n verde y tus datos vuelven solos a la app.</p>
+  <div class="stats">
+    <div class="stat"><b id="stVentas">0</b>ventas</div>
+    <div class="stat"><b id="stDeudas">0</b>deudas</div>
+    <div class="stat"><b id="stStock">0</b>bandejas</div>
+    <div class="stat"><b id="stCompras">0</b>compras</div>
+  </div>
+  <button onclick="recuperar()">â™»ï¸ RECUPERAR MIS DATOS</button>
+  <button class="sec" onclick="location.href='MisHuevos_Movil.html'">Ir a la app sin recuperar</button>
+  <div id="msg"></div>
+</div>
+<script>
+const DATO = {
+  "stock": {
+    "Primera": 23,
+    "Segunda": 0
+  },
+  "precios": {
+    "Primera": 6000,
+    "Segunda": 5111
+  },
+  "feriaPrecio": 6000,
+  "margen": 18,
+  "tema": "verde",
+  "umbral": 2,
+  "ventas": [
+    {
+      "bandejas": 1,
+      "cant": 1,
+      "f": 1787265043305,
+      "gan": 1008.333333333333,
+      "id": "1787265043305-9yjku",
+      "pago": "deuda",
+      "precio": 6000,
+      "prod": "Primera",
+      "quien": "Vecino lo vendiÃ³ JosÃ©",
+      "tipo": "bandeja"
+    },
+    {
+      "bandejas": 1,
+      "cant": 1,
+      "f": 1787341533643,
+      "gan": 1008.333333333333,
+      "id": "1787341533643-c5szt",
+      "pago": "deuda",
+      "precio": 6000,
+      "prod": "Primera",
+      "quien": "Rafaela 103",
+      "tipo": "bandeja"
+    },
+    {
+      "bandejas": 1,
+      "cant": 1,
+      "f": 1787438275207,
+      "gan": 1008.333333333333,
+      "id": "1787438275207-tlqzg",
+      "pago": "deuda",
+      "precio": 6000,
+      "prod": "Primera",
+      "quien": "Antonelli",
+      "tipo": "bandeja"
+    },
+    {
+      "bandejas": 1,
+      "cant": 1,
+      "f": 1787493430863,
+      "gan": 1008.333333333333,
+      "id": "1787493430863-0blta",
+      "pago": "deuda",
+      "precio": 6000,
+      "prod": "Primera",
+      "quien": "Manolo",
+      "tipo": "bandeja"
+    },
+    {
+      "bandejas": 1,
+      "cant": 1,
+      "f": 1787495380272,
+      "gan": 1008.333333333333,
+      "id": "1787495380271-v7eoe",
+      "pago": "efectivo",
+      "precio": 6000,
+      "prod": "Primera",
+      "quien": "Feria",
+      "tipo": "bandeja"
+    },
+    {
+      "bandejas": 1,
+      "cant": 1,
+      "f": 1787499785327,
+      "gan": 1008.333333333333,
+      "id": "1787499785327-yj9iu",
+      "pago": "efectivo",
+      "precio": 6000,
+      "prod": "Primera",
+      "quien": "Feria",
+      "tipo": "bandeja"
+    },
+    {
+      "bandejas": 1,
+      "cant": 1,
+      "f": 1787500291119,
+      "gan": 1008.333333333333,
+      "id": "1787500291119-he7mp",
+      "pago": "efectivo",
+      "precio": 6000,
+      "prod": "Primera",
+      "quien": "Feria",
+      "tipo": "bandeja"
+    },
+    {
+      "bandejas": 1,
+      "cant": 1,
+      "f": 1787501787896,
+      "gan": 1008.333333333333,
+      "id": "1787501787896-gaxbl",
+      "pago": "efectivo",
+      "precio": 6000,
+      "prod": "Primera",
+      "quien": "Feria",
+      "tipo": "bandeja"
+    },
+    {
+      "bandejas": 2,
+      "cant": 2,
+      "f": 1787504672271,
+      "gan": 2016.666666666666,
+      "id": "1787504672269-1024s",
+      "pago": "efectivo",
+      "precio": 12000,
+      "prod": "Primera",
+      "quien": "Feria",
+      "tipo": "bandeja"
+    },
+    {
+      "bandejas": 1,
+      "cant": 1,
+      "f": 1787505791125,
+      "gan": 1008.333333333333,
+      "id": "1787505791125-k592j",
+      "pago": "efectivo",
+      "precio": 6000,
+      "prod": "Primera",
+      "quien": "Feria",
+      "tipo": "bandeja"
+    },
+    {
+      "bandejas": 1,
+      "cant": 1,
+      "f": 1787505987029,
+      "gan": 1008.333333333333,
+      "id": "1787505987029-f1ehn",
+      "pago": "efectivo",
+      "precio": 6000,
+      "prod": "Primera",
+      "quien": "Feria",
+      "tipo": "bandeja"
+    },
+    {
+      "bandejas": 1,
+      "cant": 1,
+      "f": 1787506230150,
+      "gan": 1008.333333333333,
+      "id": "1787506230150-hyb8d",
+      "pago": "efectivo",
+      "precio": 6000,
+      "prod": "Primera",
+      "quien": "Feria",
+      "tipo": "bandeja"
+    },
+    {
+      "bandejas": 1,
+      "cant": 1,
+      "f": 1787506533832,
+      "gan": 1008.333333333333,
+      "id": "1787506533832-toxil",
+      "pago": "efectivo",
+      "precio": 6000,
+      "prod": "Primera",
+      "quien": "Feria",
+      "tipo": "bandeja"
+    },
+    {
+      "bandejas": 2,
+      "cant": 2,
+      "f": 1787508619528,
+      "gan": 2016.666666666666,
+      "id": "1787508619528-mwfsf",
+      "pago": "efectivo",
+      "precio": 12000,
+      "prod": "Primera",
+      "quien": "Feria",
+      "tipo": "bandeja"
+    },
+    {
+      "bandejas": 1,
+      "cant": 1,
+      "f": 1787510920574,
+      "gan": 1008.333333333333,
+      "id": "1787510920574-0onm7",
+      "pago": "efectivo",
+      "precio": 6000,
+      "prod": "Primera",
+      "quien": "Feria",
+      "tipo": "bandeja"
+    },
+    {
+      "bandejas": 1,
+      "cant": 1,
+      "f": 1787512778055,
+      "gan": 1008.333333333333,
+      "id": "1787512778055-io5g1",
+      "pago": "deuda",
+      "precio": 6000,
+      "prod": "Primera",
+      "quien": "Vecina de las bolsas",
+      "tipo": "bandeja"
+    },
+    {
+      "id": "1787524321515-878um",
+      "f": 1787524321515,
+      "prod": "Primera",
+      "tipo": "bandeja",
+      "cant": 1,
+      "bandejas": 1,
+      "precio": 6000,
+      "gan": 1416,
+      "pago": "transferencia",
+      "quien": "Moises 304"
+    }
+  ],
+  "compras": [
+    {
+      "bandejas": 0,
+      "cajas": 7,
+      "f": 1787184000000,
+      "precio": 27503,
+      "prod": "Primera",
+      "proveedor": "Sin proveedor",
+      "total": 192521
+    }
+  ],
+  "mermas": [
+    {
+      "f": 1787501163001,
+      "huevos": 2,
+      "perdida": 332.77777777777777,
+      "prod": "Primera"
+    }
+  ],
+  "gastos": [
+    {
+      "concepto": "CafÃ© , sopaipillas",
+      "f": 1787497714900,
+      "monto": 1300
+    },
+    {
+      "concepto": "Colaciones",
+      "f": 1787502864400,
+      "monto": 10000
+    },
+    {
+      "concepto": "Ganchos Roma y alfombra baÃ±o",
+      "f": 1787512032562,
+      "monto": 2000
+    }
+  ],
+  "deudas": [
+    {
+      "monto": 12000,
+      "nombre": "Daniel",
+      "tipo": "prestamo"
+    },
+    {
+      "monto": 6000,
+      "nombre": "Vero",
+      "tipo": "prestamo"
+    },
+    {
+      "monto": 6000,
+      "nombre": "Vecino lo vendiÃ³ JosÃ©"
+    },
+    {
+      "monto": 6000,
+      "nombre": "Rafaela 103"
+    },
+    {
+      "f": 1787438275207,
+      "monto": 6000,
+      "nombre": "Antonelli"
+    },
+    {
+      "f": 1787493430863,
+      "monto": 6000,
+      "nombre": "Manolo"
+    },
+    {
+      "f": 1787512778055,
+      "monto": 6000,
+      "nombre": "Vecina de las bolsas"
+    },
+    {
+      "f": 1787518047294,
+      "monto": 12000,
+      "nombre": "Claudio, pero se los descuentos de la estufa",
+      "tipo": "prestamo"
+    }
+  ],
+  "arqueoInicial": 1,
+  "arqueoFecha": "",
+  "arqueoInicialManana": 1,
+  "diaAbierto": true,
+  "ultimoRespaldo": 1787530099672,
+  "productosExtra": {},
+  "logs": [
+    {
+      "detalle": "DÃ­a abierto con $1 en efectivo",
+      "t": 1787519176161,
+      "tipo": "APERTURA"
+    },
+    {
+      "detalle": "DÃ­a cerrado con $1 (esperado $1, diff +0) Â· 23-08-2026, 5:04:24 p. m.",
+      "t": 1787519064291,
+      "tipo": "CIERRE"
+    },
+    {
+      "detalle": "Claudio, pero se los descuentos de la estufa Â· $12.000",
+      "t": 1787518047294,
+      "tipo": "PRÃ‰STAMO"
+    },
+    {
+      "detalle": "Venta eliminada: $12.000 Â· Primera bandeja 2 Â· Feria Â· 23-08-2026, 1:22:47 p. m.",
+      "t": 1787505781758,
+      "tipo": "ELIMINAR"
+    },
+    {
+      "detalle": "2 huevo(s) rotos de Primera Â· PÃ©rdida: $333",
+      "t": 1787501163001,
+      "tipo": "MERMA"
+    },
+    {
+      "detalle": "Venta eliminada: $12.000 Â· Primera bandeja 2 Â· Claudio Â· 23-08-2026, 11:29:06 a. m.",
+      "t": 1787498970021,
+      "tipo": "ELIMINAR"
+    },
+    {
+      "detalle": "Venta eliminada: $6.000 Â· Primera bandeja 1 Â· Feria Â· 23-08-2026, 9:45:19 a. m.",
+      "t": 1787494194602,
+      "tipo": "ELIMINAR"
+    },
+    {
+      "detalle": "DÃ­a abierto con $1 en efectivo",
+      "t": 1787428135843,
+      "tipo": "APERTURA"
+    },
+    {
+      "detalle": "DÃ­a cerrado con $1 (esperado $1, diff +0) Â· 22-08-2026, 11:39:04 a. m.",
+      "t": 1787413144102,
+      "tipo": "CIERRE"
+    },
+    {
+      "detalle": "DÃ­a abierto con $1 en efectivo",
+      "t": 1787346451799,
+      "tipo": "APERTURA"
+    },
+    {
+      "detalle": "DÃ­a cerrado con $1 (esperado $1, diff +0) Â· 21-08-2026, 5:07:25 p. m.",
+      "t": 1787346445258,
+      "tipo": "CIERRE"
+    },
+    {
+      "detalle": "DÃ­a abierto con $1 en efectivo",
+      "t": 1787247222507,
+      "tipo": "APERTURA"
+    },
+    {
+      "detalle": "DÃ­a cerrado con $1 (esperado $1, diff +0) Â· 20-08-2026, 7:49:32 a. m.",
+      "t": 1787226572262,
+      "tipo": "CIERRE"
+    },
+    {
+      "detalle": "Vero Â· $6.000",
+      "t": 1787193662319,
+      "tipo": "PRÃ‰STAMO"
+    },
+    {
+      "detalle": "Daniel Â· $12.000",
+      "t": 1787193656326,
+      "tipo": "PRÃ‰STAMO"
+    },
+    {
+      "detalle": "mama Â· $6.000",
+      "t": 1787188957700,
+      "tipo": "PRÃ‰STAMO"
+    },
+    {
+      "detalle": "Primera Â· 7 cajas + 0 bandejas Â· $192.521 Â· Sin proveedor",
+      "t": 1787188529933,
+      "tipo": "COMPRA"
+    }
+  ],
+  "tercera": {
+    "activada": false,
+    "margen": 20,
+    "precio": 4500,
+    "stock": 0
+  },
+  "versiones": [
+    {
+      "efectivo": 78000,
+      "fecha": 1787522155095,
+      "label": "Ver 9",
+      "stockPrim": 24,
+      "stockSeg": 0,
+      "transfer": 0,
+      "ventasCount": 16
+    },
+    {
+      "efectivo": 78000,
+      "fecha": 1787519265127,
+      "label": "Ver 8",
+      "stockPrim": 24,
+      "stockSeg": 0,
+      "transfer": 0,
+      "ventasCount": 16
+    },
+    {
+      "efectivo": 78000,
+      "fecha": 1787519166553,
+      "label": "Ver 7",
+      "stockPrim": 24,
+      "stockSeg": 0,
+      "transfer": 0,
+      "ventasCount": 16
+    },
+    {
+      "efectivo": 78000,
+      "fecha": 1787516892681,
+      "label": "Ver 6",
+      "stockPrim": 24,
+      "stockSeg": 0,
+      "transfer": 0,
+      "ventasCount": 16
+    },
+    {
+      "efectivo": 72000,
+      "fecha": 1787509252936,
+      "label": "Ver 5",
+      "stockPrim": 26,
+      "stockSeg": 0,
+      "transfer": 0,
+      "ventasCount": 14
+    },
+    {
+      "efectivo": 72000,
+      "fecha": 1787508721500,
+      "label": "Ver 4",
+      "stockPrim": 26,
+      "stockSeg": 0,
+      "transfer": 0,
+      "ventasCount": 14
+    },
+    {
+      "efectivo": 6000,
+      "fecha": 1787493181097,
+      "label": "Ver 3",
+      "stockPrim": 38,
+      "stockSeg": 0,
+      "transfer": 0,
+      "ventasCount": 4
+    },
+    {
+      "efectivo": 0,
+      "fecha": 1787432899145,
+      "label": "Ver 2",
+      "stockPrim": 40,
+      "stockSeg": 0,
+      "transfer": 0,
+      "ventasCount": 2
+    },
+    {
+      "efectivo": 0,
+      "fecha": 1787429050616,
+      "label": "Ver 1",
+      "stockPrim": 40,
+      "stockSeg": 0,
+      "transfer": 0,
+      "ventasCount": 2
+    }
+  ],
+  "clientesPrecios": {},
+  "cuadratura": {
+    "1000": 0,
+    "2000": 0,
+    "5000": 0,
+    "10000": 0,
+    "20000": 0,
+    "moneda10": 0,
+    "moneda100": 0,
+    "moneda50": 0,
+    "moneda500": 0
+  },
+  "flujoCaja": [],
+  "darkMode": false,
+  "stockParcial": {},
+  "lastModified": 1787530099672,
+  "_alertaVenta10": true,
+  "cierres": [
+    "Thu Aug 20 2026",
+    "Fri Aug 21 2026",
+    "Wed Aug 19 2026",
+    "Sat Aug 22 2026"
+  ],
+  "clientesFonos": {
+    "Daniel": "920450362"
+  },
+  "cuadraturaFecha": "Sun Aug 23 2026",
+  "diaAbiertoFecha": "Sun Aug 23 2026",
+  "salidaFeria": {
+    "activa": false,
+    "f": null,
+    "llevadas": {
+      "Primera": 0,
+      "Segunda": 0,
+      "Tercera": 0
+    },
+    "quedan": {
+      "Primera": 0,
+      "Segunda": 0,
+      "Tercera": 0
+    }
+  }
+};
+const f=new Date(DATO.lastModified||Date.now());
+document.getElementById('fechaRespaldo').textContent=f.toLocaleDateString('es-CL')+' '+f.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
+document.getElementById('stVentas').textContent=(DATO.ventas||[]).length;
+document.getElementById('stDeudas').textContent=(DATO.deudas||[]).length;
+document.getElementById('stStock').textContent=(DATO.stock&&DATO.stock.Primera||0)+(DATO.stock&&DATO.stock.Segunda||0);
+document.getElementById('stCompras').textContent=(DATO.compras||[]).length;
+function recuperar(){
+  const msg=document.getElementById('msg');
+  try{
+    const t=JSON.stringify(DATO);
+    localStorage.setItem('misHuevos',t);
+    try{ sessionStorage.setItem('misHuevos',t); }catch(e){}
+    msg.textContent='âœ… Datos restaurados. Abriendo la app...';
+    msg.className='ok';
+    setTimeout(()=>{ location.href='MisHuevos_Movil.html'; },1200);
+  }catch(err){
+    msg.textContent='âŒ Error: '+err.message;
+    msg.className='err';
+  }
+}
+</script>
+</body>
+</html>
