@@ -235,7 +235,6 @@ body.dark .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316;
         <div class="cd-hero">
           <div class="l">💰 TUYO HOY</div>
           <div class="v" id="cajaDiaNeto">$0</div>
-          <div class="cd-sub" id="cajaDiaSub"></div>
         </div>
         <div class="cd-chips">
           <div class="chip"><div class="v" id="cajaDiaVentas">$0</div><div class="l">Vendido</div></div>
@@ -2432,12 +2431,6 @@ function actualizarHistorial(){
   const netoEl = document.getElementById('cajaDiaNeto');
   netoEl.textContent = fmtShort(netoDia);
   netoEl.style.color = netoDia >= 0 ? '#16a34a' : '#dc2626';
-  const ganDia = hoyVentas.reduce((a,v)=>a+ganVenta(v),0);
-  const merDia = mHoy.reduce((a,m)=>a+(m.perdida||0),0);
-  let _partes=[];
-  if(gastosDia>0) _partes.push('gastos '+fmtShort(gastosDia));
-  if(merDia>0) _partes.push('merma '+fmtShort(merDia));
-  document.getElementById('cajaDiaSub').textContent = 'ganancia '+fmtShort(ganDia)+(gastosDia>0||merDia>0?' − '+_partes.join(' − '):'');
 }
 function logAccion(tipo, detalle){
   estado.logs.unshift({ t: Date.now(), tipo, detalle });
@@ -2779,6 +2772,9 @@ document.getElementById('resetClave').addEventListener('input', function(){
     btn.style.opacity = '0.5';
   }
 });
+document.getElementById('resetClave').addEventListener('keydown', function(e){
+  if(e.key==='Enter' && this.value==='1234'){ e.preventDefault(); reiniciarTodo(); }
+});
 function reiniciarTodo(){
   const clave = document.getElementById('resetClave').value;
   if(clave !== '1234'){ toast('❌ Clave incorrecta'); return; }
@@ -2797,6 +2793,16 @@ function reiniciarTodo(){
   estado.clientesPrecios = {};
   estado.versiones = [];
   estado.ultimoRespaldo = Date.now();
+  estado.salidaFeria = { activa:false, f:null, llevadas:{Primera:0,Segunda:0,Tercera:0}, quedan:{Primera:0,Segunda:0,Tercera:0} };
+  estado.flujoCaja = [];
+  estado.cierres = [];
+  estado.arqueoInicial = 0;
+  estado.arqueoInicialManana = 0;
+  estado.arqueoFecha = '';
+  estado.diaAbierto = false;
+  estado.diaAbiertoFecha = '';
+  estado.productosExtra = {};
+  try{ sessionStorage.removeItem('misHuevosQA'); }catch(e){}
   guardar();
   if(fbRef){
     try{ fbRef.off(); }catch(e){}
