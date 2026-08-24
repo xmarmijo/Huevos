@@ -2003,14 +2003,7 @@ function llenarDeudas(){
     return '<div class="gan-line"><span class="k" style="font-weight:800;">'+d.nombre+sub+'</span><span style="display:flex;gap:6px;align-items:center;"><span style="color:#dc2626;font-weight:800;">'+fmt(d.monto)+'</span> <button style="padding:6px 10px;border:none;border-radius:8px;color:#fff;font-weight:800;font-size:11px;cursor:pointer;background:#25D366;" onclick="cobrarWhatsApp(\''+d.nombre+'\')">💬</button> <button class="btn-ok" style="padding:6px 10px;border:none;border-radius:8px;color:#fff;font-weight:800;font-size:11px;cursor:pointer;background:#16a34a;" onclick="pagarDeuda(\''+d.nombre+'\')">Pagó</button> <button style="padding:6px 10px;border:none;border-radius:8px;color:#fff;font-weight:800;font-size:11px;cursor:pointer;background:#dc2626;" onclick="borrarDeuda(\''+d.nombre+'\')">✕</button></span></div>';
   }).join('');
   const total = estado.deudas.reduce((a,d)=>a+d.monto,0);
-  const totalClientes = estado.deudas.filter(d=>d.tipo!=='prestamo').reduce((a,d)=>a+d.monto,0);
-  const totalPrestado = estado.deudas.filter(d=>d.tipo==='prestamo').reduce((a,d)=>a+d.monto,0);
-  if(totalPrestado>0){
-    c.innerHTML += '<div class="gan-line"><span class="k">Total por cobrar (clientes)</span><span class="v" style="color:#dc2626;">'+fmt(totalClientes)+'</span></div>';
-    c.innerHTML += '<div class="gan-line"><span class="k">💰 Total prestado</span><span class="v" style="color:#c2410c;">'+fmt(totalPrestado)+'</span></div>';
-  } else {
-    c.innerHTML += '<div class="gan-line"><span class="k">Total por cobrar</span><span class="v" style="color:#dc2626;">'+fmt(total)+'</span></div>';
-  }
+  c.innerHTML += '<div class="gan-line"><span class="k">Total por cobrar</span><span class="v" style="color:#dc2626;">'+fmt(total)+'</span></div>';
 }
 function pagarDeuda(nombre){
   const d = estado.deudas.find(x=>x.nombre===nombre);
