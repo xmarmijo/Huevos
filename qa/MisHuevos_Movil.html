@@ -1287,7 +1287,7 @@ function llenarProyeccion(){
 }
 let confirmCallback = null;
 function miConfirmar(msj, callback){
-  document.getElementById('confirmMsj').textContent = msj;
+  document.getElementById('confirmMsj').innerHTML = msj;
   confirmCallback = callback;
   abrirModal('confirmModal');
 }
