@@ -141,9 +141,14 @@ label.campo { font-size:12px; font-weight:700; color:#555; display:block; margin
 .sesion-resumen .v { font-size:18px; font-weight:900; color:#15803d; }
 .sesion-resumen .l { font-size:10px; color:#6b7280; }
 .alert-banner { background:#fef2f2; border:1.5px solid #fecaca; color:#dc2626; border-radius:10px; padding:10px 12px; margin-bottom:10px; font-size:13px; font-weight:700; text-align:center; }
-.caja-dia { background:#eff6ff; border:1.5px solid #bfdbfe; border-radius:12px; padding:10px 6px; margin-bottom:10px; display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:4px; text-align:center; }
-.caja-dia .v { font-size:14px; font-weight:900; color:#1d4ed8; overflow-wrap:anywhere; white-space:nowrap; }
-.caja-dia .l { font-size:9px; color:#6b7280; }
+      .caja-dia { background:#eff6ff; border:1.5px solid #bfdbfe; border-radius:12px; padding:10px; margin-bottom:10px; }
+      .cd-hero { text-align:center; padding:4px 0 10px; border-bottom:1.5px dashed #bfdbfe; margin-bottom:8px; }
+      .cd-hero .v { font-size:30px; font-weight:900; color:#16a34a; line-height:1.15; }
+      .cd-hero .l { font-size:11px; color:#374151; font-weight:800; letter-spacing:.6px; margin-bottom:2px; }
+      .cd-chips { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; }
+      .cd-chips .chip { background:#fff; border:1px solid #dbeafe; border-radius:9px; padding:7px 2px; text-align:center; }
+      .cd-chips .chip .v { font-size:12.5px; font-weight:900; color:#1d4ed8; white-space:nowrap; overflow-wrap:anywhere; }
+      .cd-chips .chip .l { font-size:9px; color:#6b7280; }
 /* ── MODO OSCURO ── */
 body.dark{ background:#111827; color:#e5e7eb; }
 body.dark .card{ background:#1f2937; box-shadow:0 1px 4px rgba(0,0,0,.3); }
@@ -225,13 +230,18 @@ body.dark .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316;
 
   <!-- ═══ VENDER ═══ -->
   <div class="card">
-    <div class="caja-dia">
-      <div><div class="v" id="cajaDiaVentas">$0</div><div class="l">Vendido hoy</div></div>
-      <div><div class="v" id="cajaDiaEfectivo">$0</div><div class="l">💵 Efectivo</div></div>
-      <div><div class="v" id="cajaDiaTransf">$0</div><div class="l">🏦 Transferencia</div></div>
-      <div><div class="v" id="cajaDiaGasto">$0</div><div class="l">💸 Gastos</div></div>
-      <div><div class="v" id="cajaDiaNeto">$0</div><div class="l">💰 Tuyo hoy</div></div>
-    </div>
+      <div class="caja-dia">
+        <div class="cd-hero">
+          <div class="l">💰 TUYO HOY</div>
+          <div class="v" id="cajaDiaNeto">$0</div>
+        </div>
+        <div class="cd-chips">
+          <div class="chip"><div class="v" id="cajaDiaVentas">$0</div><div class="l">Vendido</div></div>
+          <div class="chip"><div class="v" id="cajaDiaEfectivo">$0</div><div class="l">💵 Efec.</div></div>
+          <div class="chip"><div class="v" id="cajaDiaTransf">$0</div><div class="l">🏦 Transf.</div></div>
+          <div class="chip"><div class="v" id="cajaDiaGasto">$0</div><div class="l">💸 Gastos</div></div>
+        </div>
+      </div>
     <button class="big-vender" onclick="abrirVenta()">➕ VENDER <span class="sub">bandejas y cajas</span></button>
     <button class="big-feria" id="bigFeriaBtn" onclick="abrirBotonFeria()">🎪 FERIA <span class="sub" id="feriaSub">rápido a $6.000 la bandeja</span></button>
     <div class="precios">
@@ -1618,6 +1628,7 @@ function confirmarVenta(){
   guardar(); actualizarTodo(); actualizarSesionVenta();
   if(estado.ventas.length % 10 === 0){ autoBackup(); toast('💾 Respaldo automático hecho'); }
   document.getElementById('ventaQuien').value='';
+  venta.cant=1; actualizarCantUI();
   feedbackVenta();
   toast(venta.pago==='transferencia' ? '🏦 Registrado: '+fmt(precio) : venta.pago==='deuda' ? '📒 Deuda anotada: '+fmt(precio) : '✅ Registrado: '+fmt(precio));
 }
@@ -1745,6 +1756,7 @@ function confirmarFeria(){
   if(estado.ventas.length % 10 === 0){ autoBackup(); toast('💾 Respaldo automático hecho'); }
   feedbackVenta();
   toast('🎪 Vendido '+feria.cant+' '+feria.tipo+(feria.cant>1?'s':'')+' · '+fmt(precio));
+  feria.cant=1; feriaCant(0);
 }
 function actualizarSesionFeria(){
   const s = feria.sesion;
