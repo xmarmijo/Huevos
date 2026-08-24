@@ -1836,6 +1836,7 @@ function _abrirSalidaFeriaModal(modo){
     const w=document.getElementById(wrap), h=document.getElementById(hint);
     if(cal==='Tercera' && !estado.tercera.activada){ w.style.display='none'; return; }
     const cajas=Math.floor((estado.stock[cal]||0)/6);
+    if(sfModo==='refuerzo'){ w.style.display=''; h.textContent='(en casa: '+cajas+')'; alguna=true; return; }
     if(cajas<=0){ w.style.display='none'; return; }
     w.style.display=''; h.textContent='(tienes '+cajas+' en casa)';
     alguna=true;
@@ -1862,9 +1863,9 @@ function confirmarSalidaFeria(){
   if(!verificarBloqueo()) return;
   const p=parseInt(document.getElementById('sfPrim').value)||0, s=parseInt(document.getElementById('sfSeg').value)||0, t=estado.tercera.activada?(parseInt(document.getElementById('sfTerc').value)||0):0;
   if(p+s+t<=0){ toast('Escribe cuántas cajas llevas'); return; }
-  if(p*6>(estado.stock.Primera||0)){ toast('⚠️ No tienes tantas bandejas de Primera ('+Math.floor((estado.stock.Primera||0)/6)+' cajas en casa)'); return; }
-  if(s*6>(estado.stock.Segunda||0)){ toast('⚠️ No tienes tantas bandejas de Segunda ('+Math.floor((estado.stock.Segunda||0)/6)+' cajas en casa)'); return; }
-  if(t*6>(estado.stock.Tercera||0)){ toast('⚠️ No tienes tantas bandejas de Tercera'); return; }
+  if(p*6>(estado.stock.Primera||0)){ toast('⚠️ Casa solo tiene '+Math.floor((estado.stock.Primera||0)/6)+' caja(s) de Primera. ¿Son nuevas? Regístralas en ➕ Compra'); return; }
+  if(s*6>(estado.stock.Segunda||0)){ toast('⚠️ Casa solo tiene '+Math.floor((estado.stock.Segunda||0)/6)+' caja(s) de Segunda. ¿Son nuevas? Regístralas en ➕ Compra'); return; }
+  if(t*6>(estado.stock.Tercera||0)){ toast('⚠️ Casa no tiene tantas bandejas de Tercera. ¿Son nuevas? Regístralas en ➕ Compra'); return; }
   if(sfModo==='refuerzo'){
     const F=estado.salidaFeria;
     F.llevadas.Primera+=p*6; F.llevadas.Segunda+=s*6; F.llevadas.Tercera=(F.llevadas.Tercera||0)+t*6;
