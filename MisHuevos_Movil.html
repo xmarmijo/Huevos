@@ -184,7 +184,7 @@ body.dark .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316;
 
 <header>
   <div class="top">
-    <h1>🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span> <span id="appVer" style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:6px;background:#374151;color:#d1d5db;font-weight:700;vertical-align:middle;">v17</span></h1>
+    <h1>🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span> <span id="appVer" style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:6px;background:#374151;color:#d1d5db;font-weight:700;vertical-align:middle;">v18</span></h1>
     <div>
       <div class="hoy"><button id="btnTema" onclick="toggleTema()" style="background:none;border:1px solid rgba(255,255,255,.4);color:#fff;padding:3px 8px;border-radius:12px;font-size:11px;cursor:pointer;margin-bottom:3px;">🌙</button> <span id="fechaHoy"></span></div>
       <div class="gan">Ganancia hoy: <span id="ganHoy">$0</span></div>
@@ -854,6 +854,16 @@ if ('serviceWorker' in navigator) {
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <script>
+// ── DETECTOR DE ERRORES VISIBLE ──
+window.addEventListener('error', function(e){
+  try{
+    var b=document.getElementById('errBanner');
+    if(!b){ b=document.createElement('div'); b.id='errBanner';
+      b.style.cssText='position:fixed;top:0;left:0;right:0;z-index:9999;background:#dc2626;color:#fff;padding:8px 12px;font-size:11px;font-family:monospace;max-height:40%;overflow:auto;';
+      (document.body||document.documentElement).appendChild(b); }
+    b.textContent += '⛔ '+e.message+' (linea '+(e.lineno||'?')+')  ';
+  }catch(_){}
+});
 // ── CONFIG ──
 const DATOS = { costoPrimera:29950, costoSegunda:25990, trx:6, huevosTrx:30, btxPrim:18, btxSeg:12 };
 const COSTO_BTX = { Primera: DATOS.costoPrimera/DATOS.trx, Segunda: DATOS.costoSegunda/DATOS.trx };
@@ -1777,7 +1787,7 @@ function sfPreviewUpdate(){
   if(p>0) det.push(p+' caja(s) Primera'); if(s>0) det.push(s+' caja(s) Segunda'); if(t>0) det.push(t+' caja(s) Tercera');
   el.innerHTML='<div style="font-size:13px;text-align:center;padding:10px;background:#fff7ed;border:1.5px solid #fed7aa;border-radius:10px;">🎪 <b>'+det.join(' + ')+'</b><br><span style="color:#c2410c;font-weight:800;">'+tot+' bandejas en total</span></div>';
 }
-['sfPrim','sfSeg','sfTerc'].forEach(id=>{ document.getElementById(id).addEventListener('input', sfPreviewUpdate); });
+['sfPrim','sfSeg','sfTerc'].forEach(id=>{ try{ const el=document.getElementById(id); if(el) el.addEventListener('input', sfPreviewUpdate); }catch(err){ window.dispatchEvent(new ErrorEvent('error',{message:'listener '+id+': '+err.message})); } });
 function confirmarSalidaFeria(){
   if(!verificarBloqueo()) return;
   if(salidaActiva()){ toast('Ya hay una feria activa'); cerrarModal('modalSalidaFeria'); return; }
@@ -3365,8 +3375,12 @@ async function initApp(){
       toast('⚠️ Deudas de 7+ días: '+msj+'. Cobrar desde 📒 Deudas.');
     },3500);
   }
+  try{ const av=document.getElementById('appVer'); if(av){ av.textContent+=' ✓'; av.style.background='#16a34a'; } }catch(e){}
 }
-initApp();
+try{ initApp(); }catch(err){
+  var _b=document.getElementById('errBanner')||(function(){ var d=document.createElement('div'); d.id='errBanner'; d.style.cssText='position:fixed;top:0;left:0;right:0;z-index:9999;background:#dc2626;color:#fff;padding:8px 12px;font-size:11px;font-family:monospace;'; document.body.appendChild(d); return d; })();
+  _b.textContent='⛔ initApp: '+err.message;
+}
 </script>
 </body>
 </html>
