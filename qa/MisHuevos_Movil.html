@@ -1647,7 +1647,7 @@ function actualizarSesionVenta(){
   if(s.length===0){ c.innerHTML='<div class="empty">Aquí verás lo que vas registrando</div>'; }
   else {
     c.innerHTML = s.slice().reverse().map(v=>{
-      const pg = v.pago==='transferencia' ? '🏦' : v.pago==='deuda' ? '📒' : '💵';
+      const pg = (v.quien==='Feria'?'🎪':'')+(v.pago==='transferencia' ? '🏦' : v.pago==='deuda' ? '📒' : '💵');
       return '<div class="venta-list-item"><span><b>'+((v.nombre||v.prod)+'').slice(0,12)+'</b> '+v.cant+' '+v.tipo+' · '+v.quien+' '+pg+'</span><span class="v-t">'+fmt(v.precio)+'</span></div>';
     }).join('');
   }
@@ -1772,7 +1772,7 @@ function actualizarSesionFeria(){
   const c = document.getElementById('feriaList');
   if(s.length===0){ c.innerHTML='<div class="empty">Aquí verás lo que vas vendiendo</div>'; }
   else {
-    c.innerHTML = s.slice().reverse().map(v=>'<div class="venta-list-item"><span><b>'+((v.nombre||v.prod)+'').slice(0,12)+'</b> '+v.cant+' bandeja(s)</span><span class="v-t">'+fmt(v.precio)+'</span></div>').join('');
+    c.innerHTML = s.slice().reverse().map(v=>'<div class="venta-list-item"><span><b>'+((v.nombre||v.prod)+'').slice(0,12)+'</b> '+v.cant+' bandeja(s) '+(v.quien==='Feria'?'🎪':'')+(v.pago==='transferencia'?'🏦':v.pago==='deuda'?'📒':'💵')+'</span><span class="v-t">'+fmt(v.precio)+'</span></div>').join('');
   }
 }
 // ── SALIDA A FERIA (modo domingo) ──
@@ -2412,7 +2412,7 @@ function actualizarHistorial(){
       const f = fDate(v.f);
       const h = new Date(v.f).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
       const quien = v.quien ? ' → '+v.quien : '';
-      const pg = v.pago==='transferencia' ? '🏦' : v.pago==='deuda' ? '📒' : '💵';
+      const pg = (v.quien==='Feria'?'🎪':'')+(v.pago==='transferencia' ? '🏦' : v.pago==='deuda' ? '📒' : '💵');
       return '<div class="h-item"><span><b>'+((v.nombre||v.prod)+'').slice(0,12)+'</b> '+v.tipo+' · <span class="d">'+f+' '+h+quien+' '+pg+'</span></span><span class="t">'+fmt(v.precio)+' <button style="background:none;border:none;font-size:13px;cursor:pointer;" onclick="editarVenta(\''+v.id+'\')">✏️</button> <button style="background:none;border:none;font-size:13px;cursor:pointer;" onclick="eliminarVenta(\''+v.id+'\')">🗑️</button></span></div>';
     }).join('');
   }
