@@ -62,13 +62,12 @@ body.dark .bottombar { background:#111827; }
 .info-item span { color:#6b7280; font-weight:600; }
 .info-item b { font-weight:900; }
     .feria-gan { padding:8px 10px; border-radius:10px; background:#f0fdf4; border:1.5px solid #bbf7d0; color:#15803d; font-weight:900; font-size:13px; text-align:center; }
-    .feria-gan { display:flex; justify-content:space-between; align-items:center; font-weight:800; }
-    .info-item.gan-ok, .feria-gan.gan-ok { border-color:#bbf7d0; background:#f0fdf4; }
-    .info-item.gan-bad, .feria-gan.gan-bad { border-color:#fecaca; background:#fef2f2; }
-    .info-item .g-r, .feria-gan .g-r { font-weight:800; }
-    .info-item.gan-ok .g-r b, .feria-gan.gan-ok .g-r b { color:#15803d; }
-    .info-item.gan-bad .g-r, .feria-gan.gan-bad .g-r, .info-item.gan-bad .g-r b, .feria-gan.gan-bad .g-r b { color:#dc2626; }
-    .g-l { font-weight:700; color:#555; }
+    .feria-gan { margin-top:4px; font-size:11px; font-weight:400; padding:0; background:none; border:none; text-align:left; }
+    .info-item { background:none; border:none; padding:3px 0; font-size:11px; }
+    .info-item, .feria-gan { color:#374151; }
+    .info-item.gan-ok, .feria-gan.gan-ok { color:#15803d; }
+    .info-item.gan-bad, .feria-gan.gan-bad { color:#dc2626; }
+    .g-txt b { font-weight:800; }
 .step-btn { width:40px; height:44px; border:none; border-radius:10px; background:#f8f9fb; border:1.5px solid #ccc; font-size:15px; font-weight:900; color:#374151; cursor:pointer; }
 .step-btn:active { background:#e5e7eb; }
 .alert-banner { margin-top:10px; background:#fef2f2; border:1.5px solid #fecaca; color:#b91c1c; border-radius:10px; padding:10px 12px; font-size:12px; font-weight:700; }
@@ -197,7 +196,7 @@ body.dark .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316;
 
 <header>
   <div class="top">
-    <h1>🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span> <span id="appVer" style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:6px;background:#374151;color:#d1d5db;font-weight:700;vertical-align:middle;">v32</span></h1>
+    <h1>🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span> <span id="appVer" style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:6px;background:#374151;color:#d1d5db;font-weight:700;vertical-align:middle;">v33</span></h1>
     <div>
       <div class="hoy"><button id="btnTema" onclick="toggleTema()" style="background:none;border:1px solid rgba(255,255,255,.4);color:#fff;padding:3px 8px;border-radius:12px;font-size:11px;cursor:pointer;margin-bottom:3px;">🌙</button> <span id="fechaHoy"></span></div>
       <div class="gan">Ganancia hoy: <span id="ganHoy">$0</span></div>
@@ -1558,14 +1557,15 @@ function desgloseCosto(vHoy){
 function pintarGanancia(elId, precio, prod, label){
   const el = document.getElementById(elId);
   if(!el) return;
-  if(!precio || precio<=0){ el.innerHTML = '<span class="g-l">'+label+'</span><span style="opacity:.55;">—</span>'; el.classList.remove('gan-ok','gan-bad'); return; }
+  if(!precio || precio<=0){ el.innerHTML = '<span class="g-txt">'+(label?label+' · ':'')+'—</span>'; el.classList.remove('gan-ok','gan-bad'); return; }
   const costo = costoBtx(prod);
   const gan = precio - costo;
   const pct = precio>0 ? Math.round(gan/precio*100) : 0;
   const ok = pct >= 15;
   el.classList.toggle('gan-ok', ok);
   el.classList.toggle('gan-bad', !ok);
-  el.innerHTML = '<span class="g-l">'+label+'</span><span class="g-r">ganas '+fmt(Math.round(gan))+' · <b>'+pct+'%</b></span>';
+  const txt = (label?label+' · ':'')+'Ganancia '+fmt(Math.round(gan))+' · <b>'+pct+'%</b>';
+  el.innerHTML = '<span class="g-txt">'+txt+'</span>';
 }
 function actualizarPreciosUI(){
   document.getElementById('precioPrimBtx').value = estado.precios.Primera;
@@ -1575,7 +1575,7 @@ function actualizarPreciosUI(){
   if(_fs) _fs.textContent = 'rápido a '+fmt(estado.feriaPrecio)+' la bandeja';
   pintarGanancia('infoGanPrim', estado.precios.Primera, 'Primera', '🥚 Primera');
   pintarGanancia('infoGanSeg', estado.precios.Segunda, 'Segunda', '🥚 Segunda');
-  pintarGanancia('infoGanFeria', estado.feriaPrecio, 'Primera', 'Feria');
+  pintarGanancia('infoGanFeria', estado.feriaPrecio, 'Primera', '');
   if(estado.tercera.activada){
     document.getElementById('precioTerceraBtx').value = estado.tercera.precio;
     pintarGanancia('infoGanTercera', estado.tercera.precio, 'Tercera', '🥚 Tercera');
@@ -1588,7 +1588,7 @@ function actualizarInfoPrecios(){
   const t = parseInt(document.getElementById('precioTerceraBtx')?.value)||0;
   pintarGanancia('infoGanPrim', p, 'Primera', '🥚 Primera');
   pintarGanancia('infoGanSeg', s, 'Segunda', '🥚 Segunda');
-  pintarGanancia('infoGanFeria', f, 'Primera', 'Feria');
+  pintarGanancia('infoGanFeria', f, 'Primera', '');
   if(estado.tercera.activada && t>0) pintarGanancia('infoGanTercera', t, 'Tercera', '🥚 Tercera');
 }
 document.getElementById('precioPrimBtx').addEventListener('input', actualizarInfoPrecios);
