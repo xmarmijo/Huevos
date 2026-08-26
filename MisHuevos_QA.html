@@ -1017,6 +1017,9 @@ function conectarFirebase(cfg){
     const auth = firebase.auth(fb);
     const iniciar = () => {
       const uid = (auth.currentUser && auth.currentUser.uid) ? auth.currentUser.uid : 'anon';
+      // Ruta compartida: todos los dispositivos leen/escriben huevos_qa/estado.
+      // refDev es solo respaldo de migracion: si la ruta compartida esta vacia,
+      // recuperamos lo que antes se guardaba por dispositivo (huevos_qa/{uid}/estado) y lo subimos.
       const refUsr = firebase.database(fb).ref('huevos_qa/estado');
       const refDev = firebase.database(fb).ref('huevos_qa/'+uid+'/estado');
       const esDefecto = (s) => !s || ((!s.ventas || s.ventas.length===0) && (!s.deudas || s.deudas.length===0) && s.stock && s.stock.Primera===STOCK_INI.Primera && s.stock.Segunda===STOCK_INI.Segunda);
