@@ -1104,7 +1104,7 @@ function llenarModalDatos(){
 }
 function tapSyncDot(){
   if(fbRef && fbConectado){ toast('Ya estás sincronizado'); return; }
-  const cfg = {"apiKey":"AIzaSyDGkne1l3xny7lCC4PvdWhmQEfS3yAE5No","authDomain":"xmishuevosx.firebaseapp.com","projectId":"xmishuevosx","storageBucket":"xmishuevosx.firebasestorage.app","messagingSenderId":"959739221540","appId":"1:959739221540:web:794b2a25429a57fcfbeab1"};
+  const cfg = {"databaseURL":"https://xmishuevosx-default-rtdb.firebaseio.com","apiKey":"AIzaSyDGkne1l3xny7lCC4PvdWhmQEfS3yAE5No","authDomain":"xmishuevosx.firebaseapp.com","projectId":"xmishuevosx","storageBucket":"xmishuevosx.firebasestorage.app","messagingSenderId":"959739221540","appId":"1:959739221540:web:794b2a25429a57fcfbeab1"};
   cfg.databaseURL = 'https://xmishuevosx-default-rtdb.firebaseio.com';
   localStorage.setItem('misHuevosFirebase', JSON.stringify(cfg));
   if(fb){ desconectarSync(); }
@@ -2264,7 +2264,7 @@ function datosTab(tab){
   });
   document.getElementById(panels[tab]).style.display='block';
   if(tab==='respaldar') llenarModalDatos();
-  if(tab==='sync'){ document.getElementById('syncConfig').value='{"apiKey":"AIzaSyDGkne1l3xny7lCC4PvdWhmQEfS3yAE5No","authDomain":"xmishuevosx.firebaseapp.com","projectId":"xmishuevosx","storageBucket":"xmishuevosx.firebasestorage.app","messagingSenderId":"959739221540","appId":"1:959739221540:web:794b2a25429a57fcfbeab1"}'; actualizarSyncUI(); }
+  if(tab==='sync'){ document.getElementById('syncConfig').value='{"databaseURL":"https://xmishuevosx-default-rtdb.firebaseio.com","apiKey":"AIzaSyDGkne1l3xny7lCC4PvdWhmQEfS3yAE5No","authDomain":"xmishuevosx.firebaseapp.com","projectId":"xmishuevosx","storageBucket":"xmishuevosx.firebasestorage.app","messagingSenderId":"959739221540","appId":"1:959739221540:web:794b2a25429a57fcfbeab1"}'; actualizarSyncUI(); }
 }
 function historialTab(tab){
   const panels = {log:'historialPanelLog', versiones:'historialPanelVersiones'};
