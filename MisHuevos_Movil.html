@@ -192,7 +192,7 @@ body.dark .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316;
 
 <header>
   <div class="top">
-    <h1>🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span> <span id="appVer" style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:6px;background:#374151;color:#d1d5db;font-weight:700;vertical-align:middle;">v35</span></h1>
+    <h1>🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span> <span id="appVer" style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:6px;background:#374151;color:#d1d5db;font-weight:700;vertical-align:middle;">v36</span></h1>
     <div>
       <div class="hoy"><button id="btnTema" onclick="toggleTema()" style="background:none;border:1px solid rgba(255,255,255,.4);color:#fff;padding:3px 8px;border-radius:12px;font-size:11px;cursor:pointer;margin-bottom:3px;">🌙</button> <span id="fechaHoy"></span></div>
       <div class="gan">Ganancia hoy: <span id="ganHoy">$0</span></div>
@@ -297,6 +297,7 @@ body.dark .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316;
       <button class="util-btn" onclick="abrirModal('modalHistorialVentas');abrirHistorialFiltrado('ventas')"><span class="ic">🔍</span>Buscar</button>
       <button class="util-btn" onclick="abrirModal('modalClientes')"><span class="ic">👤</span>Clientes</button>
       <button class="util-btn" onclick="abrirModal('modalReportes')"><span class="ic">📊</span>Reportes</button>
+      <button class="util-btn" onclick="abrirSimulador()"><span class="ic">🔮</span>Simulador</button>
       <button class="util-btn" onclick="abrirModal('modalMiDinero')"><span class="ic">💵</span>Mi dinero</button>
       <button class="util-btn" onclick="abrirModal('modalCalcCaja')"><span class="ic">🧮</span>Calc. caja</button>
     </div>
@@ -953,11 +954,12 @@ const TEMAS = {
 
 let venta = { producto:'Primera', tipo:'bandeja', cant:1, pago:'efectivo', sesion:[] };
 let feria = { producto:'Primera', cant:1, sesion:[] };
+let feriaProdActual = 'Primera';
 const merma = { prod:'Primera', cant:1 };
 
 // ── ALMACENAMIENTO ROBUSTO (3 copias: localStorage, IndexedDB, sessionStorage) ──
 function aplicarDefaults(d){
-  if(d.stock.Primera===undefined||d.stock.Primera>100) d.stock={...STOCK_INI};
+  if(d.stock.Primera===undefined) d.stock={...STOCK_INI};
   if(d.feriaPrecio===undefined) d.feriaPrecio=6000;
   if(d.margen===undefined) d.margen=18;
   if(d.tema===undefined) d.tema='naranja';
@@ -1009,6 +1011,11 @@ function guardar(){
     document.getElementById('alertaGuardado').innerHTML = '<div class="alert-banner">⚠️ Tu navegador no está guardando los datos. Ábrelo en Chrome o añádelo a la pantalla de inicio, o usa Respaldar → Exportar.</div>';
   }
   if(fbRef) syncFirebase();
+}
+let _saveT = null;
+function guardarPronto(){
+  if(_saveT) clearTimeout(_saveT);
+  _saveT = setTimeout(function(){ guardar(); }, 700);
 }
 function cargar(){
   let s = null;
@@ -1261,7 +1268,7 @@ function calcularCaja(){
       msg.innerHTML = '<div style="padding:10px;border-radius:10px;background:#dcfce7;color:#166534;font-weight:700;text-align:center;">✅ Margen '+porc.toFixed(1)+'% — dentro del objetivo (≥15%).</div>';
     }
     estado.calCaja = { compraCaja:compraCaja, bandejasCaja:bandejasCaja, huevosBandeja:huevosBandeja, precioVenta:precioVenta };
-    guardar();
+    guardarPronto();
   } else {
     res.innerHTML = '';
     msg.innerHTML = '<div class="alert-banner">Ingresa el valor de compra de la caja, las bandejas por caja y el precio de venta por bandeja.</div>';
@@ -1477,6 +1484,7 @@ function actualizarStockUI(){
   document.getElementById('ajPrim').textContent = Math.floor(stock/6)+' cajas';
   document.getElementById('ajSeg').textContent = Math.floor(stock2/6)+' cajas';
   document.getElementById('umbralStock').value = estado.umbral;
+  const tStock = estado.stock.Tercera||0;
   let msj='';
   if(stock>0 && stock<=3) msj+='🚨 <b>¡URGENTE!</b> Solo quedan <b>'+stock+'</b> bandejas de Primera. ¡Reponer ya! ';
   else if(stock>0 && stock<=estado.umbral) msj+='⚠️ Stock bajo de Primera ('+stock+' bandejas). ';
@@ -1491,7 +1499,6 @@ function actualizarStockUI(){
   else document.getElementById('stockAlerta').innerHTML='';
   // Tercera UI
   const tAct = estado.tercera.activada;
-  const tStock = estado.stock.Tercera||0;
   const tVisible = tAct && tStock > 0;
   document.getElementById('stockTerceraBox').style.display = tVisible ? 'block' : 'none';
   document.getElementById('stockTercera').textContent = tStock;
@@ -1557,7 +1564,7 @@ function pintarGanancia(elId, precio, prod, label){
   const el = document.getElementById(elId);
   if(!el) return;
   if(!precio || precio<=0){ el.innerHTML = '<span class="g-txt">'+(label?label+' · ':'')+'—</span>'; el.classList.remove('gan-ok','gan-bad'); return; }
-  const costo = costoBtx(prod);
+  const costo = costoPromedioBtx(prod);
   const gan = precio - costo;
   const pct = precio>0 ? Math.round(gan/precio*100) : 0;
   const ok = pct >= 15;
@@ -1574,7 +1581,7 @@ function actualizarPreciosUI(){
   if(_fs) _fs.textContent = 'rápido a '+fmt(estado.feriaPrecio)+' la bandeja';
   pintarGanancia('infoGanPrim', estado.precios.Primera, 'Primera', '');
   pintarGanancia('infoGanSeg', estado.precios.Segunda, 'Segunda', '');
-  pintarGanancia('infoGanFeria', estado.feriaPrecio, 'Primera', '');
+  pintarGanancia('infoGanFeria', estado.feriaPrecio, feriaProdActual, '');
   if(estado.tercera.activada){
     document.getElementById('precioTerceraBtx').value = estado.tercera.precio;
     pintarGanancia('infoGanTercera', estado.tercera.precio, 'Tercera', '');
@@ -1587,7 +1594,7 @@ function actualizarInfoPrecios(){
   const t = parseInt(document.getElementById('precioTerceraBtx')?.value)||0;
   pintarGanancia('infoGanPrim', p, 'Primera', '');
   pintarGanancia('infoGanSeg', s, 'Segunda', '');
-  pintarGanancia('infoGanFeria', f, 'Primera', '');
+  pintarGanancia('infoGanFeria', f, feriaProdActual, '');
   if(estado.tercera.activada && t>0) pintarGanancia('infoGanTercera', t, 'Tercera', '');
 }
 document.getElementById('precioPrimBtx').addEventListener('input', actualizarInfoPrecios);
@@ -1766,7 +1773,11 @@ function confirmarVenta(){
   if(estado.ventas.length % 10 === 0){ autoBackup(); toast('💾 Respaldo automático hecho'); }
   document.getElementById('ventaQuien').value='';
   feedbackVenta();
-  toast(venta.pago==='transferencia' ? '🏦 Registrado: '+fmt(precio) : venta.pago==='deuda' ? '📒 Deuda anotada: '+fmt(precio) : '✅ Registrado: '+fmt(precio));
+  const _prod = venta.producto;
+  const _mg = (_prod!=='Otro' && precio>0) ? Math.round((precio - costoPromedioBtx(_prod))/precio*100) : null;
+  let _msg = venta.pago==='transferencia' ? '🏦 Registrado: '+fmt(precio) : venta.pago==='deuda' ? '📒 Deuda anotada: '+fmt(precio) : '✅ Registrado: '+fmt(precio);
+  if(_mg!==null && _mg<15) _msg += ' · ⚠️'+_mg+'% margen';
+  toast(_msg);
   venta.cant=1; actualizarCantUI();
 }
 function actualizarSesionVenta(){
@@ -1816,6 +1827,7 @@ function feriaTipo(t){
   feriaCant(0);
 }
 function feriaProducto(p){
+  feriaProdActual = p;
   feria.producto = p;
   document.getElementById('feriaProdPrimera').classList.toggle('act', p==='Primera');
   document.getElementById('feriaProdSegunda').classList.toggle('act', p==='Segunda');
@@ -1898,7 +1910,10 @@ function confirmarFeria(){
   guardar(); actualizarTodo(); actualizarSesionFeria();
   if(estado.ventas.length % 10 === 0){ autoBackup(); toast('💾 Respaldo automático hecho'); }
   feedbackVenta();
-  toast('🎪 Vendido '+feria.cant+' '+feria.tipo+(feria.cant>1?'s':'')+' · '+fmt(precio));
+  const _mgf = (precioUnit>0) ? Math.round((precioUnit - costoPromedioBtx(feria.producto))/precioUnit*100) : null;
+  let _msgf = '🎪 Vendido '+feria.cant+' '+feria.tipo+(feria.cant>1?'s':'')+' · '+fmt(precio);
+  if(_mgf!==null && _mgf<15) _msgf += ' · ⚠️'+_mgf+'% margen';
+  toast(_msgf);
   feria.cant=1; feriaCant(0);
 }
 function actualizarSesionFeria(){
@@ -2062,10 +2077,12 @@ function agregarOtro(dest){
   toast('➕ '+nombre+': '+fmt(precio));
   if(!estado.productosExtra) estado.productosExtra={};
   estado.productosExtra[nombre.toLowerCase()] = precio;
+  if(quien && quien!=='Venta suelta' && nombre) setClientePrecio(quien, nombre, precio);
 }
 function onOtroNombreInput(dest){
   const nombre = document.getElementById(dest==='feria'?'feriaOtroNombre':'otroNombre').value.trim().toLowerCase();
-  const precio = estado.productosExtra && estado.productosExtra[nombre];
+  let precio = estado.productosExtra && estado.productosExtra[nombre];
+  if(!precio){ const cli = (dest==='feria'?'Feria':(document.getElementById('ventaQuien').value||'').trim()); if(cli && cli!=='Venta suelta') precio = getClientePrecio(cli, nombre); }
   if(precio) document.getElementById(dest==='feria'?'feriaOtroPrecio':'otroPrecio').value = precio;
 }
 
@@ -2531,7 +2548,7 @@ function llenarResumen(){
   const partes = [];
   if(estado.stock.Primera > 0) partes.push(estado.stock.Primera + ' btx Primera');
   if(estado.stock.Segunda > 0) partes.push(estado.stock.Segunda + ' btx Segunda');
-  if(estado.stock.Terceira > 0) partes.push(estado.stock.Terceira + ' btx Tercera');
+  if(estado.stock.Tercera > 0) partes.push(estado.stock.Tercera + ' btx Tercera');
   document.getElementById('rsInvertido').innerHTML = partes.length > 0 ? partes.join('<br>') : '<span style="color:#999;">Sin stock</span>';
 }
 
@@ -3518,13 +3535,13 @@ function renderHistorialFiltrado(){
 }
 
 // ── PRECIOS POR CLIENTE FRECUENTE ──
-function getClientePrecio(nombre){
+function getClientePrecio(cliente, producto){
   if(!estado.clientesPrecios) return null;
-  return estado.clientesPrecios[nombre] || null;
+  return estado.clientesPrecios[cliente+'::'+producto] || null;
 }
-function setClientePrecio(nombre, precio){
+function setClientePrecio(cliente, producto, precio){
   if(!estado.clientesPrecios) estado.clientesPrecios = {};
-  estado.clientesPrecios[nombre] = precio;
+  estado.clientesPrecios[cliente+'::'+producto] = precio;
   guardar();
 }
 
