@@ -190,7 +190,7 @@ body.dark .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316;
 
 <header>
   <div class="top">
-    <h1>🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span> <span id="appVer" style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:6px;background:#374151;color:#d1d5db;font-weight:700;vertical-align:middle;">v25</span></h1>
+    <h1>🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span> <span id="appVer" style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:6px;background:#374151;color:#d1d5db;font-weight:700;vertical-align:middle;">v26</span></h1>
     <div>
       <div class="hoy"><button id="btnTema" onclick="toggleTema()" style="background:none;border:1px solid rgba(255,255,255,.4);color:#fff;padding:3px 8px;border-radius:12px;font-size:11px;cursor:pointer;margin-bottom:3px;">🌙</button> <span id="fechaHoy"></span></div>
       <div class="gan">Ganancia hoy: <span id="ganHoy">$0</span></div>
@@ -290,6 +290,7 @@ body.dark .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316;
       <button class="util-btn" onclick="abrirModal('modalClientes')"><span class="ic">👤</span>Clientes</button>
       <button class="util-btn" onclick="abrirModal('modalReportes')"><span class="ic">📊</span>Reportes</button>
       <button class="util-btn" onclick="abrirModal('modalMiDinero')"><span class="ic">💵</span>Mi dinero</button>
+      <button class="util-btn" onclick="abrirModal('modalCalcCaja')"><span class="ic">🧮</span>Calc. caja</button>
     </div>
     <div class="card-titulo" style="font-size:11px;color:#999;margin-top:12px;">Ajustes</div>
     <div class="util-grid">
@@ -636,9 +637,15 @@ if ('serviceWorker' in navigator) {
       <div class="caja-mini"><div class="v" id="cajaCompra2">$0</div><div class="l">🛒 Compras hoy</div></div>
     </div>
     <div class="gan-line" style="margin-top:10px;"><span class="k">Total del día</span><span class="v" id="cajaNeto2">$0</span></div>
+    <div class="modal-btns"><button class="btn-cancel" onclick="cerrarModal('modalMiDinero')">Cerrar</button></div>
+  </div>
+</div>
 
-    <div class="paso-titulo">3 · Calculadora de caja y ganancia</div>
-    <p style="font-size:12px;color:#777;margin-bottom:8px;">Pon el dinero de la caja y las bandejas: te dice el valor por bandeja y tu % de ganancia. Si baja del 15% te aviso.</p>
+<!-- ═══ MODAL CALCULADORA DE CAJA ═══ -->
+<div class="modal-back" id="modalCalcCaja">
+  <div class="modal">
+    <div class="modal-header"><h3>🧮 Calculadora de caja y ganancia</h3><button class="modal-close" onclick="cerrarModal('modalCalcCaja')">✕</button></div>
+    <p style="font-size:12px;color:#777;margin-bottom:10px;">Pon el dinero de la caja y las bandejas: te dice el valor por bandeja y tu % de ganancia. Si baja del 15% te aviso.</p>
     <div style="display:flex;gap:8px;">
       <div style="flex:1;min-width:0;"><label class="campo">Bandejas</label><input type="number" class="field" id="calcBandejas" inputmode="decimal" placeholder="ej. 20" oninput="calcularCaja()"></div>
       <div style="flex:1;min-width:0;"><label class="campo">Monto de la caja ($)</label><input type="number" class="field" id="calcCaja" inputmode="decimal" placeholder="ej. 60000" oninput="calcularCaja()"></div>
@@ -647,7 +654,7 @@ if ('serviceWorker' in navigator) {
     <div style="margin-top:8px;"><label class="campo">% de venta (ganancia) — editable</label><input type="number" class="field" id="calcPorc" inputmode="decimal" placeholder="se calcula solo" onfocus="calcPorcFocusIn()" onblur="calcPorcFocusOut()" oninput="calcPorcInput()"></div>
     <div id="calcResult" style="margin-top:10px;"></div>
     <div id="calcMsg"></div>
-    <div class="modal-btns"><button class="btn-cancel" onclick="cerrarModal('modalMiDinero')">Cerrar</button></div>
+    <div class="modal-btns"><button class="btn-cancel" onclick="cerrarModal('modalCalcCaja')">Cerrar</button></div>
   </div>
 </div>
 
@@ -1164,7 +1171,8 @@ function abrirModal(id){
   if(id==='modalApertura') llenarApertura();
   if(id==='modalReportes'){ reportesTab('resumen'); }
   if(id==='modalMerma') mermaProducto('Primera');
-  if(id==='modalMiDinero'){ llenarCajaResumen(); calcularVuelto(); cargarCalcCaja(); }
+  if(id==='modalMiDinero'){ llenarCajaResumen(); calcularVuelto(); }
+  if(id==='modalCalcCaja'){ cargarCalcCaja(); }
   if(id==='modalAjustar'){
     document.getElementById('ajPrimInput').value = estado.stock.Primera;
     document.getElementById('ajSegInput').value = estado.stock.Segunda;
