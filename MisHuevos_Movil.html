@@ -190,7 +190,7 @@ body.dark .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316;
 
 <header>
   <div class="top">
-    <h1>🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span> <span id="appVer" style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:6px;background:#374151;color:#d1d5db;font-weight:700;vertical-align:middle;">v27</span></h1>
+    <h1>🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span> <span id="appVer" style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:6px;background:#374151;color:#d1d5db;font-weight:700;vertical-align:middle;">v28</span></h1>
     <div>
       <div class="hoy"><button id="btnTema" onclick="toggleTema()" style="background:none;border:1px solid rgba(255,255,255,.4);color:#fff;padding:3px 8px;border-radius:12px;font-size:11px;cursor:pointer;margin-bottom:3px;">🌙</button> <span id="fechaHoy"></span></div>
       <div class="gan">Ganancia hoy: <span id="ganHoy">$0</span></div>
@@ -645,14 +645,14 @@ if ('serviceWorker' in navigator) {
 <div class="modal-back" id="modalCalcCaja">
   <div class="modal">
     <div class="modal-header"><h3>🧮 Calculadora de caja y ganancia</h3><button class="modal-close" onclick="cerrarModal('modalCalcCaja')">✕</button></div>
-    <p style="font-size:12px;color:#777;margin-bottom:10px;">Pon el valor de compra de la caja. Con las bandejas por caja y huevos por bandeja (defecto 6 y 30) se calcula el costo y el precio de venta por bandeja. El % de venta es variable, pero nunca menor al 15%.</p>
+    <p style="font-size:12px;color:#777;margin-bottom:10px;">Pon el valor de compra de la caja, las bandejas por caja (defecto 6) y huevos por bandeja (defecto 30). Luego el precio de venta por bandeja y te dice qué % estás ganando. Si baja del 15% te avisa.</p>
     <label class="campo">Valor de compra de la caja ($)</label>
     <input type="number" class="field" id="calcCompraCaja" inputmode="decimal" placeholder="ej. 30000" oninput="calcularCaja()">
     <div style="display:flex;gap:8px;margin-top:8px;">
       <div style="flex:1;min-width:0;"><label class="campo">Bandejas por caja</label><input type="number" class="field" id="calcBandejasCaja" value="6" inputmode="decimal" oninput="calcularCaja()"></div>
       <div style="flex:1;min-width:0;"><label class="campo">Huevos por bandeja</label><input type="number" class="field" id="calcHuevosBandeja" value="30" inputmode="decimal" oninput="calcularCaja()"></div>
     </div>
-    <div style="margin-top:8px;"><label class="campo">% de venta (ganancia) — variable, mínimo 15%</label><input type="number" class="field" id="calcPorc" value="15" inputmode="decimal" onfocus="calcPorcFocusIn()" onblur="calcPorcFocusOut()" oninput="calcPorcInput()"></div>
+    <div style="margin-top:8px;"><label class="campo">Precio de venta por bandeja ($)</label><input type="number" class="field" id="calcPrecioVenta" inputmode="decimal" placeholder="ej. 6000" oninput="calcularCaja()"></div>
     <div id="calcResult" style="margin-top:10px;"></div>
     <div id="calcMsg"></div>
     <div class="modal-btns"><button class="btn-cancel" onclick="cerrarModal('modalCalcCaja')">Cerrar</button></div>
@@ -1196,53 +1196,50 @@ function cerrarModal(id){
   try{ if(history.state && history.state.modal) history.back(); }catch(e){}
 }
 // ── CALCULADORA DE CAJA ──
-let _calcPorcFocus = false;
 function cargarCalcCaja(){
   const c = estado.calCaja || {};
   document.getElementById('calcCompraCaja').value = c.compraCaja!=null ? c.compraCaja : '';
   document.getElementById('calcBandejasCaja').value = c.bandejasCaja!=null ? c.bandejasCaja : 6;
   document.getElementById('calcHuevosBandeja').value = c.huevosBandeja!=null ? c.huevosBandeja : 30;
-  document.getElementById('calcPorc').value = c.porc!=null ? c.porc : 15;
+  document.getElementById('calcPrecioVenta').value = c.precioVenta!=null ? c.precioVenta : '';
   calcularCaja();
 }
-function calcPorcFocusIn(){ _calcPorcFocus = true; }
-function calcPorcFocusOut(){ _calcPorcFocus = false; calcularCaja(); }
-function calcPorcInput(){ _calcPorcFocus = true; calcularCaja(); }
 function calcularCaja(){
   const compraCaja = parseFloat(document.getElementById('calcCompraCaja').value)||0;
   const bandejasCaja = parseFloat(document.getElementById('calcBandejasCaja').value)||0;
   const huevosBandeja = parseFloat(document.getElementById('calcHuevosBandeja').value)||0;
+  const precioVenta = parseFloat(document.getElementById('calcPrecioVenta').value)||0;
   const MIN = 15;
   const res = document.getElementById('calcResult');
   const msg = document.getElementById('calcMsg');
-  let porc = parseFloat(document.getElementById('calcPorc').value);
-  if(isNaN(porc)) porc = MIN;
-  let msgText = '';
-  if(porc < MIN){
-    msgText = '⚠️ El % de venta no puede ser menor al 15%. Se ajustó a 15%.';
-    porc = MIN;
-    if(!_calcPorcFocus) document.getElementById('calcPorc').value = MIN;
-  }
-  if(compraCaja>0 && bandejasCaja>0){
+  if(compraCaja>0 && bandejasCaja>0 && precioVenta>0){
     const costoBandeja = compraCaja / bandejasCaja;
-    const precioVenta = costoBandeja * (1 + porc/100);
     const gananciaBandeja = precioVenta - costoBandeja;
+    const porc = costoBandeja>0 ? (gananciaBandeja/costoBandeja)*100 : 0;
     const costoHuevo = huevosBandeja>0 ? costoBandeja/huevosBandeja : 0;
     const precioHuevo = huevosBandeja>0 ? precioVenta/huevosBandeja : 0;
+    const mal = gananciaBandeja<0 || porc<MIN;
+    const colorPorc = mal ? '#dc2626' : '#15803d';
+    const bordePorc = mal ? '#fecaca' : '#bbf7d0';
+    const fondoPorc = mal ? '#fef2f2' : '#f0fdf4';
     res.innerHTML =
+      '<div style="text-align:center;padding:10px;border-radius:10px;background:'+fondoPorc+';border:1.5px solid '+bordePorc+';margin-bottom:8px;"><div style="font-size:11px;color:#6b7280;">TU MARGEN DE GANANCIA</div><div style="font-size:28px;font-weight:900;color:'+colorPorc+';">'+porc.toFixed(1)+'%</div></div>'+
       '<div class="gan-line"><span class="k">Costo por bandeja (compra)</span><span class="v">$'+Math.round(costoBandeja).toLocaleString('es-CL')+'</span></div>'+
-      '<div class="gan-line"><span class="k">Precio de venta por bandeja</span><span class="v">$'+Math.round(precioVenta).toLocaleString('es-CL')+'</span></div>'+
       '<div class="gan-line"><span class="k">Ganancia por bandeja</span><span class="v">$'+Math.round(gananciaBandeja).toLocaleString('es-CL')+'</span></div>'+
       (huevosBandeja>0 ? '<div class="gan-line"><span class="k">Costo por huevo</span><span class="v">$'+Math.round(costoHuevo).toLocaleString('es-CL')+'</span></div>'+
-      '<div class="gan-line"><span class="k">Precio por huevo</span><span class="v">$'+Math.round(precioHuevo).toLocaleString('es-CL')+'</span></div>' : '')+
-      '<div class="gan-line"><span class="k">% de venta aplicado</span><span class="v">'+porc.toFixed(1)+'%</span></div>';
-    if(msgText) msg.innerHTML = '<div class="alert-banner">'+msgText+'</div>';
-    else msg.innerHTML = '';
-    estado.calCaja = { compraCaja:compraCaja, bandejasCaja:bandejasCaja, huevosBandeja:huevosBandeja, porc:porc };
+      '<div class="gan-line"><span class="k">Precio por huevo</span><span class="v">$'+Math.round(precioHuevo).toLocaleString('es-CL')+'</span></div>' : '');
+    if(gananciaBandeja<0){
+      msg.innerHTML = '<div class="alert-banner">⚠️ Estás vendiendo a pérdida ($'+Math.round(gananciaBandeja).toLocaleString('es-CL')+' por bandeja). Sube el precio.</div>';
+    } else if(porc<MIN){
+      msg.innerHTML = '<div class="alert-banner">⚠️ Tu margen es '+porc.toFixed(1)+'%. No debe bajar del 15% de ganancia.</div>';
+    } else {
+      msg.innerHTML = '<div style="padding:10px;border-radius:10px;background:#dcfce7;color:#166534;font-weight:700;text-align:center;">✅ Margen '+porc.toFixed(1)+'% — dentro del objetivo (≥15%).</div>';
+    }
+    estado.calCaja = { compraCaja:compraCaja, bandejasCaja:bandejasCaja, huevosBandeja:huevosBandeja, precioVenta:precioVenta };
     guardar();
   } else {
     res.innerHTML = '';
-    msg.innerHTML = '<div class="alert-banner">'+(msgText?msgText:'Ingresa el valor de compra de la caja y las bandejas por caja.')+'</div>';
+    msg.innerHTML = '<div class="alert-banner">Ingresa el valor de compra de la caja, las bandejas por caja y el precio de venta por bandeja.</div>';
   }
 }
 
