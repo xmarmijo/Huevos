@@ -57,24 +57,19 @@ body.dark .bottombar { background:#111827; }
 .feria-precio-row .lb { font-size:11px; font-weight:800; color:#6d28d9; white-space:nowrap; }
 .feria-precio-row input { flex:1; padding:10px; border:1.5px solid #ddd6fe; border-radius:10px; font-size:17px; font-weight:800; color:#6d28d9; background:#faf5ff; }
 .feria-precio-row .sug { padding:10px 12px; border:none; border-radius:10px; background:#eef2ff; color:#4338ca; font-weight:800; font-size:12px; cursor:pointer; border:1.5px dashed #4338ca; }
-.info-precios { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px; }
-.info-item { background:#f0fdf4; border:1.5px solid #bbf7d0; border-radius:10px; padding:8px 10px; font-size:12px; color:#15803d; display:flex; justify-content:space-between; align-items:center; }
-.info-item span { color:#6b7280; font-weight:600; }
-.info-item b { font-weight:900; }
-    .feria-gan { padding:8px 10px; border-radius:10px; background:#f0fdf4; border:1.5px solid #bbf7d0; color:#15803d; font-weight:900; font-size:13px; text-align:center; }
-    .feria-gan { margin-top:4px; font-size:11px; font-weight:400; padding:0; background:none; border:none; text-align:left; }
-    .info-item { background:none; border:none; padding:3px 0; font-size:11px; }
-    .info-item, .feria-gan { color:#374151; }
-    .info-item.gan-ok, .feria-gan.gan-ok { color:#15803d; }
-    .info-item.gan-bad, .feria-gan.gan-bad { color:#dc2626; }
     .g-txt b { font-weight:800; }
 .step-btn { width:40px; height:44px; border:none; border-radius:10px; background:#f8f9fb; border:1.5px solid #ccc; font-size:15px; font-weight:900; color:#374151; cursor:pointer; }
 .step-btn:active { background:#e5e7eb; }
 .alert-banner { margin-top:10px; background:#fef2f2; border:1.5px solid #fecaca; color:#b91c1c; border-radius:10px; padding:10px 12px; font-size:12px; font-weight:700; }
-.precios { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:8px; margin-top:12px; }
-.precio-box { background:#f8f9fb; border:1.5px solid #ccc; border-radius:10px; padding:8px 10px; }
+.precios { display:grid; grid-template-columns:1fr; gap:10px; margin-bottom:8px; margin-top:12px; }
+.precio-box { background:#f8f9fb; border:1.5px solid #ccc; border-radius:10px; padding:8px 10px; display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.precio-box .pb-main { flex:1; min-width:0; }
 .precio-box .lb { font-size:10px; font-weight:700; color:#777; text-transform:uppercase; }
 .precio-box input { width:100%; border:none; background:none; font-size:20px; font-weight:800; margin-top:2px; }
+.pb-gan, .feria-gan { font-size:11px; font-weight:800; white-space:nowrap; text-align:right; }
+.pb-gan.gan-ok, .feria-gan.gan-ok { color:#15803d; }
+.pb-gan.gan-bad, .feria-gan.gan-bad { color:#dc2626; }
+.pb-gan b, .feria-gan b { font-weight:800; }
 .btn-sugerir { width:100%; margin-bottom:8px; padding:10px; background:#eef2ff; color:#4338ca; border:1.5px dashed #4338ca; border-radius:10px; font-size:13px; font-weight:700; cursor:pointer; }
 .btn-sugerir:active { background:#e0e7ff; }
 .historial { max-height:200px; overflow-y:auto; }
@@ -196,7 +191,7 @@ body.dark .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316;
 
 <header>
   <div class="top">
-    <h1>🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span> <span id="appVer" style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:6px;background:#374151;color:#d1d5db;font-weight:700;vertical-align:middle;">v33</span></h1>
+    <h1>🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span> <span id="appVer" style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:6px;background:#374151;color:#d1d5db;font-weight:700;vertical-align:middle;">v34</span></h1>
     <div>
       <div class="hoy"><button id="btnTema" onclick="toggleTema()" style="background:none;border:1px solid rgba(255,255,255,.4);color:#fff;padding:3px 8px;border-radius:12px;font-size:11px;cursor:pointer;margin-bottom:3px;">🌙</button> <span id="fechaHoy"></span></div>
       <div class="gan">Ganancia hoy: <span id="ganHoy">$0</span></div>
@@ -252,20 +247,24 @@ body.dark .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316;
     <button class="big-vender" onclick="abrirVenta()">➕ VENDER <span class="sub">bandejas y cajas</span></button>
     <button class="big-feria" id="bigFeriaBtn" onclick="abrirBotonFeria()">🎪 FERIA <span class="sub" id="feriaSub">rápido a $6.000 la bandeja</span></button>
     <div class="precios">
-      <div class="precio-box" id="precioPrimBox"><div class="lb">Primera $/bandeja</div><input type="number" id="precioPrimBtx" inputmode="decimal"></div>
-      <div class="precio-box" id="precioSegBox"><div class="lb">Segunda $/bandeja</div><input type="number" id="precioSegBtx" inputmode="decimal"></div>
-      <div class="precio-box" id="precioTerceraBox" style="display:none;"><div class="lb">Tercera $/bandeja</div><input type="number" id="precioTerceraBtx" inputmode="decimal"></div>
-    </div>
-    <div class="info-precios">
-      <div class="info-item" id="infoPrimItem"><span>🥚 Primera:</span><b id="infoGanPrim">—</b></div>
-      <div class="info-item" id="infoSegItem"><span>🥚 Segunda:</span><b id="infoGanSeg">—</b></div>
-      <div class="info-item" id="infoTerceraItem" style="display:none;"><span>🥚 Tercera:</span><b id="infoGanTercera">—</b></div>
+      <div class="precio-box" id="precioPrimBox">
+        <div class="pb-main"><div class="lb">Primera $/bandeja</div><input type="number" id="precioPrimBtx" inputmode="decimal"></div>
+        <div class="pb-gan" id="infoGanPrim">—</div>
+      </div>
+      <div class="precio-box" id="precioSegBox">
+        <div class="pb-main"><div class="lb">Segunda $/bandeja</div><input type="number" id="precioSegBtx" inputmode="decimal"></div>
+        <div class="pb-gan" id="infoGanSeg">—</div>
+      </div>
+      <div class="precio-box" id="precioTerceraBox" style="display:none;">
+        <div class="pb-main"><div class="lb">Tercera $/bandeja</div><input type="number" id="precioTerceraBtx" inputmode="decimal"></div>
+        <div class="pb-gan" id="infoGanTercera">—</div>
+      </div>
     </div>
     <div class="feria-precio-row">
       <span class="lb">Precio FERIA</span>
       <input type="number" id="feriaPrecioPrincipal" inputmode="decimal">
+      <span class="feria-gan" id="infoGanFeria">—</span>
     </div>
-    <div class="feria-gan" id="infoGanFeria" style="margin-top:6px;">—</div>
     <div id="alertaGuardado"></div>
   </div>
 
@@ -1472,8 +1471,6 @@ function actualizarStockUI(){
   document.getElementById('feriaProdSegunda').style.display = stock2 > 0 ? '' : 'none';
   document.getElementById('precioPrimBox').style.display = stock > 0 ? '' : 'none';
   document.getElementById('precioSegBox').style.display = stock2 > 0 ? '' : 'none';
-  document.getElementById('infoPrimItem').style.display = stock > 0 ? '' : 'none';
-  document.getElementById('infoSegItem').style.display = stock2 > 0 ? '' : 'none';
   document.getElementById('ajPrim').textContent = Math.floor(stock/6)+' cajas';
   document.getElementById('ajSeg').textContent = Math.floor(stock2/6)+' cajas';
   document.getElementById('umbralStock').value = estado.umbral;
@@ -1500,10 +1497,9 @@ function actualizarStockUI(){
   document.getElementById('selTerceraRow').style.display = tVisible ? 'grid' : 'none';
   document.getElementById('feriaTerceraRow').style.display = tVisible ? 'grid' : 'none';
   document.getElementById('precioTerceraBox').style.display = tAct ? 'block' : 'none';
-  document.getElementById('infoTerceraItem').style.display = tAct ? 'flex' : 'none';
   if(tAct){
     document.getElementById('precioTerceraBtx').value = estado.tercera.precio;
-    pintarGanancia('infoGanTercera', estado.tercera.precio, 'Tercera', '🥚 Tercera');
+    pintarGanancia('infoGanTercera', estado.tercera.precio, 'Tercera', '');
   }
 }
 function respaldoPendiente(){
@@ -1573,12 +1569,12 @@ function actualizarPreciosUI(){
   document.getElementById('feriaPrecioPrincipal').value = estado.feriaPrecio;
   const _fs = document.getElementById('feriaSub');
   if(_fs) _fs.textContent = 'rápido a '+fmt(estado.feriaPrecio)+' la bandeja';
-  pintarGanancia('infoGanPrim', estado.precios.Primera, 'Primera', '🥚 Primera');
-  pintarGanancia('infoGanSeg', estado.precios.Segunda, 'Segunda', '🥚 Segunda');
+  pintarGanancia('infoGanPrim', estado.precios.Primera, 'Primera', '');
+  pintarGanancia('infoGanSeg', estado.precios.Segunda, 'Segunda', '');
   pintarGanancia('infoGanFeria', estado.feriaPrecio, 'Primera', '');
   if(estado.tercera.activada){
     document.getElementById('precioTerceraBtx').value = estado.tercera.precio;
-    pintarGanancia('infoGanTercera', estado.tercera.precio, 'Tercera', '🥚 Tercera');
+    pintarGanancia('infoGanTercera', estado.tercera.precio, 'Tercera', '');
   }
 }
 function actualizarInfoPrecios(){
@@ -1586,10 +1582,10 @@ function actualizarInfoPrecios(){
   const s = parseInt(document.getElementById('precioSegBtx').value)||0;
   const f = parseInt(document.getElementById('feriaPrecioPrincipal').value)||0;
   const t = parseInt(document.getElementById('precioTerceraBtx')?.value)||0;
-  pintarGanancia('infoGanPrim', p, 'Primera', '🥚 Primera');
-  pintarGanancia('infoGanSeg', s, 'Segunda', '🥚 Segunda');
+  pintarGanancia('infoGanPrim', p, 'Primera', '');
+  pintarGanancia('infoGanSeg', s, 'Segunda', '');
   pintarGanancia('infoGanFeria', f, 'Primera', '');
-  if(estado.tercera.activada && t>0) pintarGanancia('infoGanTercera', t, 'Tercera', '🥚 Tercera');
+  if(estado.tercera.activada && t>0) pintarGanancia('infoGanTercera', t, 'Tercera', '');
 }
 document.getElementById('precioPrimBtx').addEventListener('input', actualizarInfoPrecios);
 document.getElementById('precioPrimBtx').addEventListener('change', e=>{ estado.precios.Primera=parseInt(e.target.value)||0; guardar(); });
