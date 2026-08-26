@@ -192,7 +192,7 @@ body.dark .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316;
 
 <header>
   <div class="top">
-    <h1>🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span> <span id="appVer" style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:6px;background:#374151;color:#d1d5db;font-weight:700;vertical-align:middle;">v39</span></h1>
+    <h1>🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span> <span id="appVer" style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:6px;background:#374151;color:#d1d5db;font-weight:700;vertical-align:middle;">v40</span></h1>
     <div>
       <div class="hoy"><button id="btnTema" onclick="toggleTema()" style="background:none;border:1px solid rgba(255,255,255,.4);color:#fff;padding:3px 8px;border-radius:12px;font-size:11px;cursor:pointer;margin-bottom:3px;">🌙</button> <span id="fechaHoy"></span></div>
       <div class="gan">Ganancia hoy: <span id="ganHoy">$0</span></div>
@@ -1108,53 +1108,44 @@ function conectarFirebase(cfg){
     const iniciar = () => {
       const uid = (auth.currentUser && auth.currentUser.uid) ? auth.currentUser.uid : 'anon';
       const refUsr = firebase.database(fb).ref('huevos/'+uid+'/estado');
+      const esDefecto = (s) => !s || ((!s.ventas || s.ventas.length===0) && (!s.deudas || s.deudas.length===0) && s.stock && s.stock.Primera===STOCK_INI.Primera && s.stock.Segunda===STOCK_INI.Segunda);
       const arrancar = () => {
         fbRef = refUsr;
         fbRef.once('value', snap=>{
-          if(snap.exists()){
-            const d = snap.val();
-            const fbTime = d.lastModified || 0;
-            const localTime = estado.lastModified || 0;
-            if(fbTime > localTime){
-              estado = Object.assign(estado, d);
-              guardar();
-              aplicarTema(estado.tema); actualizarTodo();
-            } else {
-              fbRef.set(JSON.parse(JSON.stringify(estado)));
-            }
-          } else {
-            fbRef.set(JSON.parse(JSON.stringify(estado)));
-          }
+          const d = snap.val();
+          if(d && !esDefecto(d)){
+            const fbTime = d.lastModified||0, localTime = estado.lastModified||0;
+            if(fbTime > localTime){ estado = Object.assign(estado, d); guardar(); aplicarTema(estado.tema); actualizarTodo(); }
+            else if(localTime > fbTime && !esDefecto(estado)){ fbRef.set(JSON.parse(JSON.stringify(estado))); }
+          } else if(!esDefecto(estado)){ fbRef.set(JSON.parse(JSON.stringify(estado))); }
         });
         fbRef.on('value', snap=>{
           const d = snap.val();
           if(d && !syncOcupado && !reiniciando){
             if(Date.now() - ultimaSyncLocal < 2000) return;
-            const fbTime = d.lastModified || 0;
-            const localTime = estado.lastModified || 0;
-            if(fbTime > localTime){
-              estado = JSON.parse(JSON.stringify(d));
-              aplicarTema(estado.tema); actualizarTodo();
-            }
+            const fbTime = d.lastModified||0, localTime = estado.lastModified||0;
+            if(fbTime > localTime && !esDefecto(d)){ estado = JSON.parse(JSON.stringify(d)); aplicarTema(estado.tema); actualizarTodo(); }
           }
         });
         firebase.database(fb).ref('.info/connected').on('value', s=>{ fbConectado = !!s.val(); actualizarSyncUI(); });
         fbConectado = true; actualizarSyncUI();
       };
-      refUsr.once('value', snap=>{
-        if(!snap.exists()){
-          firebase.database(fb).ref('huevos/estado').once('value', snapV=>{
-            if(snapV.exists()){
-              estado = JSON.parse(JSON.stringify(snapV.val()));
-              guardar();
-              aplicarTema(estado.tema); actualizarTodo();
-              refUsr.set(JSON.parse(JSON.stringify(estado)));
-            }
-            arrancar();
-          });
-        } else {
-          arrancar();
+      refUsr.once('value', snapUsr=>{
+        const dUsr = snapUsr.val();
+        if(!esDefecto(dUsr)){
+          if(esDefecto(estado) || (dUsr.lastModified||0) >= (estado.lastModified||0)){
+            estado = JSON.parse(JSON.stringify(dUsr)); guardar(); aplicarTema(estado.tema); actualizarTodo();
+          }
+          arrancar(); return;
         }
+        firebase.database(fb).ref('huevos/estado').once('value', snapV=>{
+          const dV = snapV.val();
+          if(!esDefecto(dV)){
+            estado = JSON.parse(JSON.stringify(dV)); guardar(); aplicarTema(estado.tema); actualizarTodo();
+            refUsr.set(JSON.parse(JSON.stringify(estado)));
+          }
+          arrancar();
+        });
       });
     };
     if(auth.currentUser){ iniciar(); }
