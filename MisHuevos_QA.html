@@ -839,7 +839,8 @@ if ('serviceWorker' in navigator) {
 <div id="toast" class="toast"></div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <script>
 // ── CONFIG ──
@@ -1013,37 +1014,42 @@ function conectarFirebase(cfg){
   try{
     if(!window.firebase || !firebase.database){ toast('❌ Sin internet para cargar Firebase'); return; }
     fb = firebase.initializeApp(cfg, 'app'+Date.now());
-    fbRef = firebase.database(fb).ref('huevos_qa/estado');
-    fbRef.once('value', snap=>{
-      if(snap.exists()){
-        const d = snap.val();
-        const fbTime = d.lastModified || 0;
-        const localTime = estado.lastModified || 0;
-        if(fbTime > localTime){
-          estado = Object.assign(estado, d);
-          guardar();
-          aplicarTema(estado.tema); actualizarTodo();
+    const auth = firebase.auth(fb);
+    const iniciar = () => {
+      fbRef = firebase.database(fb).ref('huevos_qa/estado');
+      fbRef.once('value', snap=>{
+        if(snap.exists()){
+          const d = snap.val();
+          const fbTime = d.lastModified || 0;
+          const localTime = estado.lastModified || 0;
+          if(fbTime > localTime){
+            estado = Object.assign(estado, d);
+            guardar();
+            aplicarTema(estado.tema); actualizarTodo();
+          } else {
+            fbRef.set(JSON.parse(JSON.stringify(estado)));
+          }
         } else {
           fbRef.set(JSON.parse(JSON.stringify(estado)));
         }
-      } else {
-        fbRef.set(JSON.parse(JSON.stringify(estado)));
-      }
-    });
-    fbRef.on('value', snap=>{
-      const d = snap.val();
-      if(d && !syncOcupado && !reiniciando){
-        if(Date.now() - ultimaSyncLocal < 2000) return;
-        const fbTime = d.lastModified || 0;
-        const localTime = estado.lastModified || 0;
-        if(fbTime > localTime){
-          estado = JSON.parse(JSON.stringify(d));
-          aplicarTema(estado.tema); actualizarTodo();
+      });
+      fbRef.on('value', snap=>{
+        const d = snap.val();
+        if(d && !syncOcupado && !reiniciando){
+          if(Date.now() - ultimaSyncLocal < 2000) return;
+          const fbTime = d.lastModified || 0;
+          const localTime = estado.lastModified || 0;
+          if(fbTime > localTime){
+            estado = JSON.parse(JSON.stringify(d));
+            aplicarTema(estado.tema); actualizarTodo();
+          }
         }
-      }
-    });
-    firebase.database(fb).ref('.info/connected').on('value', s=>{ fbConectado = !!s.val(); actualizarSyncUI(); });
-    fbConectado = true; actualizarSyncUI();
+      });
+      firebase.database(fb).ref('.info/connected').on('value', s=>{ fbConectado = !!s.val(); actualizarSyncUI(); });
+      fbConectado = true; actualizarSyncUI();
+    };
+    if(auth.currentUser){ iniciar(); }
+    else { auth.signInAnonymously().then(iniciar).catch(()=>{ toast('❌ Error de autenticación Firebase'); }); }
   }catch(e){ fb = null; fbRef = null; toast('❌ Error al conectar'); }
 }
 function llenarModalDatos(){
