@@ -1016,7 +1016,8 @@ function conectarFirebase(cfg){
     fb = firebase.initializeApp(cfg, 'app'+Date.now());
     const auth = firebase.auth(fb);
     const iniciar = () => {
-      fbRef = firebase.database(fb).ref('huevos_qa/estado');
+      const uid = (auth.currentUser && auth.currentUser.uid) ? auth.currentUser.uid : 'anon';
+      fbRef = firebase.database(fb).ref('huevos_qa/'+uid+'/estado');
       fbRef.once('value', snap=>{
         if(snap.exists()){
           const d = snap.val();
