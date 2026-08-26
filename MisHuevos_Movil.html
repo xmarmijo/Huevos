@@ -61,7 +61,14 @@ body.dark .bottombar { background:#111827; }
 .info-item { background:#f0fdf4; border:1.5px solid #bbf7d0; border-radius:10px; padding:8px 10px; font-size:12px; color:#15803d; display:flex; justify-content:space-between; align-items:center; }
 .info-item span { color:#6b7280; font-weight:600; }
 .info-item b { font-weight:900; }
-.feria-gan { padding:8px 10px; border-radius:10px; background:#f0fdf4; border:1.5px solid #bbf7d0; color:#15803d; font-weight:900; font-size:13px; text-align:center; }
+    .feria-gan { padding:8px 10px; border-radius:10px; background:#f0fdf4; border:1.5px solid #bbf7d0; color:#15803d; font-weight:900; font-size:13px; text-align:center; }
+    .feria-gan { display:flex; justify-content:space-between; align-items:center; font-weight:800; }
+    .info-item.gan-ok, .feria-gan.gan-ok { border-color:#bbf7d0; background:#f0fdf4; }
+    .info-item.gan-bad, .feria-gan.gan-bad { border-color:#fecaca; background:#fef2f2; }
+    .info-item .g-r, .feria-gan .g-r { font-weight:800; }
+    .info-item.gan-ok .g-r b, .feria-gan.gan-ok .g-r b { color:#15803d; }
+    .info-item.gan-bad .g-r, .feria-gan.gan-bad .g-r, .info-item.gan-bad .g-r b, .feria-gan.gan-bad .g-r b { color:#dc2626; }
+    .g-l { font-weight:700; color:#555; }
 .step-btn { width:40px; height:44px; border:none; border-radius:10px; background:#f8f9fb; border:1.5px solid #ccc; font-size:15px; font-weight:900; color:#374151; cursor:pointer; }
 .step-btn:active { background:#e5e7eb; }
 .alert-banner { margin-top:10px; background:#fef2f2; border:1.5px solid #fecaca; color:#b91c1c; border-radius:10px; padding:10px 12px; font-size:12px; font-weight:700; }
@@ -1497,7 +1504,7 @@ function actualizarStockUI(){
   document.getElementById('infoTerceraItem').style.display = tAct ? 'flex' : 'none';
   if(tAct){
     document.getElementById('precioTerceraBtx').value = estado.tercera.precio;
-    document.getElementById('infoGanTercera').textContent = gananciaInfo(estado.tercera.precio,'Tercera');
+    pintarGanancia('infoGanTercera', estado.tercera.precio, 'Tercera', '🥚 Tercera');
   }
 }
 function respaldoPendiente(){
@@ -1548,12 +1555,17 @@ function desgloseCosto(vHoy){
 }
 
 // ── PRECIOS (escribes el precio, la app te dice cuánto ganas) ──
-function gananciaInfo(precio, prod){
-  if(!precio || precio<=0) return '—';
+function pintarGanancia(elId, precio, prod, label){
+  const el = document.getElementById(elId);
+  if(!el) return;
+  if(!precio || precio<=0){ el.innerHTML = '<span class="g-l">'+label+'</span><span style="opacity:.55;">—</span>'; el.classList.remove('gan-ok','gan-bad'); return; }
   const costo = costoBtx(prod);
   const gan = precio - costo;
-  const pct = Math.round(gan/precio*100);
-  return fmt(Math.round(gan))+' ('+pct+'%)';
+  const pct = precio>0 ? Math.round(gan/precio*100) : 0;
+  const ok = pct >= 15;
+  el.classList.toggle('gan-ok', ok);
+  el.classList.toggle('gan-bad', !ok);
+  el.innerHTML = '<span class="g-l">'+label+'</span><span class="g-r">ganas '+fmt(Math.round(gan))+' · <b>'+pct+'%</b></span>';
 }
 function actualizarPreciosUI(){
   document.getElementById('precioPrimBtx').value = estado.precios.Primera;
@@ -1561,12 +1573,12 @@ function actualizarPreciosUI(){
   document.getElementById('feriaPrecioPrincipal').value = estado.feriaPrecio;
   const _fs = document.getElementById('feriaSub');
   if(_fs) _fs.textContent = 'rápido a '+fmt(estado.feriaPrecio)+' la bandeja';
-  document.getElementById('infoGanPrim').textContent = gananciaInfo(estado.precios.Primera,'Primera');
-  document.getElementById('infoGanSeg').textContent = gananciaInfo(estado.precios.Segunda,'Segunda');
-  document.getElementById('infoGanFeria').textContent = 'ganas '+gananciaInfo(estado.feriaPrecio,'Primera');
+  pintarGanancia('infoGanPrim', estado.precios.Primera, 'Primera', '🥚 Primera');
+  pintarGanancia('infoGanSeg', estado.precios.Segunda, 'Segunda', '🥚 Segunda');
+  pintarGanancia('infoGanFeria', estado.feriaPrecio, 'Primera', 'Feria');
   if(estado.tercera.activada){
     document.getElementById('precioTerceraBtx').value = estado.tercera.precio;
-    document.getElementById('infoGanTercera').textContent = gananciaInfo(estado.tercera.precio,'Tercera');
+    pintarGanancia('infoGanTercera', estado.tercera.precio, 'Tercera', '🥚 Tercera');
   }
 }
 function actualizarInfoPrecios(){
@@ -1574,10 +1586,10 @@ function actualizarInfoPrecios(){
   const s = parseInt(document.getElementById('precioSegBtx').value)||0;
   const f = parseInt(document.getElementById('feriaPrecioPrincipal').value)||0;
   const t = parseInt(document.getElementById('precioTerceraBtx')?.value)||0;
-  document.getElementById('infoGanPrim').textContent = gananciaInfo(p,'Primera');
-  document.getElementById('infoGanSeg').textContent = gananciaInfo(s,'Segunda');
-  document.getElementById('infoGanFeria').textContent = 'ganas '+gananciaInfo(f,'Primera');
-  if(estado.tercera.activada && t>0) document.getElementById('infoGanTercera').textContent = gananciaInfo(t,'Tercera');
+  pintarGanancia('infoGanPrim', p, 'Primera', '🥚 Primera');
+  pintarGanancia('infoGanSeg', s, 'Segunda', '🥚 Segunda');
+  pintarGanancia('infoGanFeria', f, 'Primera', 'Feria');
+  if(estado.tercera.activada && t>0) pintarGanancia('infoGanTercera', t, 'Tercera', '🥚 Tercera');
 }
 document.getElementById('precioPrimBtx').addEventListener('input', actualizarInfoPrecios);
 document.getElementById('precioPrimBtx').addEventListener('change', e=>{ estado.precios.Primera=parseInt(e.target.value)||0; guardar(); });
