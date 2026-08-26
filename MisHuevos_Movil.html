@@ -190,7 +190,7 @@ body.dark .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316;
 
 <header>
   <div class="top">
-    <h1>🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span> <span id="appVer" style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:6px;background:#374151;color:#d1d5db;font-weight:700;vertical-align:middle;">v29</span></h1>
+    <h1>🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span> <span id="appVer" style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:6px;background:#374151;color:#d1d5db;font-weight:700;vertical-align:middle;">v30</span></h1>
     <div>
       <div class="hoy"><button id="btnTema" onclick="toggleTema()" style="background:none;border:1px solid rgba(255,255,255,.4);color:#fff;padding:3px 8px;border-radius:12px;font-size:11px;cursor:pointer;margin-bottom:3px;">🌙</button> <span id="fechaHoy"></span></div>
       <div class="gan">Ganancia hoy: <span id="ganHoy">$0</span></div>
@@ -645,7 +645,7 @@ if ('serviceWorker' in navigator) {
 <div class="modal-back" id="modalCalcCaja">
   <div class="modal">
     <div class="modal-header"><h3>🧮 Calculadora de caja y ganancia</h3><button class="modal-close" onclick="cerrarModal('modalCalcCaja')">✕</button></div>
-    <p style="font-size:12px;color:#777;margin-bottom:10px;">Pon el valor de compra de la caja, las bandejas por caja (defecto 6) y huevos por bandeja (defecto 30). Luego el precio de venta por bandeja y te dice qué % estás ganando. Si baja del 15% te avisa.</p>
+    <p style="font-size:12px;color:#777;margin-bottom:10px;">Pon el valor de compra de la caja, las bandejas por caja (defecto 6) y huevos por bandeja (defecto 30). Luego el precio de venta por bandeja y te dice qué % ganás (sobre el precio de venta). Si baja del 15% te avisa.</p>
     <label class="campo">Valor de compra de la caja ($)</label>
     <input type="number" class="field" id="calcCompraCaja" inputmode="decimal" placeholder="ej. 30000" oninput="calcularCaja()">
     <button type="button" onclick="traerUltimaCompra()" style="margin-top:6px;width:100%;padding:10px;border:1.5px dashed #4338ca;background:#eef2ff;color:#4338ca;font-weight:700;border-radius:10px;cursor:pointer;font-size:12px;">📦 Traer última compra (Nueva compra)</button>
@@ -1232,7 +1232,7 @@ function calcularCaja(){
   if(compraCaja>0 && bandejasCaja>0 && precioVenta>0){
     const costoBandeja = compraCaja / bandejasCaja;
     const gananciaBandeja = precioVenta - costoBandeja;
-    const porc = costoBandeja>0 ? (gananciaBandeja/costoBandeja)*100 : 0;
+    const porc = precioVenta>0 ? (gananciaBandeja/precioVenta)*100 : 0;
     const costoHuevo = huevosBandeja>0 ? costoBandeja/huevosBandeja : 0;
     const precioHuevo = huevosBandeja>0 ? precioVenta/huevosBandeja : 0;
     const mal = gananciaBandeja<0 || porc<MIN;
