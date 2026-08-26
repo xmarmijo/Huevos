@@ -192,7 +192,7 @@ body.dark .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316;
 
 <header>
   <div class="top">
-    <h1>🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span> <span id="appVer" style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:6px;background:#374151;color:#d1d5db;font-weight:700;vertical-align:middle;">v40</span></h1>
+    <h1>🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span> <span id="appVer" style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:6px;background:#374151;color:#d1d5db;font-weight:700;vertical-align:middle;">v41</span></h1>
     <div>
       <div class="hoy"><button id="btnTema" onclick="toggleTema()" style="background:none;border:1px solid rgba(255,255,255,.4);color:#fff;padding:3px 8px;border-radius:12px;font-size:11px;cursor:pointer;margin-bottom:3px;">🌙</button> <span id="fechaHoy"></span></div>
       <div class="gan">Ganancia hoy: <span id="ganHoy">$0</span></div>
@@ -737,7 +737,7 @@ if ('serviceWorker' in navigator) {
     <div class="modal-header"><h3>🔧 Ajustar stock</h3><button class="modal-close" onclick="cerrarModal('modalAjustar')">✕</button></div>
     <p style="font-size:11px;color:#999;margin-bottom:10px;">El stock se modifica por compras y ventas. Solo podés poner un número exacto.</p>
     <div class="gan-line"><span class="k">🥚 Primera</span><span class="v" id="ajPrim">3 cajas</span></div>
-    <div class="gan-line"><span class="k">🥚 Segunda</span><span class="v" id="ajSeg">2 cajas</span></div>
+    <div class="gan-line" id="ajSegRow"><span class="k">🥚 Segunda</span><span class="v" id="ajSeg">2 cajas</span></div>
     <div class="paso-titulo">Poner un número exacto</div>
     <div style="display:flex;gap:8px;">
       <div style="flex:1;"><label class="campo">🥚 Primera (cajas)</label><input type="number" class="field" id="ajPrimInput" min="0" inputmode="numeric"></div>
@@ -1491,6 +1491,8 @@ function actualizarStockUI(){
   document.getElementById('feriaProdSegunda').style.display = stock2 > 0 ? '' : 'none';
   document.getElementById('precioPrimBox').style.display = stock > 0 ? '' : 'none';
   document.getElementById('precioSegBox').style.display = stock2 > 0 ? '' : 'none';
+  document.getElementById('mermaSeg').style.display = stock2 > 0 ? '' : 'none';
+  const _ajSegRow = document.getElementById('ajSegRow'); if(_ajSegRow) _ajSegRow.style.display = stock2 > 0 ? '' : 'none';
   document.getElementById('ajPrim').textContent = Math.floor(stock/6)+' cajas';
   document.getElementById('ajSeg').textContent = Math.floor(stock2/6)+' cajas';
   document.getElementById('umbralStock').value = estado.umbral;

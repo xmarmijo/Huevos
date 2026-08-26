@@ -696,7 +696,7 @@ if ('serviceWorker' in navigator) {
     <div class="modal-header"><h3>🔧 Ajustar stock</h3><button class="modal-close" onclick="cerrarModal('modalAjustar')">✕</button></div>
     <p style="font-size:11px;color:#999;margin-bottom:10px;">El stock se modifica por compras y ventas. Solo podés poner un número exacto.</p>
     <div class="gan-line"><span class="k">🥚 Primera</span><span class="v" id="ajPrim">3 cajas</span></div>
-    <div class="gan-line"><span class="k">🥚 Segunda</span><span class="v" id="ajSeg">2 cajas</span></div>
+    <div class="gan-line" id="ajSegRow"><span class="k">🥚 Segunda</span><span class="v" id="ajSeg">2 cajas</span></div>
     <div class="paso-titulo">Poner un número exacto</div>
     <div style="display:flex;gap:8px;">
       <div style="flex:1;"><label class="campo">🥚 Primera (cajas)</label><input type="number" class="field" id="ajPrimInput" min="0" inputmode="numeric"></div>
@@ -1311,6 +1311,8 @@ function actualizarStockUI(){
   document.getElementById('feriaProdSegunda').style.display = stock2 > 0 ? '' : 'none';
   document.getElementById('precioPrimBox').style.display = stock > 0 ? '' : 'none';
   document.getElementById('precioSegBox').style.display = stock2 > 0 ? '' : 'none';
+  document.getElementById('mermaSeg').style.display = stock2 > 0 ? '' : 'none';
+  const _ajSegRow = document.getElementById('ajSegRow'); if(_ajSegRow) _ajSegRow.style.display = stock2 > 0 ? '' : 'none';
   document.getElementById('infoPrimItem').style.display = stock > 0 ? '' : 'none';
   document.getElementById('infoSegItem').style.display = stock2 > 0 ? '' : 'none';
   document.getElementById('ajPrim').textContent = Math.floor(stock/6)+' cajas';
