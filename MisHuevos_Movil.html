@@ -192,7 +192,7 @@ body.dark .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316;
 
 <header>
   <div class="top">
-    <h1>🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span> <span id="appVer" style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:6px;background:#374151;color:#d1d5db;font-weight:700;vertical-align:middle;">v45</span></h1>
+    <h1>🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span> <span id="appVer" style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:6px;background:#374151;color:#d1d5db;font-weight:700;vertical-align:middle;">v46</span></h1>
     <div>
       <div class="hoy"><button id="btnTema" onclick="toggleTema()" style="background:none;border:1px solid rgba(255,255,255,.4);color:#fff;padding:3px 8px;border-radius:12px;font-size:11px;cursor:pointer;margin-bottom:3px;">🌙</button> <span id="fechaHoy"></span></div>
       <div class="gan">Ganancia hoy: <span id="ganHoy">$0</span></div>
@@ -1021,7 +1021,7 @@ function cargar(){
   let s = null;
   try{ s = localStorage.getItem('misHuevos'); }catch(e){}
   if(!s){ try{ s = sessionStorage.getItem('misHuevos'); }catch(e){} }
-  if(s){ try{ const d=JSON.parse(s); aplicarDefaults(d); if(!d.lastModified) d.lastModified = Date.now(); estado=Object.assign(estado,d); }catch(e){} }
+  if(s){ try{ const d=JSON.parse(s); aplicarDefaults(d); if(!d.lastModified) d.lastModified = 0; estado=Object.assign(estado,d); }catch(e){} }
   return s;
 }
 async function recuperarIndexedDB(){
@@ -1030,7 +1030,7 @@ async function recuperarIndexedDB(){
     if(idb){
       const d = JSON.parse(idb);
       aplicarDefaults(d);
-      if(!d.lastModified) d.lastModified = Date.now();
+      if(!d.lastModified) d.lastModified = 0;
       estado = Object.assign(estado, d);
       try{ localStorage.setItem('misHuevos', JSON.stringify(estado)); }catch(e){}
       return true;
@@ -1137,7 +1137,7 @@ function conectarFirebase(cfg){
       refUsr.once('value', snapUsr=>{
         const dUsr = snapUsr.val();
         if(!esDefecto(dUsr)){
-          if(esDefecto(estado) || (dUsr.lastModified||0) >= (estado.lastModified||0)){
+          if(esDefecto(estado) || (dUsr.lastModified||0) > (estado.lastModified||0)){
             estado = JSON.parse(JSON.stringify(dUsr)); guardar(); aplicarTema(estado.tema); actualizarTodo();
           }
           arrancar(); return;
@@ -1145,7 +1145,7 @@ function conectarFirebase(cfg){
         refDev.once('value', snapDev=>{
           const dDev = snapDev.val();
           if(!esDefecto(dDev)){
-            if(esDefecto(estado) || (dDev.lastModified||0) >= (estado.lastModified||0)){
+            if(esDefecto(estado) || (dDev.lastModified||0) > (estado.lastModified||0)){
               estado = JSON.parse(JSON.stringify(dDev)); guardar(); aplicarTema(estado.tema); actualizarTodo();
             }
             refUsr.set(JSON.parse(JSON.stringify(estado)));
