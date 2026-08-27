@@ -192,7 +192,7 @@ body.dark .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316;
 
 <header>
   <div class="top">
-    <h1>🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span> <span id="appVer" style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:6px;background:#374151;color:#d1d5db;font-weight:700;vertical-align:middle;">v1.2</span></h1>
+    <h1>🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span> <span id="appVer" style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:6px;background:#374151;color:#d1d5db;font-weight:700;vertical-align:middle;">v1.3</span></h1>
     <div>
       <div class="hoy"><button id="btnTema" onclick="toggleTema()" style="background:none;border:1px solid rgba(255,255,255,.4);color:#fff;padding:3px 8px;border-radius:12px;font-size:11px;cursor:pointer;margin-bottom:3px;">🌙</button> <span id="fechaHoy"></span></div>
       <div class="gan">Ganancia hoy: <span id="ganHoy">$0</span></div>
@@ -1034,14 +1034,13 @@ function renderBanco(){
   const c = bancoCalc();
   const fmt = function(n){ return '$'+Math.round(n).toLocaleString('es-CL'); };
   let dash = '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">';
-  dash += bancoCard('Saldo banco (actual)', fmt(c.saldoReal));
+  dash += bancoCard('Saldo banco', fmt(c.saldoEsperado));
   dash += bancoCard('Utilidad bancaria', fmt(c.utilidad), c.utilidad>=0?'#16a34a':'#dc2626');
   dash += bancoCard('Aportado bolsillo', fmt(c.aporte), '#c2410c');
   dash += bancoCard('Giros personales', fmt(c.giro), '#c2410c');
   dash += bancoCard('Transferencias (app)', fmt(c.vt));
-  dash += bancoCard('Saldo esperado', fmt(c.saldoEsperado));
   dash += '</div>';
-  if(Math.abs(c.gap)>1000){
+  if(c.saldoReal>0 && Math.abs(c.gap)>1000){
     const g = (c.gap<0)
       ? '⚠️ El banco tiene <b>'+fmt(-c.gap)+'</b> MENOS de lo esperado. Revisa si falta registrar un depósito o sobra un giro personal no anotado.'
       : '✅ El banco tiene <b>'+fmt(c.gap)+'</b> MÁS de lo esperado (sobrante o depósito no registrado).';
@@ -3804,7 +3803,7 @@ try{ initApp(); }catch(err){
     </div>
     <input type="text" id="bancoDesc" class="field" placeholder="descripción / comprobante (ej: compra Fundo Peumo, o lo que sacaste)" style="width:100%;margin-bottom:8px;">
     <button class="btn-ok" onclick="agregarMovBanco()" style="width:100%;">Agregar movimiento</button>
-    <div style="font-size:11px;color:#9ca3af;margin:10px 0 4px;">Transferencias (app) se suman solas desde que activaste el módulo. El efectivo NO se suma (lo gastas en caja). Registra depósitos, pagos y aportes a mano.</div>
+    <div style="font-size:11px;color:#9ca3af;margin:10px 0 4px;">Pones el <b>Saldo inicial</b> una sola vez. El <b>Saldo banco</b> se va actualizando solo con tus transferencias y movimientos. El <b>Saldo actual (estado de cuenta)</b> es opcional: escríbelo para ver si cuadra. El efectivo NO se suma (lo gastas en caja).</div>
     <div id="bancoLista" style="max-height:210px;overflow:auto;"></div>
   </div>
 </div>
