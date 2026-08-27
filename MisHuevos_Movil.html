@@ -192,7 +192,7 @@ body.dark .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316;
 
 <header>
   <div class="top">
-    <h1>🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span> <span id="appVer" style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:6px;background:#374151;color:#d1d5db;font-weight:700;vertical-align:middle;">v1.4</span></h1>
+    <h1>🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span> <span id="appVer" style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:6px;background:#374151;color:#d1d5db;font-weight:700;vertical-align:middle;">v1.5</span></h1>
     <div>
       <div class="hoy"><button id="btnTema" onclick="toggleTema()" style="background:none;border:1px solid rgba(255,255,255,.4);color:#fff;padding:3px 8px;border-radius:12px;font-size:11px;cursor:pointer;margin-bottom:3px;">🌙</button> <span id="fechaHoy"></span></div>
       <div class="gan">Ganancia hoy: <span id="ganHoy">$0</span></div>
@@ -1097,8 +1097,19 @@ function bancoProyeccion(){
   const margen = Number(estado.margen)||0;
   const ingP=P*pP, ingS=S*pS, ingT=T*pT;
   const ingTotal=ingP+ingS+ingT;
-  const ganTotal = margen>0 ? Math.round(ingTotal*margen/(100+margen)) : 0;
-  return {pP:pP,pS:pS,P:P,S:S,T:T,pT:pT,ingP:ingP,ingS:ingS,ingT:ingT,ingTotal:ingTotal,ganTotal:ganTotal};
+  const ganEst = margen>0 ? Math.round(ingTotal*margen/(100+margen)) : 0;
+  let tb=0, tc=0;
+  (estado.compras||[]).forEach(function(c){
+    if(['Primera','Segunda','Tercera'].indexOf(c.prod)<0) return;
+    const b=(Number(c.cajas)||0)*6+(Number(c.bandejas)||0);
+    const costo=Number(c.total)||0;
+    if(b>0){ tb+=b; tc+=costo; }
+  });
+  const cb = tb>0 ? tc/tb : null;
+  const btxTot = P+S+T;
+  const costoStock = cb!=null ? Math.round(btxTot*cb) : 0;
+  const ganReal = cb!=null ? Math.round(ingTotal - costoStock) : null;
+  return {pP:pP,pS:pS,P:P,S:S,T:T,pT:pT,ingP:ingP,ingS:ingS,ingT:ingT,ingTotal:ingTotal,ganEst:ganEst,cb:cb,costoStock:costoStock,ganReal:ganReal,btxTot:btxTot};
 }
 function renderBancoProy(){
   const c = bancoProyeccion();
@@ -1112,7 +1123,13 @@ function renderBancoProy(){
   h += fila('🥚 Segunda', c.S, c.pS, c.ingS);
   h += fila('🥚 Tercera', c.T, c.pT, c.ingT);
   h += '<div style="display:flex;justify-content:space-between;font-size:14px;font-weight:800;padding:6px 0 2px;border-top:2px solid #e5e7eb;margin-top:2px;"><span>Recaudación total</span><span>'+fmt(c.ingTotal)+'</span></div>';
-  h += '<div style="display:flex;justify-content:space-between;font-size:12px;color:#16a34a;font-weight:700;"><span>Ganancia estimada ('+Number(estado.margen||0)+'%)</span><span>'+fmt(c.ganTotal)+'</span></div>';
+  if(c.cb!=null){
+    h += '<div style="display:flex;justify-content:space-between;font-size:12px;color:#b45309;font-weight:700;"><span>Costo stock ('+c.btxTot+' btejas)</span><span>'+fmt(c.costoStock)+'</span></div>';
+    h += '<div style="display:flex;justify-content:space-between;font-size:12px;color:#16a34a;font-weight:800;"><span>Ganancia real</span><span>'+fmt(c.ganReal)+'</span></div>';
+  } else {
+    h += '<div style="display:flex;justify-content:space-between;font-size:12px;color:#16a34a;font-weight:700;"><span>Ganancia estimada ('+Number(estado.margen||0)+'%)</span><span>'+fmt(c.ganEst)+'</span></div>';
+    h += '<div style="font-size:10px;color:#9ca3af;">Sin compras registradas: ganancia es estimada por margen.</div>';
+  }
   const el = document.getElementById('bancoProy');
   if(el) el.innerHTML = h;
 }
