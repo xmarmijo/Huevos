@@ -192,7 +192,7 @@ body.dark .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316;
 
 <header>
   <div class="top">
-    <h1>🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span> <span id="appVer" style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:6px;background:#374151;color:#d1d5db;font-weight:700;vertical-align:middle;">v1.1</span></h1>
+    <h1>🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span> <span id="appVer" style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:6px;background:#374151;color:#d1d5db;font-weight:700;vertical-align:middle;">v1.2</span></h1>
     <div>
       <div class="hoy"><button id="btnTema" onclick="toggleTema()" style="background:none;border:1px solid rgba(255,255,255,.4);color:#fff;padding:3px 8px;border-radius:12px;font-size:11px;cursor:pointer;margin-bottom:3px;">🌙</button> <span id="fechaHoy"></span></div>
       <div class="gan">Ganancia hoy: <span id="ganHoy">$0</span></div>
@@ -1003,7 +1003,7 @@ function aplicarDefaults(d){
   d.ventas.forEach((v,i)=>{ if(!v.id) v.id='v'+i+'-'+v.f; });
 }
 function bancoCalc(){
-  const b = estado.banco || {saldo:0,saldoInicial:0,movs:[]};
+  const b = estado.banco || {saldo:0,saldoInicial:0,movs:[],desde:0};
   const movs = b.movs||[];
   let deposito=0, aporte=0, pagoCompra=0, pagoGasto=0, giro=0;
   movs.forEach(function(m){
@@ -1013,22 +1013,20 @@ function bancoCalc(){
     else if(m.tipo==='pagoGasto') pagoGasto+=m.monto;
     else if(m.tipo==='giro') giro+=m.monto;
   });
-  const vs = estado.ventas||[];
-  const vt = vs.filter(function(v){return v.pago==='transferencia';}).reduce(function(s,v){return s+(Number(v.precio)||0);},0);
-  const ve = vs.filter(function(v){return v.pago==='efectivo';}).reduce(function(s,v){return s+(Number(v.precio)||0);},0);
+  const desde = Number(b.desde)||0;
+  const vt = (estado.ventas||[]).filter(function(v){return v.pago==='transferencia' && (Number(v.f)||0) >= desde;}).reduce(function(s,v){return s+(Number(v.precio)||0);},0);
   const egrNegocio = pagoCompra + pagoGasto;
   const utilidad = (deposito + vt) - egrNegocio;
   const ingTotal = deposito + aporte + vt;
   const saldoEsperado = (Number(b.saldoInicial)||0) + ingTotal - (pagoCompra+pagoGasto+giro);
   const saldoReal = Number(b.saldo)||0;
   const gap = saldoReal - saldoEsperado;
-  const pendiente = Math.max(0, ve - deposito);
-  return {deposito:deposito, aporte:aporte, pagoCompra:pagoCompra, pagoGasto:pagoGasto, giro:giro, vt:vt, ve:ve, utilidad:utilidad, saldoEsperado:saldoEsperado, saldoReal:saldoReal, gap:gap, pendiente:pendiente, ingTotal:ingTotal, egrNegocio:egrNegocio};
+  return {deposito:deposito, aporte:aporte, pagoCompra:pagoCompra, pagoGasto:pagoGasto, giro:giro, vt:vt, utilidad:utilidad, saldoEsperado:saldoEsperado, saldoReal:saldoReal, gap:gap, ingTotal:ingTotal, egrNegocio:egrNegocio};
 }
 function bancoCard(t,v,color){
   return '<div style="flex:1;min-width:120px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:8px;text-align:center;"><div style="font-size:10px;color:#6b7280;">'+t+'</div><div style="font-size:15px;font-weight:800;color:'+(color||'#111')+';">'+v+'</div></div>';
 }
-function abrirBanco(){ if(!estado.banco) estado.banco={saldo:0,saldoInicial:0,movs:[]}; renderBanco(); abrirModal('modalBanco'); }
+function abrirBanco(){ if(!estado.banco) estado.banco={saldo:0,saldoInicial:0,movs:[],desde:Date.now()}; if(!estado.banco.desde) estado.banco.desde=Date.now(); renderBanco(); abrirModal('modalBanco'); }
 function renderBanco(){
   const b = estado.banco;
   document.getElementById('bancoInicial').value = b.saldoInicial||0;
@@ -1036,23 +1034,19 @@ function renderBanco(){
   const c = bancoCalc();
   const fmt = function(n){ return '$'+Math.round(n).toLocaleString('es-CL'); };
   let dash = '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">';
-  dash += bancoCard('Saldo banco', fmt(c.saldoReal));
+  dash += bancoCard('Saldo banco (actual)', fmt(c.saldoReal));
   dash += bancoCard('Utilidad bancaria', fmt(c.utilidad), c.utilidad>=0?'#16a34a':'#dc2626');
   dash += bancoCard('Aportado bolsillo', fmt(c.aporte), '#c2410c');
   dash += bancoCard('Giros personales', fmt(c.giro), '#c2410c');
-  dash += bancoCard('Ventas transferencia', fmt(c.vt));
-  dash += bancoCard('Efectivo vendido', fmt(c.ve), '#92400e');
+  dash += bancoCard('Transferencias (app)', fmt(c.vt));
   dash += bancoCard('Saldo esperado', fmt(c.saldoEsperado));
   dash += '</div>';
-  if(c.pendiente>1000){
-    dash += '<div class="alert-banner" style="background:#fff7ed;border-color:#ea580c;color:#9a3412;text-align:left;"><div>⚠️ <b>NO has depositado '+fmt(c.pendiente)+' de efectivo</b> que está registrado como venta en la app. Anda al banco y deposita ese efectivo. Cuando lo hagas, registra el depósito con su comprobante.</div><button class="btn-ok" style="margin-top:8px;background:#ea580c;" onclick="depositarPendienteBanco()">Depositar efectivo pendiente ('+fmt(c.pendiente)+')</button></div>';
-  }
   if(Math.abs(c.gap)>1000){
     const g = (c.gap<0)
-      ? '⚠️ El banco tiene <b>'+fmt(-c.gap)+'</b> MENOS de lo esperado. Ese dinero se fugó (efectivo no depositado o giro no registrado).'
+      ? '⚠️ El banco tiene <b>'+fmt(-c.gap)+'</b> MENOS de lo esperado. Revisa si falta registrar un depósito o sobra un giro personal no anotado.'
       : '✅ El banco tiene <b>'+fmt(c.gap)+'</b> MÁS de lo esperado (sobrante o depósito no registrado).';
     dash += '<div class="alert-banner" style="background:'+(c.gap<0?'#fef2f2':'#f0fdf4')+';border-color:'+(c.gap<0?'#dc2626':'#16a34a')+';color:'+(c.gap<0?'#b91c1c':'#15803d')+';">'+g+'</div>';
-  } else if(c.pendiente<=1000){
+  } else {
     dash += '<div class="alert-banner" style="background:#f0fdf4;border-color:#bbf7d0;color:#15803d;">✅ El banco cuadra con lo esperado.</div>';
   }
   document.getElementById('bancoDash').innerHTML = dash;
@@ -1089,15 +1083,6 @@ function bancoSetSaldo(){
   estado.banco.saldoInicial = Math.round(Number(document.getElementById('bancoInicial').value)||0);
   estado.banco.saldo = Math.round(Number(document.getElementById('bancoSaldo').value)||0);
   guardar(); renderBanco();
-}
-function depositarPendienteBanco(){
-  const c = bancoCalc();
-  if(c.pendiente<=0){ toast('No hay efectivo pendiente'); return; }
-  document.getElementById('bancoTipo').value='deposito';
-  document.getElementById('bancoMonto').value=Math.round(c.pendiente);
-  document.getElementById('bancoDesc').value='Depósito efectivo (ventas app) · comprobante: ';
-  document.getElementById('bancoDesc').focus();
-  toast('Completa el n° de comprobante y pulsa Agregar');
 }
 function guardar(){
   estado.lastModified = Date.now();
@@ -3803,8 +3788,8 @@ try{ initApp(); }catch(err){
     <div class="modal-header"><h3>🏦 Control Bancario</h3><button class="modal-close" onclick="cerrarModal('modalBanco')">✕</button></div>
     <div style="font-size:12px;color:#666;margin-bottom:8px;">Banco de Chile · cuenta corriente del negocio (sin tarjeta). Se alimenta en vivo con tus ventas.</div>
     <div style="display:flex;gap:8px;margin-bottom:8px;">
-      <div style="flex:1;"><label class="campo">Saldo inicial ($)</label><input type="number" id="bancoInicial" class="field" onchange="bancoSetSaldo()"></div>
-      <div style="flex:1;"><label class="campo">Saldo actual banco ($)</label><input type="number" id="bancoSaldo" class="field" onchange="bancoSetSaldo()"></div>
+      <div style="flex:1;"><label class="campo">Saldo inicial ($) · lo que hay hoy</label><input type="number" id="bancoInicial" class="field" onchange="bancoSetSaldo()"></div>
+      <div style="flex:1;"><label class="campo">Saldo actual banco ($) · estado de cuenta</label><input type="number" id="bancoSaldo" class="field" onchange="bancoSetSaldo()"></div>
     </div>
     <div id="bancoDash"></div>
     <div style="display:flex;gap:6px;margin:10px 0 6px;">
@@ -3819,7 +3804,7 @@ try{ initApp(); }catch(err){
     </div>
     <input type="text" id="bancoDesc" class="field" placeholder="descripción / comprobante (ej: compra Fundo Peumo, o lo que sacaste)" style="width:100%;margin-bottom:8px;">
     <button class="btn-ok" onclick="agregarMovBanco()" style="width:100%;">Agregar movimiento</button>
-    <div style="font-size:11px;color:#9ca3af;margin:10px 0 4px;">Las ventas por transferencia se suman solas. El efectivo cuenta solo cuando haces un Depósito (con comprobante).</div>
+    <div style="font-size:11px;color:#9ca3af;margin:10px 0 4px;">Transferencias (app) se suman solas desde que activaste el módulo. El efectivo NO se suma (lo gastas en caja). Registra depósitos, pagos y aportes a mano.</div>
     <div id="bancoLista" style="max-height:210px;overflow:auto;"></div>
   </div>
 </div>
