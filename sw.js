@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = 'mis-huevos-v44';
+﻿const CACHE_NAME = 'mis-huevos-v45';
 const ASSETS = [
   './',
   './MisHuevos_Movil.html',
@@ -23,7 +23,25 @@ self.addEventListener('activate', e => {
   );
 });
 
+// Network-first para el HTML (siempre trae la ultima version del deploy),
+// cache-first para assets estaticos (para poder usar offline).
 self.addEventListener('fetch', e => {
+  const url = new URL(e.request.url);
+  const isHtml = e.request.mode === 'navigate' || url.pathname.endsWith('.html');
+  if (isHtml) {
+    e.respondWith(
+      fetch(e.request)
+        .then(resp => {
+          if (resp && resp.status === 200) {
+            const clone = resp.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
+          }
+          return resp;
+        })
+        .catch(() => caches.match(e.request))
+    );
+    return;
+  }
   e.respondWith(
     caches.match(e.request).then(cached => {
       const fetched = fetch(e.request).then(resp => {
@@ -37,8 +55,3 @@ self.addEventListener('fetch', e => {
     })
   );
 });
-
-
-
-
-
