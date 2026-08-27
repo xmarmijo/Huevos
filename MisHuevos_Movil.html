@@ -192,7 +192,7 @@ body.dark .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316;
 
 <header>
   <div class="top">
-    <h1>🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span> <span id="appVer" style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:6px;background:#374151;color:#d1d5db;font-weight:700;vertical-align:middle;">v1.5</span></h1>
+    <h1>🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span> <span id="appVer" style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:6px;background:#374151;color:#d1d5db;font-weight:700;vertical-align:middle;">v1.6</span></h1>
     <div>
       <div class="hoy"><button id="btnTema" onclick="toggleTema()" style="background:none;border:1px solid rgba(255,255,255,.4);color:#fff;padding:3px 8px;border-radius:12px;font-size:11px;cursor:pointer;margin-bottom:3px;">🌙</button> <span id="fechaHoy"></span></div>
       <div class="gan">Ganancia hoy: <span id="ganHoy">$0</span></div>
@@ -311,6 +311,7 @@ body.dark .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316;
     </div>
   </div>
 
+  <div id="bancoAviso" style="padding:0 14px;"></div>
   <div style="height:86px"></div>
 </main>
 
@@ -981,7 +982,7 @@ function aplicarDefaults(d){
   if(d.cuadraturaFecha===undefined) d.cuadraturaFecha='';
   if(!d.flujoCaja) d.flujoCaja=[];
   if(!d.salidaFeria) d.salidaFeria={ activa:false, f:null, llevadas:{Primera:0,Segunda:0,Tercera:0}, quedan:{Primera:0,Segunda:0,Tercera:0} };
-  if(!d.banco) d.banco={ saldo:0, saldoInicial:0, movs:[] };
+  if(!d.banco) d.banco={ saldo:0, saldoInicial:0, movs:[], pendienteEfectivo:[], desde:0 };
   const _hoyStr = new Date().toDateString();
   const _movs = [].concat(d.ventas,d.gastos,d.compras,d.mermas);
   if(d.diaAbierto===true && !d.diaAbiertoFecha){
@@ -1021,12 +1022,13 @@ function bancoCalc(){
   const saldoEsperado = (Number(b.saldoInicial)||0) + ingTotal - (pagoCompra+pagoGasto+giro);
   const saldoReal = Number(b.saldo)||0;
   const gap = saldoReal - saldoEsperado;
-  return {deposito:deposito, aporte:aporte, pagoCompra:pagoCompra, pagoGasto:pagoGasto, giro:giro, vt:vt, utilidad:utilidad, saldoEsperado:saldoEsperado, saldoReal:saldoReal, gap:gap, ingTotal:ingTotal, egrNegocio:egrNegocio};
+  const pendiente = (b.pendienteEfectivo||[]).reduce(function(a,x){return a+(Number(x.monto)||0);},0);
+  return {deposito:deposito, aporte:aporte, pagoCompra:pagoCompra, pagoGasto:pagoGasto, giro:giro, vt:vt, utilidad:utilidad, saldoEsperado:saldoEsperado, saldoReal:saldoReal, gap:gap, ingTotal:ingTotal, egrNegocio:egrNegocio, pendiente:pendiente};
 }
 function bancoCard(t,v,color){
   return '<div style="flex:1;min-width:120px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:8px;text-align:center;"><div style="font-size:10px;color:#6b7280;">'+t+'</div><div style="font-size:15px;font-weight:800;color:'+(color||'#111')+';">'+v+'</div></div>';
 }
-function abrirBanco(){ if(!estado.banco) estado.banco={saldo:0,saldoInicial:0,movs:[],desde:Date.now()}; if(!estado.banco.desde) estado.banco.desde=Date.now(); renderBanco(); abrirModal('modalBanco'); }
+function abrirBanco(){ if(!estado.banco) estado.banco={saldo:0,saldoInicial:0,movs:[],pendienteEfectivo:[],desde:Date.now()}; if(!estado.banco.desde) estado.banco.desde=Date.now(); renderBanco(); abrirModal('modalBanco'); }
 function renderBanco(){
   const b = estado.banco;
   document.getElementById('bancoInicial').value = b.saldoInicial||0;
@@ -1043,6 +1045,10 @@ function renderBanco(){
   dash += bancoCard('Giros personales', fmt(c.giro), '#c2410c');
   dash += bancoCard('Transferencias (app)', fmt(c.vt));
   dash += '</div>';
+  if(c.pendiente>0){
+    const apr=bancoApremiante();
+    dash += '<div class="alert-banner" style="background:'+(apr?'#fef2f2':'#fff7ed')+';border-color:'+(apr?'#dc2626':'#ea580c')+';color:'+(apr?'#b91c1c':'#9a3412')+';text-align:left;">💵 Tienes <b>'+fmt(c.pendiente)+'</b> en efectivo por depositar.'+(apr?' ⚠️ Ya es hora: llévalo al banco (los lunes).':' Recuerda llevarlo al banco los lunes.')+'<div><button class="btn-ok" style="margin-top:8px;background:#ea580c;" onclick="depositarAcumuladoBanco()">Registrar depósito ('+fmt(c.pendiente)+')</button></div></div>';
+  }
   if(c.saldoReal>0 && Math.abs(c.gap)>1000){
     const g = (c.gap<0)
       ? '⚠️ El banco tiene <b>'+fmt(-c.gap)+'</b> MENOS de lo esperado. Revisa si falta registrar un depósito o sobra un giro personal no anotado.'
@@ -1135,9 +1141,53 @@ function renderBancoProy(){
 }
 function reiniciarBanco(){
   miConfirmar('¿Reiniciar el módulo bancario? Se borrarán saldo inicial, saldo actual y todos los movimientos. Las ventas transferencia volverán a contar desde hoy.', function(){
-    estado.banco = {saldo:0,saldoInicial:0,movs:[],desde:Date.now()};
+    estado.banco = {saldo:0,saldoInicial:0,movs:[],pendienteEfectivo:[],desde:Date.now()};
     guardar(); renderBanco(); toast('Módulo banco reiniciado');
   });
+}
+let _bancoMontoPend=0;
+function bancoApremiante(){
+  const d=new Date(); const dia=d.getDay(); const h=d.getHours();
+  return dia===0 ? h>=12 : dia>=1;
+}
+function preguntarDepositoBanco(monto){
+  if(!estado.banco) estado.banco={saldo:0,saldoInicial:0,movs:[],pendienteEfectivo:[],desde:Date.now()};
+  _bancoMontoPend = Math.round(Number(monto)||0);
+  const el=document.getElementById('depEfectivoMonto'); if(el) el.textContent=fmt(_bancoMontoPend);
+  abrirModal('modalDepositoEfectivo');
+}
+function depositoEfectivoSi(){
+  if(!estado.banco) estado.banco={saldo:0,saldoInicial:0,movs:[],pendienteEfectivo:[],desde:Date.now()};
+  estado.banco.movs.push({f:Date.now(),tipo:'deposito',monto:_bancoMontoPend,desc:'Venta efectivo depositada'});
+  guardar(); cerrarModal('modalDepositoEfectivo'); renderBanco(); actualizarAvisoBanco(); toast('Depósito registrado en el banco');
+}
+function depositoEfectivoPendiente(){
+  if(!estado.banco) estado.banco={saldo:0,saldoInicial:0,movs:[],pendienteEfectivo:[],desde:Date.now()};
+  estado.banco.pendienteEfectivo.push({f:Date.now(),monto:_bancoMontoPend});
+  guardar(); cerrarModal('modalDepositoEfectivo'); renderBanco(); actualizarAvisoBanco(); toast('Anotado: efectivo pendiente de depósito');
+}
+function depositoEfectivoPersonal(){
+  cerrarModal('modalDepositoEfectivo'); toast('Ok, no va al banco');
+}
+function depositarAcumuladoBanco(){
+  const pe=(estado.banco&&estado.banco.pendienteEfectivo)||[];
+  const tot=pe.reduce(function(a,x){return a+(Number(x.monto)||0);},0);
+  if(tot<=0){ toast('No hay efectivo pendiente'); return; }
+  estado.banco.movs.push({f:Date.now(),tipo:'deposito',monto:Math.round(tot),desc:'Depósito efectivo acumulado (lunes)'});
+  estado.banco.pendienteEfectivo=[];
+  guardar(); renderBanco(); actualizarAvisoBanco(); toast('Depósito de '+fmt(Math.round(tot))+' registrado');
+}
+function bancoTipoRapido(t){
+  document.getElementById('bancoTipo').value=t;
+  document.getElementById('bancoMonto').focus();
+}
+function actualizarAvisoBanco(){
+  const el=document.getElementById('bancoAviso'); if(!el) return;
+  const pe=(estado.banco&&estado.banco.pendienteEfectivo)||[];
+  const tot=pe.reduce(function(a,x){return a+(Number(x.monto)||0);},0);
+  if(tot<=0){ el.innerHTML=''; return; }
+  const apr=bancoApremiante();
+  el.innerHTML='<div class="alert-banner" style="background:'+(apr?'#fef2f2':'#fff7ed')+';border-color:'+(apr?'#dc2626':'#ea580c')+';color:'+(apr?'#b91c1c':'#9a3412')+';">💵 Tienes <b>'+fmt(Math.round(tot))+'</b> en efectivo por depositar.'+(apr?' ⚠️ Ya es hora: llévalo al banco (los lunes).':' Recuerda llevarlo al banco los lunes.')+'</div>';
 }
 function guardar(){
   estado.lastModified = Date.now();
@@ -1929,6 +1979,7 @@ function confirmarVenta(){
   venta.sesion.push(vReg);
   guardar(); actualizarTodo(); actualizarSesionVenta();
   if(estado.ventas.length % 10 === 0){ autoBackup(); toast('💾 Respaldo automático hecho'); }
+  if(venta.pago==='efectivo') preguntarDepositoBanco(precio);
   document.getElementById('ventaQuien').value='';
   feedbackVenta();
   const _prod = venta.producto;
@@ -2067,6 +2118,7 @@ function confirmarFeria(){
   feria.sesion.push(vReg);
   guardar(); actualizarTodo(); actualizarSesionFeria();
   if(estado.ventas.length % 10 === 0){ autoBackup(); toast('💾 Respaldo automático hecho'); }
+  preguntarDepositoBanco(precio);
   feedbackVenta();
   const _mgf = (precioUnit>0) ? Math.round((precioUnit - costoPromedioBtx(feria.producto))/precioUnit*100) : null;
   let _msgf = '🎪 Vendido '+feria.cant+' '+feria.tipo+(feria.cant>1?'s':'')+' · '+fmt(precio);
@@ -2236,6 +2288,7 @@ function agregarOtro(dest){
   (esFeria?feria.sesion:venta.sesion).push(vReg);
   guardar(); actualizarTodo();
   if(esFeria) actualizarSesionFeria(); else actualizarSesionVenta();
+  if(pago==='efectivo') preguntarDepositoBanco(precio);
   document.getElementById(esFeria?'feriaOtroNombre':'otroNombre').value='';
   document.getElementById(esFeria?'feriaOtroPrecio':'otroPrecio').value='';
   feedbackVenta();
@@ -3801,7 +3854,7 @@ document.addEventListener('focusin',function(e){
 
 // ── INIT ──
 function actualizarTodo(){
-  try{ instalarExtras(); }catch(e){} actualizarAvisoDia(); actualizarStockUI(); actualizarBannerFeria(); actualizarPreciosUI(); actualizarHistorial(); actualizarBtnApertura(); }
+  try{ instalarExtras(); }catch(e){} actualizarAvisoDia(); actualizarStockUI(); actualizarBannerFeria(); actualizarPreciosUI(); actualizarHistorial(); actualizarBtnApertura(); actualizarAvisoBanco(); }
 async function initApp(){
   const s = cargar();
   document.getElementById('fechaHoy').textContent = 'Hoy: '+hoy();
@@ -3860,10 +3913,23 @@ try{ initApp(); }catch(err){
     </div>
     <input type="text" id="bancoDesc" class="field" placeholder="descripción / comprobante (ej: compra Fundo Peumo, o lo que sacaste)" style="width:100%;margin-bottom:8px;">
     <button class="btn-ok" onclick="agregarMovBanco()" style="width:100%;">Agregar movimiento</button>
+    <div style="display:flex;gap:8px;margin-top:8px;">
+      <button class="btn-ok" style="flex:1;background:#c2410c;" onclick="bancoTipoRapido('aporte')">➕ Aporte personal</button>
+      <button class="btn-ok" style="flex:1;background:#c2410c;" onclick="bancoTipoRapido('giro')">➖ Giro personal</button>
+    </div>
     <div style="font-size:11px;color:#9ca3af;margin:10px 0 4px;">Pones el <b>Saldo inicial</b> una sola vez. El <b>Saldo banco</b> se va actualizando solo con tus transferencias y movimientos. El <b>Saldo actual (estado de cuenta)</b> es opcional: escríbelo para ver si cuadra. El efectivo NO se suma (lo gastas en caja).</div>
     <div id="bancoLista" style="max-height:210px;overflow:auto;"></div>
     <div id="bancoProy" style="margin-top:12px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:10px;"></div>
     <button class="btn-ok" style="width:100%;margin-top:10px;background:#64748b;" onclick="reiniciarBanco()">↺ Reiniciar módulo banco</button>
+  </div>
+</div>
+<div class="modal-back" id="modalDepositoEfectivo">
+  <div class="modal">
+    <div class="modal-header"><h3>💵 Venta en efectivo</h3><button class="modal-close" onclick="cerrarModal('modalDepositoEfectivo')">✕</button></div>
+    <div style="font-size:14px;margin:8px 0;">Registraste una venta en efectivo de <b id="depEfectivoMonto"></b>. ¿Lo depositaste en el banco?</div>
+    <button class="btn-ok" style="width:100%;margin-bottom:8px;background:#16a34a;" onclick="depositoEfectivoSi()">✅ Sí, ya lo deposité (sumar al banco)</button>
+    <button class="btn-ok" style="width:100%;margin-bottom:8px;background:#ea580c;" onclick="depositoEfectivoPendiente()">🗓️ Aún no, lo llevo el lunes (anotar)</button>
+    <button class="btn-ok" style="width:100%;background:#64748b;" onclick="depositoEfectivoPersonal()">🙋 No, es efectivo personal / me lo quedo</button>
   </div>
 </div>
 </body>
