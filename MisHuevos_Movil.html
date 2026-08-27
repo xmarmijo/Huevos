@@ -192,7 +192,7 @@ body.dark .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316;
 
 <header>
   <div class="top">
-    <h1>🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span> <span id="appVer" style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:6px;background:#374151;color:#d1d5db;font-weight:700;vertical-align:middle;">v1.6</span></h1>
+    <h1>🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span> <span id="appVer" style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:6px;background:#374151;color:#d1d5db;font-weight:700;vertical-align:middle;">v1.7</span></h1>
     <div>
       <div class="hoy"><button id="btnTema" onclick="toggleTema()" style="background:none;border:1px solid rgba(255,255,255,.4);color:#fff;padding:3px 8px;border-radius:12px;font-size:11px;cursor:pointer;margin-bottom:3px;">🌙</button> <span id="fechaHoy"></span></div>
       <div class="gan">Ganancia hoy: <span id="ganHoy">$0</span></div>
@@ -1020,10 +1020,8 @@ function bancoCalc(){
   const utilidad = (deposito + vt) - egrNegocio;
   const ingTotal = deposito + aporte + vt;
   const saldoEsperado = (Number(b.saldoInicial)||0) + ingTotal - (pagoCompra+pagoGasto+giro);
-  const saldoReal = Number(b.saldo)||0;
-  const gap = saldoReal - saldoEsperado;
   const pendiente = (b.pendienteEfectivo||[]).reduce(function(a,x){return a+(Number(x.monto)||0);},0);
-  return {deposito:deposito, aporte:aporte, pagoCompra:pagoCompra, pagoGasto:pagoGasto, giro:giro, vt:vt, utilidad:utilidad, saldoEsperado:saldoEsperado, saldoReal:saldoReal, gap:gap, ingTotal:ingTotal, egrNegocio:egrNegocio, pendiente:pendiente};
+  return {deposito:deposito, aporte:aporte, pagoCompra:pagoCompra, pagoGasto:pagoGasto, giro:giro, vt:vt, utilidad:utilidad, saldoEsperado:saldoEsperado, ingTotal:ingTotal, egrNegocio:egrNegocio, pendiente:pendiente};
 }
 function bancoCard(t,v,color){
   return '<div style="flex:1;min-width:120px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:8px;text-align:center;"><div style="font-size:10px;color:#6b7280;">'+t+'</div><div style="font-size:15px;font-weight:800;color:'+(color||'#111')+';">'+v+'</div></div>';
@@ -1032,7 +1030,6 @@ function abrirBanco(){ if(!estado.banco) estado.banco={saldo:0,saldoInicial:0,mo
 function renderBanco(){
   const b = estado.banco;
   document.getElementById('bancoInicial').value = b.saldoInicial||0;
-  document.getElementById('bancoSaldo').value = b.saldo||0;
   const ini = document.getElementById('bancoInicial');
   if((Number(b.saldoInicial)||0)>0){ ini.disabled=true; ini.style.opacity='0.6'; document.getElementById('bancoLockNota').innerHTML='🔒 Capital inicial fijado. Para sumar plata tuya usa <b>Aporte personal</b>.'; }
   else { ini.disabled=false; ini.style.opacity='1'; document.getElementById('bancoLockNota').innerHTML='Pon tu saldo inicial una vez (lo que tienes en el banco hoy).'; }
@@ -1049,14 +1046,7 @@ function renderBanco(){
     const apr=bancoApremiante();
     dash += '<div class="alert-banner" style="background:'+(apr?'#fef2f2':'#fff7ed')+';border-color:'+(apr?'#dc2626':'#ea580c')+';color:'+(apr?'#b91c1c':'#9a3412')+';text-align:left;">💵 Tienes <b>'+fmt(c.pendiente)+'</b> en efectivo por depositar.'+(apr?' ⚠️ Ya es hora: llévalo al banco (los lunes).':' Recuerda llevarlo al banco los lunes.')+'<div><button class="btn-ok" style="margin-top:8px;background:#ea580c;" onclick="depositarAcumuladoBanco()">Registrar depósito ('+fmt(c.pendiente)+')</button></div></div>';
   }
-  if(c.saldoReal>0 && Math.abs(c.gap)>1000){
-    const g = (c.gap<0)
-      ? '⚠️ El banco tiene <b>'+fmt(-c.gap)+'</b> MENOS de lo esperado. Revisa si falta registrar un depósito o sobra un giro personal no anotado.'
-      : '✅ El banco tiene <b>'+fmt(c.gap)+'</b> MÁS de lo esperado (sobrante o depósito no registrado).';
-    dash += '<div class="alert-banner" style="background:'+(c.gap<0?'#fef2f2':'#f0fdf4')+';border-color:'+(c.gap<0?'#dc2626':'#16a34a')+';color:'+(c.gap<0?'#b91c1c':'#15803d')+';">'+g+'</div>';
-  } else {
-    dash += '<div class="alert-banner" style="background:#f0fdf4;border-color:#bbf7d0;color:#15803d;">✅ El banco cuadra con lo esperado.</div>';
-  }
+
   document.getElementById('bancoDash').innerHTML = dash;
   let html='';
   const m=b.movs||[];
@@ -1088,9 +1078,8 @@ function eliminarMovBanco(i){
   guardar(); renderBanco();
 }
 function bancoSetSaldo(){
-  if(!estado.banco) estado.banco={saldo:0,saldoInicial:0,movs:[]};
+  if(!estado.banco) estado.banco={saldo:0,saldoInicial:0,movs:[],pendienteEfectivo:[],desde:Date.now()};
   estado.banco.saldoInicial = Math.round(Number(document.getElementById('bancoInicial').value)||0);
-  estado.banco.saldo = Math.round(Number(document.getElementById('bancoSaldo').value)||0);
   guardar(); renderBanco();
 }
 function bancoProyeccion(){
@@ -3897,7 +3886,6 @@ try{ initApp(); }catch(err){
     <div style="font-size:12px;color:#666;margin-bottom:8px;">Banco de Chile · cuenta corriente del negocio (sin tarjeta). Se alimenta en vivo con tus ventas.</div>
     <div style="display:flex;gap:8px;margin-bottom:8px;">
       <div style="flex:1;"><label class="campo">Saldo inicial ($) · lo que hay hoy</label><input type="number" id="bancoInicial" class="field" onchange="bancoSetSaldo()"></div>
-      <div style="flex:1;"><label class="campo">Saldo actual banco ($) · estado de cuenta</label><input type="number" id="bancoSaldo" class="field" onchange="bancoSetSaldo()"></div>
     </div>
     <div id="bancoLockNota" style="font-size:11px;color:#6b7280;margin-bottom:6px;"></div>
     <div id="bancoDash"></div>
@@ -3917,7 +3905,7 @@ try{ initApp(); }catch(err){
       <button class="btn-ok" style="flex:1;background:#c2410c;" onclick="bancoTipoRapido('aporte')">➕ Aporte personal</button>
       <button class="btn-ok" style="flex:1;background:#c2410c;" onclick="bancoTipoRapido('giro')">➖ Giro personal</button>
     </div>
-    <div style="font-size:11px;color:#9ca3af;margin:10px 0 4px;">Pones el <b>Saldo inicial</b> una sola vez. El <b>Saldo banco</b> se va actualizando solo con tus transferencias y movimientos. El <b>Saldo actual (estado de cuenta)</b> es opcional: escríbelo para ver si cuadra. El efectivo NO se suma (lo gastas en caja).</div>
+    <div style="font-size:11px;color:#9ca3af;margin:10px 0 4px;">Pones el <b>Saldo inicial</b> una sola vez. El <b>Saldo banco</b> se va actualizando solo con tus transferencias, depósitos y movimientos. El efectivo NO se suma hasta que lo depositas.</div>
     <div id="bancoLista" style="max-height:210px;overflow:auto;"></div>
     <div id="bancoProy" style="margin-top:12px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:10px;"></div>
     <button class="btn-ok" style="width:100%;margin-top:10px;background:#64748b;" onclick="reiniciarBanco()">↺ Reiniciar módulo banco</button>
