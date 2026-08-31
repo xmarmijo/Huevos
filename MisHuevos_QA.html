@@ -718,6 +718,12 @@ if ('serviceWorker' in navigator) {
         <div style="flex:1;"><label class="campo">Efectivo esperado ($)</label><input type="number" class="field" id="cuadEsperado" placeholder="" onchange="actualizarCuadratura()"></div>
       </div>
       <div id="cuadDiferencia" style="margin-top:8px;padding:10px;border-radius:10px;text-align:center;font-weight:800;font-size:14px;"></div>
+      <div style="margin-top:10px;padding:12px;background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:12px;">
+        <label style="font-size:13px;font-weight:800;display:block;margin-bottom:2px;">💵 ¿Cuánto depositaste al banco hoy?</label>
+        <div style="font-size:11px;color:#1d4ed8;margin-bottom:6px;">Sugerido: <b id="cuadDepositoSugerido">$0</b> (efectivo neto del día)</div>
+        <input type="number" class="field" id="cuadDepositoBanco" placeholder="" min="0" inputmode="numeric" style="font-weight:800;">
+        <div style="font-size:10px;color:#6b7280;margin-top:4px;">Lo que no depositas hoy quedará pendiente y el aviso te lo recordará (el lunes para el domingo).</div>
+      </div>
       <button onclick="guardarCuadratura()" style="width:100%;padding:10px;border:none;border-radius:10px;background:#16a34a;color:#fff;font-weight:700;cursor:pointer;font-size:13px;margin-top:8px;">💾 Guardar cuadratura</button>
       <div style="margin-top:14px;padding-top:14px;border-top:2px dashed #ddd;">
         <label style="font-size:13px;font-weight:700;display:block;margin-bottom:4px;">💵 Cuánto efectivo tienes contado</label>
@@ -1985,7 +1991,6 @@ function confirmarVenta(){
   venta.sesion.push(vReg);
   guardar(); actualizarTodo(); actualizarSesionVenta();
   if(estado.ventas.length % 10 === 0){ autoBackup(); toast('💾 Respaldo automático hecho'); }
-  if(venta.pago==='efectivo') preguntarDepositoBanco(precio);
   document.getElementById('ventaQuien').value='';
   feedbackVenta();
   const _prod = venta.producto;
@@ -2140,7 +2145,6 @@ function confirmarFeria(){
   feria.sesion.push(vReg);
   guardar(); actualizarTodo(); actualizarSesionFeria();
   if(estado.ventas.length % 10 === 0){ autoBackup(); toast('💾 Respaldo automático hecho'); }
-  if(feria.pago==='efectivo') preguntarDepositoBanco(precio);
   feedbackVenta();
   const _mgf = (precioUnit>0) ? Math.round((precioUnit - costoPromedioBtx(feria.producto))/precioUnit*100) : null;
   let _msgf = '🎪 Vendido '+feria.cant+' '+feria.tipo+(feria.cant>1?'s':'')+' · '+fmt(precio);
@@ -2310,7 +2314,6 @@ function agregarOtro(dest){
   (esFeria?feria.sesion:venta.sesion).push(vReg);
   guardar(); actualizarTodo();
   if(esFeria) actualizarSesionFeria(); else actualizarSesionVenta();
-  if(pago==='efectivo') preguntarDepositoBanco(precio);
   document.getElementById(esFeria?'feriaOtroNombre':'otroNombre').value='';
   document.getElementById(esFeria?'feriaOtroPrecio':'otroPrecio').value='';
   feedbackVenta();
@@ -2755,6 +2758,8 @@ function cerrarDia(){
     toast((diferencia>0?'🟢 Sobrante: +':'🔴 Faltante: ')+fmt(Math.abs(diferencia)));
   }
   logAccion('CIERRE', 'Día cerrado con '+fmt(contado)+' (esperado '+fmt(esperado)+', diff '+(diferencia>=0?'+':'')+diferencia+') · '+new Date().toLocaleString('es-CL'));
+  const _depCierre = document.getElementById('cuadDepositoBanco') ? (parseInt(document.getElementById('cuadDepositoBanco').value)||0) : 0;
+  procesarDepositoCierre(_depCierre);
   estado.arqueoInicial = contado;
   if(!Array.isArray(estado.cierres)) estado.cierres = [];
   if(modoCierreForzado){
@@ -3007,6 +3012,15 @@ function renderCuadratura(){
   });
   document.getElementById('cuadMonedas').innerHTML = mh;
   document.getElementById('cuadEsperado').value = estado.cuadratura.efectivoReal || '';
+  const sugerido = efectivoNetoDia();
+  const _sd = document.getElementById('cuadDepositoSugerido'); if(_sd) _sd.textContent = '$'+R(sugerido).toLocaleString('es-CL');
+  const _cb = document.getElementById('cuadDepositoBanco');
+  if(_cb){
+    const _proc = estado.banco && estado.banco.cierreProcesado;
+    if(_proc === new Date().toDateString() && estado.banco.cierreDepositado !== undefined){
+      _cb.value = estado.banco.cierreDepositado || '';
+    }
+  }
   actualizarCuadratura();
 }
 function actualizarCuadratura(){
@@ -3028,10 +3042,30 @@ function actualizarCuadratura(){
     else { difEl.style.background='#fef2f2'; difEl.style.color='#dc2626'; difEl.textContent='⚠️ Faltan $'+R(Math.abs(dif)).toLocaleString('es-CL'); }
   } else { difEl.style.background='#f3f4f6'; difEl.style.color='#6b7280'; difEl.textContent='Escribe el efectivo esperado'; }
 }
+function procesarDepositoCierre(depositado){
+  const sugerido = efectivoNetoDia();
+  if(!estado.banco) estado.banco={saldo:0,saldoInicial:0,movs:[],pendienteEfectivo:[],desde:Date.now()};
+  if(!Array.isArray(estado.banco.movs)) estado.banco.movs=[];
+  if(!Array.isArray(estado.banco.pendienteEfectivo)) estado.banco.pendienteEfectivo=[];
+  const _hoy = new Date().toDateString();
+  if(estado.banco.cierreProcesado !== _hoy){
+    if(depositado>0){
+      estado.banco.movs.push({f:Date.now(),tipo:'deposito',monto:Math.round(depositado),desc:'Depósito día (cierre)'});
+    }
+    const pend = Math.max(0, sugerido - depositado);
+    if(pend>0){
+      estado.banco.pendienteEfectivo.push({f:Date.now(),monto:Math.round(pend),desde:_hoy});
+    }
+    estado.banco.cierreProcesado = _hoy;
+    estado.banco.cierreDepositado = depositado;
+  }
+}
 function guardarCuadratura(){
   estado.cuadratura.efectivoReal = parseInt(document.getElementById('cuadEsperado').value)||0;
   estado.cuadraturaFecha = new Date().toDateString();
-  guardar(); cerrarModal('modalCuadratura'); toast('🧮 Cuadratura guardada');
+  const depositado = parseInt(document.getElementById('cuadDepositoBanco').value)||0;
+  procesarDepositoCierre(depositado);
+  guardar(); if(typeof renderBanco==='function') renderBanco(); if(typeof actualizarAvisoBanco==='function') actualizarAvisoBanco(); cerrarModal('modalCuadratura'); toast('🧮 Cuadratura guardada');
 }
 
 // ── EXPORTAR EXCEL (.xlsx real multi-hoja con SheetJS) ──
@@ -3351,6 +3385,16 @@ function rangoCorte(){
   }
   const h = new Date(); h.setHours(0,0,0,0);
   return { desde: h.getTime(), hasta: Infinity };
+}
+function efectivoNetoDia(){
+  const rg = rangoCorte(); const f0 = rg.desde, f1 = rg.hasta;
+  const efVentas = estado.ventas.filter(v=>v.pago==='efectivo'&&v.f>=f0&&v.f<f1).reduce((a,v)=>a+v.precio,0);
+  const fc = (estado.flujoCaja||[]).filter(x=>x.f>=f0&&x.f<f1);
+  const cobrosEf = fc.filter(x=>x.tipo==='pagoDeuda'&&x.metodo!=='transferencia').reduce((a,x)=>a+x.monto,0);
+  const gastosEf = estado.gastos.filter(g=>g.f>=f0&&g.f<f1).reduce((a,g)=>a+g.monto,0);
+  const compras = estado.compras.filter(c=>c.f>=f0&&c.f<f1).reduce((a,c)=>a+(c.total!==undefined?c.total:c.cajas*c.precio),0);
+  const prestamos = fc.filter(x=>x.tipo==='prestamo').reduce((a,x)=>a+x.monto,0);
+  return Math.max(0, efVentas + cobrosEf - gastosEf - compras - prestamos);
 }
 function fmtDiaVenc(dStr){
   try { return new Date(dStr).toLocaleDateString('es-CL',{weekday:'long',day:'2-digit',month:'2-digit'}); }
