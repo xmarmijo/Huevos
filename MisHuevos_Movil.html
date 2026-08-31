@@ -193,7 +193,7 @@ body.dark .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316;
 
 <header>
   <div class="top">
-    <h1>🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span> <span id="appVer" style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:6px;background:#374151;color:#d1d5db;font-weight:700;vertical-align:middle;">v1.9</span></h1>
+    <h1>🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span> <span id="appVer" style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:6px;background:#374151;color:#d1d5db;font-weight:700;vertical-align:middle;">v2</span></h1>
     <div>
       <div class="hoy"><button id="btnTema" onclick="toggleTema()" style="background:none;border:1px solid rgba(255,255,255,.4);color:#fff;padding:3px 8px;border-radius:12px;font-size:11px;cursor:pointer;margin-bottom:3px;">🌙</button> <span id="fechaHoy"></span></div>
       <div class="gan">Ganancia hoy: <span id="ganHoy">$0</span></div>
@@ -987,6 +987,7 @@ function aplicarDefaults(d){
   if(!d.flujoCaja) d.flujoCaja=[];
   if(!d.salidaFeria) d.salidaFeria={ activa:false, f:null, llevadas:{Primera:0,Segunda:0,Tercera:0}, quedan:{Primera:0,Segunda:0,Tercera:0} };
   if(!d.banco) d.banco={ saldo:0, saldoInicial:0, movs:[], pendienteEfectivo:[], desde:0 };
+  else { if(!Array.isArray(d.banco.movs)) d.banco.movs=[]; if(!Array.isArray(d.banco.pendienteEfectivo)) d.banco.pendienteEfectivo=[]; if(!d.banco.desde) d.banco.desde=0; }
   const _hoyStr = new Date().toDateString();
   const _movs = [].concat(d.ventas,d.gastos,d.compras,d.mermas);
   if(d.diaAbierto===true && !d.diaAbiertoFecha){
@@ -1163,7 +1164,10 @@ function depositoEfectivoPersonal(){
   cerrarModal('modalDepositoEfectivo'); toast('Ok, no va al banco');
 }
 function depositarAcumuladoBanco(){
-  const pe=(estado.banco&&estado.banco.pendienteEfectivo)||[];
+  if(!estado.banco) estado.banco={saldo:0,saldoInicial:0,movs:[],pendienteEfectivo:[],desde:Date.now()};
+  if(!estado.banco.movs) estado.banco.movs=[];
+  if(!estado.banco.pendienteEfectivo) estado.banco.pendienteEfectivo=[];
+  const pe=estado.banco.pendienteEfectivo;
   const tot=pe.reduce(function(a,x){return a+(Number(x.monto)||0);},0);
   if(tot<=0){ toast('No hay efectivo pendiente'); return; }
   estado.banco.movs.push({f:Date.now(),tipo:'deposito',monto:Math.round(tot),desc:'Depósito efectivo acumulado (lunes)'});
