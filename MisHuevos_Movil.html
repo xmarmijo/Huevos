@@ -193,7 +193,7 @@ body.dark .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316;
 
 <header>
   <div class="top">
-    <h1>🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span> <span id="appVer" style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:6px;background:#374151;color:#d1d5db;font-weight:700;vertical-align:middle;">v2</span></h1>
+    <h1>🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span> <span id="appVer" style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:6px;background:#374151;color:#d1d5db;font-weight:700;vertical-align:middle;">v2.1</span></h1>
     <div>
       <div class="hoy"><button id="btnTema" onclick="toggleTema()" style="background:none;border:1px solid rgba(255,255,255,.4);color:#fff;padding:3px 8px;border-radius:12px;font-size:11px;cursor:pointer;margin-bottom:3px;">🌙</button> <span id="fechaHoy"></span></div>
       <div class="gan">Ganancia hoy: <span id="ganHoy">$0</span></div>
@@ -438,6 +438,11 @@ if ('serviceWorker' in navigator) {
       <button class="menos" onclick="feriaCant(-1)">−</button>
       <div><div class="num" id="feriaCant">1</div><div class="unid" id="feriaCantUnid">bandeja(s)</div></div>
       <button class="mas" onclick="feriaCant(1)">+</button>
+    </div>
+    <div class="paso-titulo">Método de pago</div>
+    <div style="display:flex;gap:6px;margin-bottom:8px;">
+      <div class="pago-op act" id="feriaPagoEfectivo" onclick="feriaPago('efectivo')" style="flex:1;text-align:center;">💵 Efectivo</div>
+      <div class="pago-op" id="feriaPagoTransferencia" onclick="feriaPago('transferencia')" style="flex:1;text-align:center;">🏦 Transferencia</div>
     </div>
     <div class="paso-titulo">Precio <span id="feriaPrecioPorLbl">por bandeja</span></div>
     <input type="number" class="field" id="feriaPrecioModal" value="6000" min="0" style="font-size:18px;font-weight:800;">
@@ -1681,8 +1686,11 @@ function actualizarStockUI(){
   document.getElementById('stockSegBox').classList.toggle('baja', stock2 > 0 && stock2 <= estado.umbral);
   document.getElementById('selProdPrimera').style.display = stock > 0 ? '' : 'none';
   document.getElementById('selProdSegunda').style.display = stock2 > 0 ? '' : 'none';
-  document.getElementById('feriaProdPrimera').style.display = stock > 0 ? '' : 'none';
-  document.getElementById('feriaProdSegunda').style.display = stock2 > 0 ? '' : 'none';
+  const _fd = estado.salidaFeria, _fa = !!(salidaActiva && salidaActiva());
+  const _enFeriaPrim = _fa && _fd && (_fd.quedan.Primera||0) > 0;
+  const _enFeriaSeg = _fa && _fd && (_fd.quedan.Segunda||0) > 0;
+  document.getElementById('feriaProdPrimera').style.display = (stock > 0 || _enFeriaPrim) ? '' : 'none';
+  document.getElementById('feriaProdSegunda').style.display = (stock2 > 0 || _enFeriaSeg) ? '' : 'none';
   document.getElementById('precioPrimBox').style.display = stock > 0 ? '' : 'none';
   document.getElementById('precioSegBox').style.display = stock2 > 0 ? '' : 'none';
   document.getElementById('mermaSeg').style.display = stock2 > 0 ? '' : 'none';
@@ -2003,15 +2011,31 @@ function actualizarSesionVenta(){
 }
 
 // ── FERIA ──
+function feriaDisponible(p){
+  if(salidaActiva()){
+    return ((estado.salidaFeria.quedan[p]||0)>0) || ((estado.stock[p]||0)>0);
+  }
+  return (estado.stock[p]||0)>0;
+}
+function feriaPago(p){
+  feria.pago = p;
+  document.getElementById('feriaPagoEfectivo').classList.toggle('act', p==='efectivo');
+  document.getElementById('feriaPagoTransferencia').classList.toggle('act', p==='transferencia');
+}
 function abrirFeria(){
-  feria = { producto:'Primera', cant:1, tipo:'bandeja', sesion:[] };
-  document.getElementById('feriaPrecioModal').value = estado.precios.Primera;
+  const _orden=['Primera','Segunda','Tercera'];
+  let _ini='Primera';
+  for(let i=0;i<_orden.length;i++){ if(feriaDisponible(_orden[i])){ _ini=_orden[i]; break; } }
+  feria = { producto:_ini, cant:1, tipo:'bandeja', sesion:[], pago:'efectivo' };
+  document.getElementById('feriaPrecioModal').value = estado.precios[feria.producto] || estado.tercera.precio;
   document.getElementById('feriaTipoBandeja').classList.add('act');
   document.getElementById('feriaTipoCaja').classList.remove('act');
+  document.getElementById('feriaPagoEfectivo').classList.add('act');
+  document.getElementById('feriaPagoTransferencia').classList.remove('act');
   document.getElementById('feriaCantUnid').textContent = 'bandeja(s)';
   document.getElementById('feriaPrecioPorLbl').textContent = 'por bandeja';
   document.getElementById('feriaPrecioLbl2').textContent = 'bandeja';
-  feriaProducto('Primera'); feriaCant(0);
+  feriaProducto(_ini); feriaCant(0);
   actualizarSesionFeria();
   document.getElementById('feriaModal').classList.add('show');
   try{ history.pushState({modal:'feriaModal'}, ''); }catch(e){}
@@ -2111,12 +2135,12 @@ function confirmarFeria(){
   }
   
   const costoTotal = bandejas * costoPromedioBtx(prod);
-  const vReg = { id:Date.now()+'-'+Math.random().toString(36).slice(2,7), f:Date.now(), prod:prod, tipo:feria.tipo, cant:feria.cant, bandejas:bandejas, precio:precio, gan:precio - costoTotal, pago:'efectivo', quien:'Feria' };
+  const vReg = { id:Date.now()+'-'+Math.random().toString(36).slice(2,7), f:Date.now(), prod:prod, tipo:feria.tipo, cant:feria.cant, bandejas:bandejas, precio:precio, gan:precio - costoTotal, pago:feria.pago, quien:'Feria' };
   estado.ventas.push(vReg);
   feria.sesion.push(vReg);
   guardar(); actualizarTodo(); actualizarSesionFeria();
   if(estado.ventas.length % 10 === 0){ autoBackup(); toast('💾 Respaldo automático hecho'); }
-  preguntarDepositoBanco(precio);
+  if(feria.pago==='efectivo') preguntarDepositoBanco(precio);
   feedbackVenta();
   const _mgf = (precioUnit>0) ? Math.round((precioUnit - costoPromedioBtx(feria.producto))/precioUnit*100) : null;
   let _msgf = '🎪 Vendido '+feria.cant+' '+feria.tipo+(feria.cant>1?'s':'')+' · '+fmt(precio);

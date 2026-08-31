@@ -51,6 +51,16 @@ Botón 🏦 en "Para revisar". Estado en `estado.banco = { saldo, saldoInicial, 
 ## Feria en cajas (v50)
 1 caja = 6 bandejas = 180 huevos. El módulo feria trabaja en cajas. Helper global `cajasTxt(b)` → "2 cajas + 4 bandejas".
 
+## Mejoras de feria (v2.1, 31-08)
+1. **Fix visibilidad de calidad:** los botones `feriaProdPrimera`/`feriaProdSegunda` se muestran si hay stock en el negocio **O** si hay stock en la salida de feria activa (`salidaFeria.quedan[prod]>0`). Antes solo dependían del stock del negocio: si llevabas TODAS las cajas de Segunda a la feria (negocio en 0), el botón SEGUNDA desaparecía y no podías venderla. Verificado con jsdom.
+2. **Auto-selección de calidad:** `abrirFeria()` ahora elige automáticamente la primera calidad disponible (Primera>Segunda>Tercera, considerando feria activa). Helper `feriaDisponible(p)`.
+3. **Selectors de pago en feria:** se portó a producción el experimento de QA — la feria ahora permite elegir **Efectivo/Transferencia** (`feriaPago(p)`, `feria.pago`). `confirmarFeria` guarda `pago:feria.pago` y solo ofrece depósito a banco si `pago==='efectivo'`.
+
+## Ambiente QA sincronizado (31-08)
+- `MisHuevos_QA.html` es copia de producción con: `manifest-qa.json`, `sw-qa.js` (cache `mis-huevos-qa-v2.1`), badge `v2.1 QA`, `data-qa="1"`.
+- **Aislamiento de datos:** guarda en `localStorage['misHuevosQA']` (y DB `misHuevosQADB`, `misHuevosQA_backup_auto`). NO toca los datos reales de producción. Firebase (config) sí se comparte.
+- Para re-sincronizar QA desde producción, copiar `MisHuevos_Movil.html`→`MisHuevos_QA.html` y transformar: `manifest.json`→`manifest-qa.json`, `sw.js`→`sw-qa.js`, `'misHuevos'`→`'misHuevosQA'`, `misHuevosDB`→`misHuevosQADB`, `misHuevos_backup_auto`→`misHuevosQA_backup_auto`, badge→`v2.1 QA`. NO tocar `misHuevosFirebase`.
+
 ## Convenciones del código
 - `fmt(n)` global → `$X.XXX` (es-CL).
 - `miConfirmar(msj, callback)` para confirmaciones.
@@ -62,7 +72,7 @@ Botón 🏦 en "Para revisar". Estado en `estado.banco = { saldo, saldoInicial, 
 - v49: el modal de feria se cerraba solo por `history.back()` en `cerrarModal`; se quitó el `history.back()` (el popstate cerraba el modal y desincronizaba). Verificado con jsdom.
 
 ## Pendiente / no hecho todavía
-- [ ] Check "¿pagado con banco del negocio?" en compras/gastos para que descuenten solos el banco (el usuario lo pidió, falta implementar).
+- [ ] Check "¿pagado con banco del negocio?" en **compras** (en gastos ya existe desde v1.8: descuenta el banco en `pagoGasto`).
 - [ ] El usuario a veces pasa plata de su cuenta personal y se queda el efectivo (ya cubierto con opción 3 del aviso).
 
 ## Cómo pedir cosas al asistente
