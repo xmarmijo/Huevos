@@ -11,7 +11,7 @@ Todo vive en **un solo archivo HTML con JS inline** (no framework, no build).
 ## Archivos clave
 - **Fuente de verdad:** `C:\Users\Marmijo\OneDrive\Documentos\Default Project\HuevosApp\MisHuevos_Movil.html`
 - `sw.js` — service worker; `CACHE_NAME='mis-huevos-X.Y'`
-- `bump-version.js` — sube versión
+- `bump\-version.js` — sube versión
 - `version.txt` — la versión ("X.Y"), única fuente
 - `Backups\respaldo-datos-MisHuevos.json` — datos del usuario
 - **Espejo de deploy:** `C:\Users\Marmijo\OneDrive\Documentos\GitHub\Huevos` (git pull tras push)

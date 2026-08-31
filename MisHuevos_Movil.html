@@ -82,8 +82,9 @@ body.dark .bottombar { background:#111827; }
 .util-btn:active { background:#eef2ff; border-color:#4338ca; }
 .util-btn .ic { font-size:20px; display:block; margin-bottom:3px; }
 .empty { color:#9ca3af; text-align:center; padding:12px; font-size:13px; }
-.toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(80px); background:#1f2937; color:#fff; padding:12px 22px; border-radius:30px; font-size:15px; font-weight:600; z-index:300; transition:transform .25s; max-width:92%; text-align:center; }
+.toast { position:fixed; bottom:100px; left:50%; transform:translateX(-50%) translateY(80px); background:#1f2937; color:#fff; padding:12px 16px; padding-right:38px; border-radius:30px; font-size:15px; font-weight:600; z-index:300; transition:transform .25s; max-width:92%; text-align:center; }
 .toast.show { transform:translateX(-50%) translateY(0); }
+.toast .toast-close { position:absolute; top:50%; right:8px; transform:translateY(-50%); width:26px; height:26px; border:none; border-radius:50%; background:rgba(255,255,255,.25); color:#fff; font-size:14px; font-weight:900; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; }
 .modal-back { position:fixed; inset:0; background:rgba(0,0,0,.5); display:none; z-index:250; align-items:flex-end; }
 .modal-back.show { display:flex; }
 .modal { background:#fff; width:100%; max-width:520px; margin:0 auto; border-radius:18px 18px 0 0; padding:18px; padding-bottom:28px; max-height:92vh; overflow-y:auto; overflow-x:hidden; }
@@ -192,7 +193,7 @@ body.dark .filtro-btn.act{ background:#f97316; color:#fff; border-color:#f97316;
 
 <header>
   <div class="top">
-    <h1>🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span> <span id="appVer" style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:6px;background:#374151;color:#d1d5db;font-weight:700;vertical-align:middle;">v1.7</span></h1>
+    <h1>🥚 Mis Huevos <span id="syncDot" onclick="tapSyncDot()" style="display:inline-block;font-size:10px;padding:2px 6px;border-radius:8px;background:#6b7280;color:#fff;font-weight:700;vertical-align:middle;cursor:pointer;" title="Toca para sincronizar">OFF</span> <span id="appVer" style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:6px;background:#374151;color:#d1d5db;font-weight:700;vertical-align:middle;">v1.8</span></h1>
     <div>
       <div class="hoy"><button id="btnTema" onclick="toggleTema()" style="background:none;border:1px solid rgba(255,255,255,.4);color:#fff;padding:3px 8px;border-radius:12px;font-size:11px;cursor:pointer;margin-bottom:3px;">🌙</button> <span id="fechaHoy"></span></div>
       <div class="gan">Ganancia hoy: <span id="ganHoy">$0</span></div>
@@ -536,6 +537,9 @@ if ('serviceWorker' in navigator) {
     <div style="height:8px"></div>
     <label class="campo">Monto ($)</label>
     <input type="number" class="field" id="gastoMonto" min="0" placeholder="">
+    <div style="margin-top:8px;">
+      <label style="display:flex;align-items:center;gap:4px;"><input type="checkbox" id="gastoBancoCheck"> Pagado con banco del negocio</label>
+    </div>
     <div class="modal-btns">
       <button class="btn-cancel" onclick="cerrarModal('modalGasto')">Cancelar</button>
       <button class="btn-ok" onclick="confirmarGasto()">✓ Registrar gasto</button>
@@ -891,7 +895,7 @@ if ('serviceWorker' in navigator) {
   </div>
 </div>
 
-<div id="toast" class="toast"></div>
+<div id="toast" class="toast"><span id="toastTxt"></span><button class="toast-close" onclick="cerrarToast()" aria-label="Cerrar">✕</button></div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
@@ -1369,7 +1373,8 @@ function actualizarSyncUI(){
 const fmt = n => { try{ return '$'+Math.round(n).toLocaleString('es-CL'); }catch(e){ return '$'+Math.round(n); } };
 const fmtShort = n => { const r = Math.round(n); if(r>=1000) return '$'+Math.round(r/1000)+'K'; return '$'+r; };
 let toastTimer=null;
-function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),1800); }
+function toast(msg){ const t=document.getElementById('toast'); document.getElementById('toastTxt').textContent=msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(cerrarToast,1800); }
+function cerrarToast(){ clearTimeout(toastTimer); const t=document.getElementById('toast'); if(t) t.classList.remove('show'); }
 function hoy(){ return new Date().toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit'}); }
 function fDate(d){ return new Date(d).toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit',year:'2-digit'}); }
 
@@ -2422,6 +2427,12 @@ function confirmarGasto(){
   var _fk = null;
   if(_fotoPendGasto){ _fk = 'foto:gasto:'+Date.now(); idbPut(_fk, _fotoPendGasto); }
   estado.gastos.push({ f:Date.now(), concepto, monto, foto:_fk||null });
+  // Si el gasto se paga con el banco del negocio, registrar movimiento bancario
+  if(document.getElementById('gastoBancoCheck')?.checked){
+    if(!estado.banco) estado.banco={saldo:0,saldoInicial:0,movs:[],pendienteEfectivo:[],desde:Date.now()};
+    estado.banco.movs.push({ f:Date.now(), tipo:'pagoGasto', monto:monto, desc:concepto });
+    renderBanco();
+  }
   _fotoPendGasto = null;
   var _fes = document.getElementById('fotoEstado_gasto'); if(_fes) _fes.textContent='';
   document.getElementById('gastoConcepto').value='';
